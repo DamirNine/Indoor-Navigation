@@ -92,6 +92,7 @@ class Floor {
   final List<NavNode> nodes;
   final List<NavEdge> edges;
   final List<Area> areas;
+  final List<List<double>>? contour;
 
   const Floor({
     required this.level,
@@ -100,6 +101,7 @@ class Floor {
     required this.nodes,
     required this.edges,
     this.areas = const [],
+    this.contour,
   });
 
   factory Floor.fromJson(Map<String, dynamic> json) {
@@ -116,6 +118,9 @@ class Floor {
           .toList(),
       areas: (json['areas'] as List? ?? [])
           .map((a) => Area.fromJson(a as Map<String, dynamic>))
+          .toList(),
+      contour: (json['contour'] as List?)
+          ?.map((p) => (p as List).map((v) => (v as num).toDouble()).toList())
           .toList(),
     );
   }

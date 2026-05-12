@@ -160,6 +160,7 @@ class _FloorViewState extends State<_FloorView> {
                 areas: widget.floor.areas,
                 stepsOnFloor: widget.steps,
                 imageSize: _virtualSize,
+                contour: widget.floor.contour,
               ),
             ),
           ],

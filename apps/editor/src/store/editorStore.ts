@@ -41,6 +41,8 @@ interface EditorState {
   selectEdge: (key: string | null) => void;
   setPendingEdgeFrom: (id: string | null) => void;
   setPreviewRoute: (route: string[] | null) => void;
+  setFloorContour: (points: number[][]) => void;
+  clearFloorContour: () => void;
 }
 
 export const useEditorStore = create<EditorState>()(
@@ -222,6 +224,24 @@ export const useEditorStore = create<EditorState>()(
       selectEdge: (key) => set({ selectedEdgeKey: key, selectedNodeId: null }),
       setPendingEdgeFrom: (id) => set({ pendingEdgeFromId: id }),
       setPreviewRoute: (route) => set({ previewRoute: route }),
+
+      setFloorContour: (points) =>
+        set(s => {
+          const floors = [...s.building.floors];
+          const i = s.activeFloorIndex;
+          floors[i] = { ...floors[i], contour: points };
+          return { building: { ...s.building, floors } };
+        }),
+
+      clearFloorContour: () =>
+        set(s => {
+          const floors = [...s.building.floors];
+          const i = s.activeFloorIndex;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { contour: _c, ...rest } = floors[i];
+          floors[i] = rest;
+          return { building: { ...s.building, floors } };
+        }),
     }),
     {
       name: 'indoor-nav-editor',
@@ -236,6 +256,7 @@ export const useEditorStore = create<EditorState>()(
             nodes: floor.nodes,
             edges: floor.edges,
             areas: floor.areas ?? [],
+            ...(floor.contour ? { contour: floor.contour } : {}),
           })),
         },
         activeFloorIndex: state.activeFloorIndex,

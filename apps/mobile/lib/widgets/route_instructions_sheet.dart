@@ -56,19 +56,21 @@ class RouteInstructionsSheet extends StatelessWidget {
     if (candidates.isEmpty) return start;
     if (candidates.length == 1 || prevNode == null) return nodeMap[candidates.first]!;
 
-    // Phase 2: BFS from prevNode — first candidate reached wins.
+    // Phase 2: BFS from prevNode — first candidate that isn't prevNode itself wins.
+    // Excluding prevNode prevents deduplication from swallowing the very next step.
     final candidateSet = candidates.toSet();
     final visited2 = <String>{prevNode.id};
     final queue2 = Queue<String>()..add(prevNode.id);
     while (queue2.isNotEmpty) {
       final id = queue2.removeFirst();
-      if (candidateSet.contains(id)) return nodeMap[id]!;
+      if (candidateSet.contains(id) && id != prevNode.id) return nodeMap[id]!;
       for (final nb in adj[id] ?? []) {
         if (visited2.add(nb)) queue2.add(nb);
       }
     }
 
-    return nodeMap[candidates.first]!;
+    final nonPrev = candidates.firstWhere((id) => id != prevNode.id, orElse: () => candidates.first);
+    return nodeMap[nonPrev]!;
   }
 
   List<RouteStep> _compress(List<RouteStep> steps) {

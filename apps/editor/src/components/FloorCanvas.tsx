@@ -32,7 +32,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const {
     building, activeFloorIndex, tool, selectedNodeId, selectedEdgeKey, pendingEdgeFromId,
     previewRoute, addNode, selectNode, selectEdge, setPendingEdgeFrom, addEdge,
-    moveNode, addArea,
+    moveNode, addArea, setFloorContour, clearFloorContour,
   } = useEditorStore();
 
   const routeSet = new Set(previewRoute ?? []);
@@ -62,11 +62,17 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [selectedVertex, setSelectedVertex] = useState<number | null>(null);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
 
+  // Contour state
+  const [contourMode, setContourMode] = useState<ZoneMode>(null);
+  const [contourPoints, setContourPoints] = useState<number[][]>([]);
+  const [selectedContourVertex, setSelectedContourVertex] = useState<number | null>(null);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPinchDist = useRef(0);
   const isPanning = tool === 'pan';
   const isMoving = tool === 'move';
   const isZone = tool === 'zone';
+  const isContour = tool === 'contour';
 
   useEffect(() => {
     const el = containerRef.current;
@@ -90,15 +96,23 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     setZoneMode(null); setZoneNodeId(null); setZonePoints([]); setSelectedVertex(null); setCursorPos(null);
   }, []);
 
+  const cancelContour = useCallback(() => {
+    setContourMode(null); setContourPoints([]); setSelectedContourVertex(null); setCursorPos(null);
+  }, []);
+
   const handleEscape = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      setPendingEdgeFrom(null); setPendingEdgeTo(null); cancelZone();
+      setPendingEdgeFrom(null); setPendingEdgeTo(null); cancelZone(); cancelContour();
     }
     if (e.key === 'Delete' && zoneMode === 'edit' && selectedVertex !== null) {
       setZonePoints(pts => pts.filter((_, i) => i !== selectedVertex));
       setSelectedVertex(null);
     }
-  }, [setPendingEdgeFrom, cancelZone, zoneMode, selectedVertex]);
+    if (e.key === 'Delete' && contourMode === 'edit' && selectedContourVertex !== null) {
+      setContourPoints(pts => pts.filter((_, i) => i !== selectedContourVertex));
+      setSelectedContourVertex(null);
+    }
+  }, [setPendingEdgeFrom, cancelZone, cancelContour, zoneMode, selectedVertex, contourMode, selectedContourVertex]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleEscape);
@@ -106,6 +120,19 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   }, [handleEscape]);
 
   useEffect(() => { if (!isZone) cancelZone(); }, [isZone, cancelZone]);
+
+  // Auto-enter draw or edit mode when contour tool is selected / floor changes
+  useEffect(() => {
+    if (!isContour) { cancelContour(); return; }
+    const existing = floor?.contour;
+    if (existing && existing.length >= 3) {
+      setContourMode('edit'); setContourPoints([...existing]);
+    } else {
+      setContourMode('draw'); setContourPoints([]);
+    }
+    setSelectedContourVertex(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isContour, activeFloorIndex]);
 
   const handleWheel = (e: any) => {
     if (!isPanning) return;
@@ -180,6 +207,23 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     setSelectedVertex(null);
   };
 
+  const saveContour = () => {
+    if (contourPoints.length >= 3) setFloorContour(contourPoints);
+    setContourMode('edit');
+    setSelectedContourVertex(null);
+  };
+
+  const deleteContourVertex = () => {
+    if (selectedContourVertex === null || contourPoints.length <= 3) return;
+    setContourPoints(pts => pts.filter((_, i) => i !== selectedContourVertex));
+    setSelectedContourVertex(null);
+  };
+
+  const deleteContour = () => {
+    clearFloorContour();
+    setContourMode('draw'); setContourPoints([]); setSelectedContourVertex(null);
+  };
+
   // ── STAGE CLICK ──────────────────────────────────────────────────────────
   const handleStageClick = (e: any) => {
     if (isPanning) return;
@@ -216,6 +260,27 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           const [sx, sy] = snap(x, y);
           setZonePoints(pts => pts.map((p, i) => i === selectedVertex ? [sx, sy] : p));
           setSelectedVertex(null);
+        }
+        return;
+      }
+    }
+
+    if (isContour) {
+      if (contourMode === 'draw' && onBackground) {
+        const { x, y } = toVirtual(e);
+        const [sx, sy] = snap(x, y);
+        if (contourPoints.length >= 3) {
+          const [fx, fy] = contourPoints[0];
+          if (Math.hypot(sx - fx, sy - fy) < SNAP_DIST) { saveContour(); return; }
+        }
+        setContourPoints(pts => [...pts, [sx, sy]]);
+        return;
+      }
+      if (contourMode === 'edit' && className !== 'Circle') {
+        if (selectedContourVertex !== null) {
+          const { x, y } = toVirtual(e);
+          setContourPoints(pts => pts.map((p, i) => i === selectedContourVertex ? [x, y] : p));
+          setSelectedContourVertex(null);
         }
         return;
       }
@@ -259,10 +324,19 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   };
 
   const handleMouseMove = (e: any) => {
-    if (isZone && (zoneMode === 'draw') && zoneNodeId) setCursorPos(toVirtual(e));
+    if (isZone && zoneMode === 'draw' && zoneNodeId) setCursorPos(toVirtual(e));
+    if (isContour && contourMode === 'draw') setCursorPos(toVirtual(e));
   };
 
   // ── HINT TEXT ─────────────────────────────────────────────────────────────
+  const contourHint = isContour
+    ? contourMode === 'draw'
+      ? `Контур — кликайте чтобы добавить вершины${contourPoints.length >= 3 ? ' • нажмите на первую точку чтобы замкнуть' : ''}`
+      : selectedContourVertex !== null
+      ? 'Нажмите куда переместить вершину'
+      : 'Контур здания — нажмите на вершину чтобы переместить'
+    : null;
+
   const zoneHint = isZone
     ? zoneMode === 'draw'
       ? `${getNode(zoneNodeId!)?.label || ''} — кликайте чтобы добавить вершины${zonePoints.length >= 3 ? ' • снова нажмите на первую точку чтобы замкнуть' : ''}`
@@ -278,6 +352,24 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
       {/* Hints */}
       {pendingEdgeFromId && <Hint color="#1976D2">Нажмите на второй узел</Hint>}
       {isMoving && movingNodeId && <Hint color="#F57C00">Нажмите куда переместить узел</Hint>}
+      {contourHint && (
+        <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#212121', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '90%' }}>
+          <span>{contourHint}</span>
+          {contourMode === 'edit' && selectedContourVertex !== null && contourPoints.length > 3 && (
+            <button onClick={deleteContourVertex} style={{ padding: '2px 8px', background: '#c62828', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Удалить вершину</button>
+          )}
+          {contourMode === 'edit' && (
+            <button onClick={saveContour} style={{ padding: '2px 8px', background: '#43a047', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Сохранить</button>
+          )}
+          {contourMode === 'edit' && (
+            <button onClick={deleteContour} style={{ padding: '2px 8px', background: '#b71c1c', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Удалить контур</button>
+          )}
+          {contourMode === 'draw' && contourPoints.length >= 3 && (
+            <button onClick={saveContour} style={{ padding: '2px 8px', background: '#43a047', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Замкнуть</button>
+          )}
+          <button onClick={cancelContour} style={{ padding: '2px 8px', background: 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Отмена</button>
+        </div>
+      )}
       {zoneHint && (
         <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#37474F', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '90%' }}>
           <span>{zoneHint}</span>
@@ -303,13 +395,59 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         onWheel={handleWheel} onTouchMove={handleTouchMove}
         onTouchEnd={() => { lastPinchDist.current = 0; }}
         onMouseMove={handleMouseMove}
-        style={{ cursor: isPanning ? 'grab' : (tool === 'node' || isZone) ? 'crosshair' : isMoving ? 'cell' : 'default' }}
+        style={{ cursor: isPanning ? 'grab' : (tool === 'node' || isZone || isContour) ? 'crosshair' : isMoving ? 'cell' : 'default' }}
       >
         <Layer>
           {bgImage
             ? <KonvaImage image={bgImage} width={VIRTUAL_W} height={VIRTUAL_H} />
             : <Rect width={VIRTUAL_W} height={VIRTUAL_H} fill="#e8e8e8" />
           }
+
+          {/* Saved contour — thick black outline behind areas */}
+          {(() => {
+            const pts = (isContour ? contourPoints : floor.contour ?? []);
+            if (pts.length < 3) return null;
+            return (
+              <Line points={pts.flatMap(p => p)} closed
+                stroke="black" strokeWidth={3} fill="rgba(0,0,0,0.04)"
+                listening={false}
+              />
+            );
+          })()}
+
+          {/* Contour being drawn */}
+          {isContour && contourMode === 'draw' && contourPoints.length > 0 && (() => {
+            const pts = contourPoints.flatMap(p => p);
+            const linePoints = cursorPos ? [...pts, cursorPos.x, cursorPos.y] : pts;
+            return (
+              <Group>
+                {contourPoints.length >= 3 && (
+                  <Line points={pts} closed fill="rgba(0,0,0,0.06)" stroke="black" strokeWidth={3} dash={[8, 5]} />
+                )}
+                <Line points={linePoints} stroke="black" strokeWidth={3} dash={[8, 5]} />
+                <Circle x={contourPoints[0][0]} y={contourPoints[0][1]} radius={9} fill="black" opacity={0.6} />
+                {contourPoints.map((pt, i) => (
+                  <Circle key={i} x={pt[0]} y={pt[1]} radius={4} fill="black" />
+                ))}
+              </Group>
+            );
+          })()}
+
+          {/* Contour edit — vertex handles */}
+          {isContour && contourMode === 'edit' && contourPoints.length >= 3 && (() => {
+            return (
+              <Group>
+                {contourPoints.map((pt, i) => (
+                  <Circle key={i} x={pt[0]} y={pt[1]} radius={selectedContourVertex === i ? 10 : 7}
+                    fill={selectedContourVertex === i ? 'black' : 'white'}
+                    stroke="black" strokeWidth={2.5}
+                    onClick={() => setSelectedContourVertex(idx => idx === i ? null : i)}
+                    onTap={() => setSelectedContourVertex(idx => idx === i ? null : i)}
+                  />
+                ))}
+              </Group>
+            );
+          })()}
 
           {/* Saved areas */}
           {(floor.areas ?? []).map(area => {

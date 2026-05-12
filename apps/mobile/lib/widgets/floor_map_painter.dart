@@ -7,12 +7,14 @@ class FloorMapPainter extends CustomPainter {
   final List<Area> areas;
   final List<RouteStep> stepsOnFloor;
   final Size imageSize;
+  final List<List<double>>? contour;
 
   FloorMapPainter({
     required this.nodes,
     required this.areas,
     required this.stepsOnFloor,
     required this.imageSize,
+    this.contour,
   });
 
   static const _nodeColors = {
@@ -45,6 +47,18 @@ class FloorMapPainter extends CustomPainter {
     }
 
     final nodeMap = {for (final n in nodes) n.id: n};
+
+    // Draw building contour behind everything
+    if (contour != null && contour!.length >= 3) {
+      final path = Path();
+      path.moveTo(toCanvas(contour![0][0], contour![0][1]).dx, toCanvas(contour![0][0], contour![0][1]).dy);
+      for (int i = 1; i < contour!.length; i++) {
+        path.lineTo(toCanvas(contour![i][0], contour![i][1]).dx, toCanvas(contour![i][0], contour![i][1]).dy);
+      }
+      path.close();
+      canvas.drawPath(path, Paint()..color = const Color(0x0A000000)..style = PaintingStyle.fill);
+      canvas.drawPath(path, Paint()..color = Colors.black..strokeWidth = 3.0..style = PaintingStyle.stroke);
+    }
 
     if (areas.isNotEmpty) {
       _paintSchematic(canvas, size, toCanvas, nodeMap, routeNodeIds);
@@ -155,5 +169,6 @@ class FloorMapPainter extends CustomPainter {
   bool shouldRepaint(FloorMapPainter old) =>
       old.stepsOnFloor != stepsOnFloor ||
       old.nodes != nodes ||
-      old.areas != areas;
+      old.areas != areas ||
+      old.contour != contour;
 }
