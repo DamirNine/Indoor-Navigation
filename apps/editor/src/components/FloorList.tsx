@@ -5,6 +5,7 @@ export default function FloorList() {
   const { building, activeFloorIndex, addFloor, removeFloor, setFloorImage, removeFloorImage, setActiveFloor } = useEditorStore();
   const fileInputs = useRef<Map<number, HTMLInputElement>>(new Map());
   const [confirmImageDelete, setConfirmImageDelete] = useState<number | null>(null);
+  const [confirmFloorDelete, setConfirmFloorDelete] = useState<number | null>(null);
 
   const handleAdd = () => {
     const nextLevel = (building.floors.at(-1)?.level ?? 0) + 1;
@@ -54,7 +55,7 @@ export default function FloorList() {
               <button
                 data-testid={`remove-floor-${i}`}
                 style={{ fontSize: 11, padding: '2px 6px', color: 'red' }}
-                onClick={() => removeFloor(i)}
+                onClick={() => setConfirmFloorDelete(i)}
               >
                 ✕
               </button>
@@ -70,6 +71,29 @@ export default function FloorList() {
               }}
             />
           </div>
+
+          {confirmFloorDelete === i && (
+            <div style={{
+              margin: '2px 0 0', padding: '6px 8px', background: '#ffebee',
+              border: '1px solid #ef9a9a', borderRadius: 4, fontSize: 12,
+            }}>
+              <div style={{ marginBottom: 6 }}>Удалить этаж «{floor.name}» со всеми узлами?</div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  onClick={() => { removeFloor(i); setConfirmFloorDelete(null); }}
+                  style={{ flex: 1, padding: '4px 0', background: '#c62828', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+                >
+                  Удалить
+                </button>
+                <button
+                  onClick={() => setConfirmFloorDelete(null)}
+                  style={{ flex: 1, padding: '4px 0', background: '#f5f5f5', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+                >
+                  Отмена
+                </button>
+              </div>
+            </div>
+          )}
 
           {confirmImageDelete === i && (
             <div style={{
