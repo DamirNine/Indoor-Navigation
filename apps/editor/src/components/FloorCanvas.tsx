@@ -209,9 +209,9 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         return;
       }
 
-      if (zoneMode === 'edit' && onBackground) {
-        if (selectedVertex !== null) {
-          // Move selected vertex
+      if (zoneMode === 'edit') {
+        // Move selected vertex on any click that isn't a vertex handle (Circle)
+        if (selectedVertex !== null && className !== 'Circle') {
           const { x, y } = toVirtual(e);
           const [sx, sy] = snap(x, y);
           setZonePoints(pts => pts.map((p, i) => i === selectedVertex ? [sx, sy] : p));

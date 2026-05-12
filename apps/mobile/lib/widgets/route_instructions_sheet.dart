@@ -99,14 +99,18 @@ class RouteInstructionsSheet extends StatelessWidget {
 
       if (isTransit) {
         final dest = _nearestLandmark(step.to, nodeMap, adj, prevNode: prevLandmark);
-        result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
-        prevLandmark = dest;
+        if (result.isEmpty || result.last.to.id != dest.id || result.last.edgeType != step.edgeType) {
+          result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
+          prevLandmark = dest;
+        }
         continue;
       }
 
       if (!toCorridor) {
-        result.add(step);
-        prevLandmark = step.to;
+        if (result.isEmpty || result.last.to.id != step.to.id) {
+          result.add(step);
+          prevLandmark = step.to;
+        }
         continue;
       }
 
@@ -115,6 +119,7 @@ class RouteInstructionsSheet extends StatelessWidget {
 
       // Intermediate corridor: show nearest landmark, tie-break by prevLandmark distance.
       final dest = _nearestLandmark(step.to, nodeMap, adj, prevNode: prevLandmark);
+      if (result.isNotEmpty && result.last.to.id == dest.id) continue; // deduplicate
       result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
       prevLandmark = dest;
     }
