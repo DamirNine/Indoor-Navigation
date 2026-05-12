@@ -1,122 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import BuildingPanel from './components/BuildingPanel';
+import FloorList from './components/FloorList';
+import Toolbar from './components/Toolbar';
+import FloorCanvas from './components/FloorCanvas';
+import NodeProperties from './components/NodeProperties';
+import EdgeProperties from './components/EdgeProperties';
+import CrossFloorDialog from './components/CrossFloorDialog';
+import ExportButton from './components/ExportButton';
+import { useEditorStore } from './store/editorStore';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [crossFloorOpen, setCrossFloorOpen] = useState(false);
+  const selectedNodeId = useEditorStore(s => s.selectedNodeId);
+  const selectedEdgeKey = useEditorStore(s => s.selectedEdgeKey);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: 'sans-serif', fontSize: 14 }}>
+      <div style={{ width: 260, borderRight: '1px solid #ddd', display: 'flex', flexDirection: 'column', gap: 0, overflowY: 'auto', background: '#fafafa' }}>
+        <div style={{ padding: 12, borderBottom: '1px solid #eee' }}>
+          <BuildingPanel />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
+        <div style={{ padding: 12, borderBottom: '1px solid #eee', flex: 1 }}>
+          <FloorList />
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        <div style={{ padding: 12, borderBottom: '1px solid #eee' }}>
+          <button
+            data-testid="cross-floor-btn"
+            onClick={() => setCrossFloorOpen(true)}
+            style={{ width: '100%', padding: '6px 0', background: '#fff', border: '1px solid #bbb', borderRadius: 4, cursor: 'pointer' }}
+          >
+            Межэтажные связи
+          </button>
+        </div>
+        <div style={{ padding: 12 }}>
+          <ExportButton />
+        </div>
+      </div>
 
-      <div className="ticks"></div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <Toolbar />
+        <FloorCanvas />
+      </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {selectedNodeId && !selectedEdgeKey && (
+        <div style={{ width: 220, borderLeft: '1px solid #ddd', padding: 12, overflowY: 'auto', background: '#fafafa' }}>
+          <NodeProperties />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+      )}
+      {selectedEdgeKey && (
+        <div style={{ width: 220, borderLeft: '1px solid #ddd', padding: 12, overflowY: 'auto', background: '#fafafa' }}>
+          <EdgeProperties />
         </div>
-      </section>
+      )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {crossFloorOpen && <CrossFloorDialog onClose={() => setCrossFloorOpen(false)} />}
+    </div>
+  );
 }
-
-export default App
