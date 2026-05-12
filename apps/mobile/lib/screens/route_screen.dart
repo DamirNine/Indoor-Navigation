@@ -118,9 +118,11 @@ class _FloorView extends StatefulWidget {
   State<_FloorView> createState() => _FloorViewState();
 }
 
+// Virtual canvas size — must match VIRTUAL_W/H in the React editor (5000×4000).
+const _virtualSize = Size(5000, 4000);
+
 class _FloorViewState extends State<_FloorView> {
   File? _imageFile;
-  Size? _imageSize;
 
   @override
   void initState() {
@@ -134,30 +136,21 @@ class _FloorViewState extends State<_FloorView> {
     final f = File(
         '${dir.path}/buildings/${widget.buildingId}/${widget.floor.image}');
     if (!await f.exists() || !mounted) return;
-    final bytes = await f.readAsBytes();
-    final decoded = await decodeImageFromList(bytes);
-    if (!mounted) return;
-    setState(() {
-      _imageFile = f;
-      _imageSize = Size(
-        decoded.width.toDouble(),
-        decoded.height.toDouble(),
-      );
-    });
+    setState(() => _imageFile = f);
   }
 
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
       child: LayoutBuilder(builder: (ctx, constraints) {
-        final mapSize = _imageSize ?? const Size(800, 600);
         return Stack(
           children: [
             if (_imageFile != null)
               Image.file(_imageFile!,
                   width: constraints.maxWidth,
                   height: constraints.maxHeight,
-                  fit: BoxFit.contain)
+                  // fill matches the virtual 5000×4000 coordinate space
+                  fit: BoxFit.fill)
             else
               Container(color: Colors.grey.shade200),
             CustomPaint(
@@ -166,7 +159,7 @@ class _FloorViewState extends State<_FloorView> {
                 nodes: widget.floor.nodes,
                 areas: widget.floor.areas,
                 stepsOnFloor: widget.steps,
-                imageSize: mapSize,
+                imageSize: _virtualSize,
               ),
             ),
           ],
