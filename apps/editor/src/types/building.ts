@@ -37,7 +37,7 @@ export interface Floor {
   imageDataUrl?: string; // in-memory only, NOT serialised
   nodes: NavNode[];
   edges: NavEdge[];
-  areas: Area[];
+  areas?: Area[];
 }
 
 export interface Building {
