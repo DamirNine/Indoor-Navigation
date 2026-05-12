@@ -1,4 +1,4 @@
-enum NodeType { room, stairs, elevator, entrance }
+enum NodeType { room, stairs, elevator, entrance, corridor }
 enum EdgeType { walk, stairs, elevator }
 
 class NavNode {

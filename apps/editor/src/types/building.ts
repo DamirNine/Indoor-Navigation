@@ -1,4 +1,4 @@
-export type NodeType = 'room' | 'stairs' | 'elevator' | 'entrance';
+export type NodeType = 'room' | 'stairs' | 'elevator' | 'entrance' | 'corridor';
 export type EdgeType = 'walk' | 'stairs' | 'elevator';
 export type Tool = 'select' | 'node' | 'edge' | 'pan' | 'move' | 'zone';
 

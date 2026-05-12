@@ -20,6 +20,7 @@ class FloorMapPainter extends CustomPainter {
     NodeType.stairs: Color(0xFFF57C00),
     NodeType.elevator: Color(0xFF7B1FA2),
     NodeType.entrance: Color(0xFF2E7D32),
+    NodeType.corridor: Color(0xFF757575),
   };
 
   static const _areaFills = {
@@ -142,6 +143,7 @@ class FloorMapPainter extends CustomPainter {
         NodeType.stairs => const Color(0xFFF57C00),
         NodeType.elevator => const Color(0xFF7B1FA2),
         NodeType.entrance => const Color(0xFF2E7D32),
+        NodeType.corridor => Colors.grey.shade400,
       };
       canvas.drawCircle(pos, 6, Paint()..color = color);
     }

@@ -6,105 +6,79 @@
       "level": 1,
       "name": "1 этаж",
       "nodes": [
-        { "id": "entrance-1", "type": "entrance", "label": "Вход",   "x": 2500, "y": 3600 },
-        { "id": "room-101",   "type": "room",     "label": "101",    "x": 1200, "y": 2800 },
-        { "id": "room-102",   "type": "room",     "label": "102",    "x": 2500, "y": 2800 },
-        { "id": "room-103",   "type": "room",     "label": "103",    "x": 3800, "y": 2800 },
-        { "id": "room-104",   "type": "room",     "label": "104",    "x": 1200, "y": 1800 },
-        { "id": "room-105",   "type": "room",     "label": "105",    "x": 2500, "y": 1800 },
-        { "id": "room-106",   "type": "room",     "label": "106",    "x": 3800, "y": 1800 },
-        { "id": "stairs-1",   "type": "stairs",   "label": "Лестн.", "x": 4400, "y": 2300 }
+        { "id": "entrance-1",  "type": "entrance",  "label": "Вход",   "x": 2500, "y": 3700 },
+        { "id": "hall-1a",     "type": "corridor",  "label": "",       "x": 2500, "y": 3300 },
+        { "id": "hall-1b",     "type": "corridor",  "label": "",       "x": 1400, "y": 2600 },
+        { "id": "hall-1c",     "type": "corridor",  "label": "",       "x": 2500, "y": 2600 },
+        { "id": "hall-1d",     "type": "corridor",  "label": "",       "x": 3600, "y": 2600 },
+        { "id": "hall-1e",     "type": "corridor",  "label": "",       "x": 4300, "y": 2600 },
+        { "id": "hall-1f",     "type": "corridor",  "label": "",       "x": 1400, "y": 1800 },
+        { "id": "hall-1g",     "type": "corridor",  "label": "",       "x": 2500, "y": 1800 },
+        { "id": "hall-1h",     "type": "corridor",  "label": "",       "x": 3600, "y": 1800 },
+        { "id": "room-101",    "type": "room",      "label": "101",    "x": 900,  "y": 2600 },
+        { "id": "room-102",    "type": "room",      "label": "102",    "x": 900,  "y": 1800 },
+        { "id": "room-103",    "type": "room",      "label": "103",    "x": 2500, "y": 1200 },
+        { "id": "room-104",    "type": "room",      "label": "104",    "x": 3600, "y": 1200 },
+        { "id": "room-105",    "type": "room",      "label": "105",    "x": 4500, "y": 1800 },
+        { "id": "stairs-1",    "type": "stairs",    "label": "Лестн.", "x": 4300, "y": 1800 }
       ],
       "edges": [
-        { "from": "entrance-1", "to": "room-102",  "type": "walk", "weight": 1 },
-        { "from": "room-102",   "to": "room-101",  "type": "walk", "weight": 1 },
-        { "from": "room-102",   "to": "room-103",  "type": "walk", "weight": 1 },
-        { "from": "room-102",   "to": "room-105",  "type": "walk", "weight": 1 },
-        { "from": "room-101",   "to": "room-104",  "type": "walk", "weight": 1 },
-        { "from": "room-103",   "to": "room-106",  "type": "walk", "weight": 1 },
-        { "from": "room-105",   "to": "room-104",  "type": "walk", "weight": 1 },
-        { "from": "room-105",   "to": "room-106",  "type": "walk", "weight": 1 },
-        { "from": "room-106",   "to": "stairs-1",  "type": "walk", "weight": 1 }
+        { "from": "entrance-1", "to": "hall-1a",  "type": "walk", "weight": 1 },
+        { "from": "hall-1a",    "to": "hall-1b",  "type": "walk", "weight": 1 },
+        { "from": "hall-1a",    "to": "hall-1c",  "type": "walk", "weight": 1 },
+        { "from": "hall-1a",    "to": "hall-1d",  "type": "walk", "weight": 1 },
+        { "from": "hall-1d",    "to": "hall-1e",  "type": "walk", "weight": 1 },
+        { "from": "hall-1b",    "to": "room-101", "type": "walk", "weight": 1 },
+        { "from": "hall-1b",    "to": "hall-1f",  "type": "walk", "weight": 1 },
+        { "from": "hall-1c",    "to": "hall-1g",  "type": "walk", "weight": 1 },
+        { "from": "hall-1d",    "to": "hall-1h",  "type": "walk", "weight": 1 },
+        { "from": "hall-1f",    "to": "room-102", "type": "walk", "weight": 1 },
+        { "from": "hall-1g",    "to": "room-103", "type": "walk", "weight": 1 },
+        { "from": "hall-1h",    "to": "room-104", "type": "walk", "weight": 1 },
+        { "from": "hall-1e",    "to": "room-105", "type": "walk", "weight": 1 },
+        { "from": "hall-1e",    "to": "stairs-1", "type": "walk", "weight": 1 },
+        { "from": "hall-1f",    "to": "hall-1g",  "type": "walk", "weight": 1 },
+        { "from": "hall-1g",    "to": "hall-1h",  "type": "walk", "weight": 1 },
+        { "from": "hall-1h",    "to": "stairs-1", "type": "walk", "weight": 1 }
       ],
       "areas": [
-        {
-          "nodeId": "entrance-1",
-          "points": [[2100,3300],[2900,3300],[2900,3900],[2100,3900]]
-        },
-        {
-          "nodeId": "room-101",
-          "points": [[700,2400],[1700,2400],[1700,3200],[700,3200]]
-        },
-        {
-          "nodeId": "room-102",
-          "points": [[2000,2400],[3000,2400],[3000,3200],[2000,3200]]
-        },
-        {
-          "nodeId": "room-103",
-          "points": [[3300,2400],[4200,2400],[4200,3200],[3300,3200]]
-        },
-        {
-          "nodeId": "room-104",
-          "points": [[700,1400],[1700,1400],[1700,2200],[700,2200]]
-        },
-        {
-          "nodeId": "room-105",
-          "points": [[2000,1400],[3000,1400],[3000,2200],[2000,2200]]
-        },
-        {
-          "nodeId": "room-106",
-          "points": [[3300,1400],[4200,1400],[4200,2200],[3300,2200]]
-        },
-        {
-          "nodeId": "stairs-1",
-          "points": [[4200,2000],[4700,2000],[4700,2600],[4200,2600]]
-        }
+        { "nodeId": "entrance-1", "points": [[2100,3450],[2900,3450],[2900,3950],[2100,3950]] },
+        { "nodeId": "room-101",   "points": [[550,2200],[1250,2200],[1250,3000],[550,3000]] },
+        { "nodeId": "room-102",   "points": [[550,1400],[1250,1400],[1250,2200],[550,2200]] },
+        { "nodeId": "room-103",   "points": [[2000,800],[3000,800],[3000,1500],[2000,1500]] },
+        { "nodeId": "room-104",   "points": [[3100,800],[4100,800],[4100,1500],[3100,1500]] },
+        { "nodeId": "room-105",   "points": [[4150,1400],[4850,1400],[4850,2200],[4150,2200]] },
+        { "nodeId": "stairs-1",   "points": [[4050,1500],[4700,1500],[4700,2100],[4050,2100]] }
       ]
     },
     {
       "level": 2,
       "name": "2 этаж",
       "nodes": [
-        { "id": "stairs-2",  "type": "stairs", "label": "Лестн.", "x": 4400, "y": 2300 },
-        { "id": "room-201",  "type": "room",   "label": "201",    "x": 1200, "y": 2800 },
-        { "id": "room-202",  "type": "room",   "label": "202",    "x": 2500, "y": 2800 },
-        { "id": "room-203",  "type": "room",   "label": "203",    "x": 3800, "y": 2800 },
-        { "id": "room-204",  "type": "room",   "label": "204",    "x": 1200, "y": 1800 },
-        { "id": "room-205",  "type": "room",   "label": "205",    "x": 2500, "y": 1800 }
+        { "id": "stairs-2",  "type": "stairs",   "label": "Лестн.", "x": 4300, "y": 1800 },
+        { "id": "hall-2a",   "type": "corridor",  "label": "",      "x": 3600, "y": 1800 },
+        { "id": "hall-2b",   "type": "corridor",  "label": "",      "x": 2500, "y": 1800 },
+        { "id": "hall-2c",   "type": "corridor",  "label": "",      "x": 1400, "y": 1800 },
+        { "id": "room-201",  "type": "room",      "label": "201",   "x": 900,  "y": 1800 },
+        { "id": "room-202",  "type": "room",      "label": "202",   "x": 2500, "y": 1200 },
+        { "id": "room-203",  "type": "room",      "label": "203",   "x": 3600, "y": 1200 },
+        { "id": "room-204",  "type": "room",      "label": "204",   "x": 4500, "y": 1800 }
       ],
       "edges": [
-        { "from": "stairs-2", "to": "room-203",  "type": "walk", "weight": 1 },
-        { "from": "room-203", "to": "room-202",  "type": "walk", "weight": 1 },
-        { "from": "room-202", "to": "room-201",  "type": "walk", "weight": 1 },
-        { "from": "room-202", "to": "room-205",  "type": "walk", "weight": 1 },
-        { "from": "room-201", "to": "room-204",  "type": "walk", "weight": 1 },
-        { "from": "room-205", "to": "room-204",  "type": "walk", "weight": 1 }
+        { "from": "stairs-2", "to": "hall-2a",  "type": "stairs", "weight": 1 },
+        { "from": "hall-2a",  "to": "hall-2b",  "type": "walk",   "weight": 1 },
+        { "from": "hall-2b",  "to": "hall-2c",  "type": "walk",   "weight": 1 },
+        { "from": "hall-2c",  "to": "room-201", "type": "walk",   "weight": 1 },
+        { "from": "hall-2b",  "to": "room-202", "type": "walk",   "weight": 1 },
+        { "from": "hall-2a",  "to": "room-203", "type": "walk",   "weight": 1 },
+        { "from": "stairs-2", "to": "room-204", "type": "walk",   "weight": 1 }
       ],
       "areas": [
-        {
-          "nodeId": "stairs-2",
-          "points": [[4200,2000],[4700,2000],[4700,2600],[4200,2600]]
-        },
-        {
-          "nodeId": "room-201",
-          "points": [[700,2400],[1700,2400],[1700,3200],[700,3200]]
-        },
-        {
-          "nodeId": "room-202",
-          "points": [[2000,2400],[3000,2400],[3000,3200],[2000,3200]]
-        },
-        {
-          "nodeId": "room-203",
-          "points": [[3300,2400],[4200,2400],[4200,3200],[3300,3200]]
-        },
-        {
-          "nodeId": "room-204",
-          "points": [[700,1400],[1700,1400],[1700,2200],[700,2200]]
-        },
-        {
-          "nodeId": "room-205",
-          "points": [[2000,1400],[3000,1400],[3000,2200],[2000,2200]]
-        }
+        { "nodeId": "stairs-2", "points": [[4050,1500],[4700,1500],[4700,2100],[4050,2100]] },
+        { "nodeId": "room-201", "points": [[550,1400],[1250,1400],[1250,2200],[550,2200]] },
+        { "nodeId": "room-202", "points": [[2000,800],[3000,800],[3000,1500],[2000,1500]] },
+        { "nodeId": "room-203", "points": [[3100,800],[4100,800],[4100,1500],[3100,1500]] },
+        { "nodeId": "room-204", "points": [[4150,1400],[4850,1400],[4850,2200],[4150,2200]] }
       ]
     }
   ],

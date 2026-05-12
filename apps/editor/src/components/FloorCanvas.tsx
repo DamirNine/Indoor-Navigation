@@ -13,6 +13,7 @@ const NODE_COLOR: Record<NodeType, string> = {
   stairs: '#F57C00',
   elevator: '#7B1FA2',
   entrance: '#2E7D32',
+  corridor: '#757575',
 };
 
 const AREA_FILL: Record<NodeType, string> = {
@@ -20,6 +21,7 @@ const AREA_FILL: Record<NodeType, string> = {
   stairs: 'rgba(245,124,0,0.18)',
   elevator: 'rgba(123,31,162,0.18)',
   entrance: 'rgba(46,125,50,0.18)',
+  corridor: '',
 };
 
 interface Props {
@@ -212,10 +214,9 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
       return;
     }
     if (isZone) {
-      if (zonePoints.length === 0) {
-        // Start drawing zone for this node
+      if (zonePoints.length === 0 && node.type !== 'corridor') {
         setZoneNodeId(node.id);
-        deleteArea(node.id); // clear existing zone if any
+        deleteArea(node.id);
       }
       return;
     }
@@ -295,7 +296,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           }
 
           {/* Existing areas */}
-          {floor.areas.map(area => {
+          {(floor.areas ?? []).map(area => {
             const node = getNode(area.nodeId);
             if (!node || area.points.length < 3) return null;
             const pts = area.points.flatMap(p => p);

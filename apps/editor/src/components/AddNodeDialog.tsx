@@ -9,6 +9,7 @@ interface Props {
 export default function AddNodeDialog({ onConfirm, onCancel }: Props) {
   const [type, setType] = useState<NodeType>('room');
   const [label, setLabel] = useState('');
+  const isCorridor = type === 'corridor';
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
@@ -21,26 +22,31 @@ export default function AddNodeDialog({ onConfirm, onCancel }: Props) {
             <option value="stairs">Лестница</option>
             <option value="elevator">Лифт</option>
             <option value="entrance">Вход</option>
+            <option value="corridor">Коридор</option>
           </select>
         </label>
-        <label style={{ display: 'block', marginBottom: 16 }}>
-          Название<br />
-          <input
-            data-testid="node-label"
-            value={label}
-            onChange={e => setLabel(e.target.value)}
-            autoFocus
-            placeholder="Кабинет 101"
-            style={{ width: '100%', boxSizing: 'border-box' }}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && label.trim()) onConfirm(type, label.trim());
-              if (e.key === 'Escape') onCancel();
-            }}
-          />
-        </label>
+        {!isCorridor && (
+          <label style={{ display: 'block', marginBottom: 16 }}>
+            Название<br />
+            <input
+              data-testid="node-label"
+              value={label}
+              onChange={e => setLabel(e.target.value)}
+              autoFocus
+              placeholder="Кабинет 101"
+              style={{ width: '100%', boxSizing: 'border-box' }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && label.trim()) onConfirm(type, label.trim());
+                if (e.key === 'Escape') onCancel();
+              }}
+            />
+          </label>
+        )}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={onCancel}>Отмена</button>
-          <button data-testid="node-confirm" disabled={!label.trim()} onClick={() => onConfirm(type, label.trim())}>
+          <button data-testid="node-confirm"
+            disabled={!isCorridor && !label.trim()}
+            onClick={() => onConfirm(type, isCorridor ? '' : label.trim())}>
             Добавить
           </button>
         </div>
