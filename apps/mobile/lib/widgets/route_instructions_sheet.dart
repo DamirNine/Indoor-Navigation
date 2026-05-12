@@ -1,22 +1,41 @@
+import 'dart:collection';
 import 'package:flutter/material.dart';
 import '../models/building.dart';
 import '../models/route.dart';
 
 class RouteInstructionsSheet extends StatelessWidget {
   final AppRoute route;
-  const RouteInstructionsSheet({super.key, required this.route});
+  final Building building;
+  const RouteInstructionsSheet({super.key, required this.route, required this.building});
 
-  // Returns nearest non-corridor node at or after steps[startIdx].to
-  NavNode _nearestNamed(List<RouteStep> steps, int startIdx) {
-    for (int j = startIdx; j < steps.length; j++) {
-      if (steps[j].to.type != NodeType.corridor) return steps[j].to;
+  // BFS over the full building graph to find nearest non-corridor node from [start].
+  NavNode _nearestNamedInGraph(NavNode start) {
+    if (start.type != NodeType.corridor) return start;
+
+    final nodeMap = {for (final n in building.allNodes) n.id: n};
+    final adj = <String, List<String>>{};
+    void addEdge(String a, String b) {
+      adj.putIfAbsent(a, () => []).add(b);
+      adj.putIfAbsent(b, () => []).add(a);
     }
-    return startIdx < steps.length ? steps[startIdx].to : steps.last.to;
+    for (final floor in building.floors) {
+      for (final e in floor.edges) { addEdge(e.from, e.to); }
+    }
+    for (final e in building.crossFloorEdges) { addEdge(e.from, e.to); }
+
+    final visited = <String>{start.id};
+    final queue = Queue<String>()..add(start.id);
+    while (queue.isNotEmpty) {
+      final id = queue.removeFirst();
+      final node = nodeMap[id];
+      if (node != null && node.type != NodeType.corridor) return node;
+      for (final nb in adj[id] ?? []) {
+        if (visited.add(nb)) queue.add(nb);
+      }
+    }
+    return start; // fallback (shouldn't happen in a valid graph)
   }
 
-  // Compress steps: skip corridor intermediates.
-  // Walk steps shown only when destination is non-corridor.
-  // Stairs/elevator always shown, destination replaced with nearest named node.
   List<RouteStep> _compress(List<RouteStep> steps) {
     final result = <RouteStep>[];
     NavNode? lastFrom = steps.isNotEmpty ? steps.first.from : null;
@@ -27,7 +46,7 @@ class RouteInstructionsSheet extends StatelessWidget {
       final toIsCorridor = step.to.type == NodeType.corridor;
 
       if (isTransit) {
-        final namedTo = toIsCorridor ? _nearestNamed(steps, i + 1) : step.to;
+        final namedTo = toIsCorridor ? _nearestNamedInGraph(step.to) : step.to;
         result.add(RouteStep(
           from: lastFrom ?? step.from,
           to: namedTo,

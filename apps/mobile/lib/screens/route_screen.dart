@@ -94,7 +94,7 @@ class _RouteScreenState extends State<RouteScreen>
             onPressed: () => showModalBottomSheet(
               context: context,
               isScrollControlled: true,
-              builder: (_) => RouteInstructionsSheet(route: widget.route),
+              builder: (_) => RouteInstructionsSheet(route: widget.route, building: widget.building),
             ),
             icon: const Icon(Icons.list),
             label: const Text('Пошаговые инструкции'),
