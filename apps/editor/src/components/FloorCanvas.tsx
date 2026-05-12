@@ -8,6 +8,15 @@ import type { NavNode, NodeType, EdgeType } from '../types/building';
 const VIRTUAL_W = 5000;
 const VIRTUAL_H = 4000;
 const SNAP_DIST = 22;
+const SEGMENT_CLICK_DIST = 28;
+
+function ptToSegDist(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+  const dx = x2 - x1, dy = y2 - y1;
+  const lenSq = dx * dx + dy * dy;
+  if (lenSq === 0) return Math.hypot(px - x1, py - y1);
+  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lenSq));
+  return Math.hypot(px - x1 - t * dx, py - y1 - t * dy);
+}
 
 const NODE_COLOR: Record<NodeType, string> = {
   room: '#1976D2', stairs: '#F57C00', elevator: '#7B1FA2',
@@ -180,15 +189,43 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     return { x: (ptr.x - stagePos.x) / zoom, y: (ptr.y - stagePos.y) / zoom };
   };
 
-  // Snap click position to any existing area vertex within SNAP_DIST
+  // Snap to area vertices (for zone drawing — skips own zone)
   const snap = (x: number, y: number): [number, number] => {
     for (const area of (floor.areas ?? [])) {
-      if (area.nodeId === zoneNodeId) continue; // don't snap to own points while drawing
+      if (area.nodeId === zoneNodeId) continue;
       for (const [px, py] of area.points) {
         if (Math.hypot(x - px, y - py) < SNAP_DIST) return [px, py];
       }
     }
     return [x, y];
+  };
+
+  // Snap for contour: area vertices + existing contour vertices (skip excludeIdx)
+  const snapContour = (x: number, y: number, excludeIdx?: number): [number, number] => {
+    for (const area of (floor.areas ?? [])) {
+      for (const [px, py] of area.points) {
+        if (Math.hypot(x - px, y - py) < SNAP_DIST) return [px, py];
+      }
+    }
+    for (let i = 0; i < contourPoints.length; i++) {
+      if (i === excludeIdx) continue;
+      const [px, py] = contourPoints[i];
+      if (Math.hypot(x - px, y - py) < SNAP_DIST) return [px, py];
+    }
+    return [x, y];
+  };
+
+  // Find index of segment to insert after (closed polygon), or null if no segment close enough
+  const nearestContourSegment = (x: number, y: number): number | null => {
+    if (contourPoints.length < 2) return null;
+    let best: number | null = null, bestDist = SEGMENT_CLICK_DIST;
+    for (let i = 0; i < contourPoints.length; i++) {
+      const [x1, y1] = contourPoints[i];
+      const [x2, y2] = contourPoints[(i + 1) % contourPoints.length];
+      const d = ptToSegDist(x, y, x1, y1, x2, y2);
+      if (d < bestDist) { bestDist = d; best = i; }
+    }
+    return best;
   };
 
   const centroid = (pts: number[][]) => ({
@@ -268,7 +305,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     if (isContour) {
       if (contourMode === 'draw' && onBackground) {
         const { x, y } = toVirtual(e);
-        const [sx, sy] = snap(x, y);
+        const [sx, sy] = snapContour(x, y);
         if (contourPoints.length >= 3) {
           const [fx, fy] = contourPoints[0];
           if (Math.hypot(sx - fx, sy - fy) < SNAP_DIST) { saveContour(); return; }
@@ -279,8 +316,20 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
       if (contourMode === 'edit' && className !== 'Circle') {
         if (selectedContourVertex !== null) {
           const { x, y } = toVirtual(e);
-          setContourPoints(pts => pts.map((p, i) => i === selectedContourVertex ? [x, y] : p));
+          const [sx, sy] = snapContour(x, y, selectedContourVertex);
+          setContourPoints(pts => pts.map((p, i) => i === selectedContourVertex ? [sx, sy] : p));
           setSelectedContourVertex(null);
+        } else {
+          // Insert vertex on nearest segment
+          const { x, y } = toVirtual(e);
+          const segIdx = nearestContourSegment(x, y);
+          if (segIdx !== null) {
+            setContourPoints(pts => [
+              ...pts.slice(0, segIdx + 1),
+              [x, y],
+              ...pts.slice(segIdx + 1),
+            ]);
+          }
         }
         return;
       }
@@ -334,7 +383,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
       ? `Контур — кликайте чтобы добавить вершины${contourPoints.length >= 3 ? ' • нажмите на первую точку чтобы замкнуть' : ''}`
       : selectedContourVertex !== null
       ? 'Нажмите куда переместить вершину'
-      : 'Контур здания — нажмите на вершину чтобы переместить'
+      : 'Нажмите вершину чтобы переместить • нажмите на линию чтобы вставить вершину'
     : null;
 
   const zoneHint = isZone

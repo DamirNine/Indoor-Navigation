@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'package:flutter/material.dart';
 import '../models/building.dart';
 import '../models/route.dart';
@@ -23,13 +22,13 @@ class RouteInstructionsSheet extends StatelessWidget {
     return adj;
   }
 
-  // Phase 1: BFS level-by-level to collect ALL rooms/entrances at minimum depth.
-  // Phase 2: if multiple candidates and prevNode given, BFS from prevNode to pick nearest.
+  // BFS to find all landmarks at minimum depth, then pick the one
+  // geographically closest to [destination] (Euclidean distance).
   NavNode _nearestLandmark(
     NavNode start,
     Map<String, NavNode> nodeMap,
     Map<String, List<String>> adj, {
-    NavNode? prevNode,
+    NavNode? destination,
   }) {
     if (start.type == NodeType.room || start.type == NodeType.entrance) return start;
 
@@ -54,23 +53,23 @@ class RouteInstructionsSheet extends StatelessWidget {
     }
 
     if (candidates.isEmpty) return start;
-    if (candidates.length == 1 || prevNode == null) return nodeMap[candidates.first]!;
+    if (candidates.length == 1 || destination == null) return nodeMap[candidates.first]!;
 
-    // Phase 2: BFS from prevNode — first candidate that isn't prevNode itself wins.
-    // Excluding prevNode prevents deduplication from swallowing the very next step.
-    final candidateSet = candidates.toSet();
-    final visited2 = <String>{prevNode.id};
-    final queue2 = Queue<String>()..add(prevNode.id);
-    while (queue2.isNotEmpty) {
-      final id = queue2.removeFirst();
-      if (candidateSet.contains(id) && id != prevNode.id) return nodeMap[id]!;
-      for (final nb in adj[id] ?? []) {
-        if (visited2.add(nb)) queue2.add(nb);
+    // Pick candidate geographically closest to the route destination — consistent
+    // tie-breaking that avoids ping-pong between equidistant rooms on opposite sides.
+    NavNode? best;
+    double bestDistSq = double.infinity;
+    for (final id in candidates) {
+      final node = nodeMap[id]!;
+      final dx = node.x - destination.x;
+      final dy = node.y - destination.y;
+      final dSq = dx * dx + dy * dy;
+      if (dSq < bestDistSq) {
+        bestDistSq = dSq;
+        best = node;
       }
     }
-
-    final nonPrev = candidates.firstWhere((id) => id != prevNode.id, orElse: () => candidates.first);
-    return nodeMap[nonPrev]!;
+    return best!;
   }
 
   List<RouteStep> _compress(List<RouteStep> steps) {
@@ -79,9 +78,10 @@ class RouteInstructionsSheet extends StatelessWidget {
     final nodeMap = _nodeMap;
     final adj = _buildAdj();
 
-    // Corridors directly adjacent to the route's named start and end
     final routeStart = steps.first.from;
     final routeEnd = steps.last.to;
+
+    // Corridors directly adjacent to the route's named start and end
     final skipIds = <String>{};
     for (final nbId in adj[routeStart.id] ?? []) {
       final n = nodeMap[nbId];
@@ -93,17 +93,15 @@ class RouteInstructionsSheet extends StatelessWidget {
     }
 
     final result = <RouteStep>[];
-    NavNode prevLandmark = routeStart;
 
     for (final step in steps) {
       final toCorridor = step.to.type == NodeType.corridor;
       final isTransit = step.edgeType != EdgeType.walk;
 
       if (isTransit) {
-        final dest = _nearestLandmark(step.to, nodeMap, adj, prevNode: prevLandmark);
+        final dest = _nearestLandmark(step.to, nodeMap, adj, destination: routeEnd);
         if (result.isEmpty || result.last.to.id != dest.id || result.last.edgeType != step.edgeType) {
           result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
-          prevLandmark = dest;
         }
         continue;
       }
@@ -111,19 +109,15 @@ class RouteInstructionsSheet extends StatelessWidget {
       if (!toCorridor) {
         if (result.isEmpty || result.last.to.id != step.to.id) {
           result.add(step);
-          prevLandmark = step.to;
         }
         continue;
       }
 
-      // Corridor destination:
-      if (skipIds.contains(step.to.id)) continue; // adjacent to start/end — skip
+      if (skipIds.contains(step.to.id)) continue;
 
-      // Intermediate corridor: show nearest landmark, tie-break by prevLandmark distance.
-      final dest = _nearestLandmark(step.to, nodeMap, adj, prevNode: prevLandmark);
-      if (result.isNotEmpty && result.last.to.id == dest.id) continue; // deduplicate
+      final dest = _nearestLandmark(step.to, nodeMap, adj, destination: routeEnd);
+      if (result.isNotEmpty && result.last.to.id == dest.id) continue;
       result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
-      prevLandmark = dest;
     }
     return result;
   }
