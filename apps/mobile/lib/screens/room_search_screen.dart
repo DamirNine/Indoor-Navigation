@@ -75,6 +75,13 @@ class _RoomSearchScreenState extends State<RoomSearchScreen> {
       final origin = GoRouterState.of(context).extra as NavNode?;
       if (origin == null || _building == null) return;
 
+      if (origin.id == node.id) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Вы уже здесь')),
+        );
+        return;
+      }
+
       final pref = context.read<PreferencesService>().preference;
       final route = context.read<RoutingService>().findRoute(
         building: _building!,
@@ -101,6 +108,12 @@ class _RoomSearchScreenState extends State<RoomSearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: widget.isSelectingOrigin
+              ? () => context.go('/')
+              : () => context.pop(),
+        ),
         title: Text(widget.isSelectingOrigin ? 'Откуда?' : 'Куда?'),
       ),
       body: Column(

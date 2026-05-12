@@ -1,0 +1,68 @@
+<h2>Дизайн — Часть 4: Обработка ошибок и тестирование</h2>
+<p class="subtitle">Что может пойти не так и как это покрывается тестами</p>
+
+<div class="section">
+  <h3>Граничные случаи и обработка ошибок</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <tr style="background:#1a1a2e;color:#7ec8e3">
+      <th style="padding:8px;text-align:left;border:1px solid #333">Ситуация</th>
+      <th style="padding:8px;text-align:left;border:1px solid #333">Поведение</th>
+    </tr>
+    <tr style="border:1px solid #333">
+      <td style="padding:8px;border:1px solid #333">Маршрут не существует (граф разорван)</td>
+      <td style="padding:8px;border:1px solid #333">Сообщение «Маршрут не найден». Валидация в редакторе предотвращает экспорт изолированных графов.</td>
+    </tr>
+    <tr style="border:1px solid #333;background:#0d0d1a">
+      <td style="padding:8px;border:1px solid #333">Повреждённый или невалидный JSON</td>
+      <td style="padding:8px;border:1px solid #333">Ошибка при импорте с понятным сообщением. JSON валидируется по схеме при загрузке.</td>
+    </tr>
+    <tr style="border:1px solid #333">
+      <td style="padding:8px;border:1px solid #333">Старт = назначение</td>
+      <td style="padding:8px;border:1px solid #333">Кнопка «Построить маршрут» неактивна. Подсказка «Вы уже здесь».</td>
+    </tr>
+    <tr style="border:1px solid #333;background:#0d0d1a">
+      <td style="padding:8px;border:1px solid #333">Отсутствует изображение плана этажа</td>
+      <td style="padding:8px;border:1px solid #333">Показывается серый фон с сеткой. Навигация всё равно работает — изображение не критично.</td>
+    </tr>
+    <tr style="border:1px solid #333">
+      <td style="padding:8px;border:1px solid #333">Нет зданий в приложении</td>
+      <td style="padding:8px;border:1px solid #333">Экран onboarding с инструкцией «Импортируйте файл здания».</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Стратегия тестирования</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+    <div style="background:#1a1a2e;padding:12px;border-radius:6px">
+      <div style="color:#f9ca24;font-weight:bold;margin-bottom:8px">Flutter (Dart)</div>
+      <ul style="margin:0;padding-left:16px;line-height:1.9">
+        <li><strong>Unit:</strong> routing_service — A* на тестовых графах, проверка весов предпочтений</li>
+        <li><strong>Unit:</strong> graph_service — парсинг JSON, валидация схемы</li>
+        <li><strong>Widget:</strong> FloorMapPainter — рендер маршрута</li>
+        <li><strong>Integration:</strong> полный flow импорт → поиск → маршрут</li>
+      </ul>
+    </div>
+    <div style="background:#1a1a2e;padding:12px;border-radius:6px">
+      <div style="color:#7ec8e3;font-weight:bold;margin-bottom:8px">React (TypeScript)</div>
+      <ul style="margin:0;padding-left:16px;line-height:1.9">
+        <li><strong>Unit (Vitest):</strong> экспорт JSON — правильная структура</li>
+        <li><strong>Unit:</strong> валидация графа — изолированные узлы, пустые этажи</li>
+        <li><strong>Component (Testing Library):</strong> добавление узла, соединение рёбер</li>
+        <li><strong>E2E (Playwright):</strong> создание здания от начала до экспорта</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Итоговый стек технологий</h3>
+  <div style="font-family:monospace;background:#1a1a2e;border-radius:8px;padding:16px;font-size:13px;line-height:2">
+    <span style="color:#f9ca24">Flutter app</span>&nbsp;&nbsp;&nbsp;Flutter 3.x · Dart · Hive · CustomPainter · file_picker<br>
+    <span style="color:#7ec8e3">React editor</span>&nbsp;&nbsp;React 19 · TypeScript · Konva.js · Zustand · Vite · Vitest<br>
+    <span style="color:#6bcb77">Общий контракт</span>&nbsp;building.json (JSON Schema для валидации)<br>
+    <span style="color:#aaa">Алгоритм</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A* на взвешенном графе всех этажей
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:24px">Всё выглядит правильно? Если да — запишу спецификацию в файл.</p>

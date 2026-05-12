@@ -1,0 +1,82 @@
+<h2>Дизайн — Часть 3: React веб-редактор карт</h2>
+<p class="subtitle">Инструмент для администратора — создаёт building.json без написания кода</p>
+
+<div class="section">
+  <h3>Интерфейс редактора</h3>
+  <div style="display:grid;grid-template-columns:200px 1fr;gap:12px;background:#1a1a2e;border-radius:8px;padding:16px">
+    <!-- Sidebar -->
+    <div style="background:#0d0d1a;border-radius:6px;padding:12px;font-size:12px;color:#e0e0e0">
+      <div style="color:#f9ca24;margin-bottom:8px;font-weight:bold">📁 Здание</div>
+      <div style="padding:4px 8px;background:#1a1a2e;border-radius:4px;margin-bottom:4px">Корпус А</div>
+      <div style="color:#7ec8e3;margin:10px 0 6px;font-weight:bold">Этажи</div>
+      <div style="padding:4px 8px;background:#2a2a4a;border-radius:4px;margin-bottom:4px;color:#6bcb77">▶ 1 этаж</div>
+      <div style="padding:4px 8px;background:#1a1a2e;border-radius:4px;margin-bottom:4px">2 этаж</div>
+      <div style="padding:4px 8px;background:#1a1a2e;border-radius:4px;margin-bottom:4px">3 этаж</div>
+      <div style="margin-top:8px;padding:4px 8px;background:#2a3a2a;border-radius:4px;color:#6bcb77;text-align:center">+ Добавить этаж</div>
+      <div style="color:#7ec8e3;margin:10px 0 6px;font-weight:bold">Инструменты</div>
+      <div style="padding:4px 8px;background:#2a2a4a;border-radius:4px;margin-bottom:4px;color:#6bcb77">🖱 Выбор</div>
+      <div style="padding:4px 8px;background:#1a1a2e;border-radius:4px;margin-bottom:4px">📍 Узел</div>
+      <div style="padding:4px 8px;background:#1a1a2e;border-radius:4px;margin-bottom:4px">➖ Ребро</div>
+    </div>
+    <!-- Canvas area -->
+    <div style="background:#111;border-radius:6px;padding:12px;font-size:12px;color:#aaa;position:relative;min-height:200px">
+      <div style="color:#555;text-align:center;margin-bottom:8px">— план этажа (загруженное изображение) —</div>
+      <!-- Simulated nodes and edges -->
+      <svg width="100%" height="160" style="position:absolute;top:30px;left:0">
+        <line x1="80" y1="60" x2="180" y2="60" stroke="#7ec8e3" stroke-width="2"/>
+        <line x1="180" y1="60" x2="280" y2="100" stroke="#7ec8e3" stroke-width="2"/>
+        <line x1="180" y1="60" x2="180" y2="130" stroke="#f9ca24" stroke-width="2" stroke-dasharray="5,3"/>
+        <circle cx="80" cy="60" r="10" fill="#6bcb77" stroke="#fff" stroke-width="1.5"/>
+        <text x="80" y="64" text-anchor="middle" fill="#fff" font-size="9">101</text>
+        <circle cx="180" cy="60" r="10" fill="#6bcb77" stroke="#fff" stroke-width="1.5"/>
+        <text x="180" y="64" text-anchor="middle" fill="#fff" font-size="9">102</text>
+        <circle cx="280" cy="100" r="10" fill="#6bcb77" stroke="#fff" stroke-width="1.5"/>
+        <text x="280" y="104" text-anchor="middle" fill="#fff" font-size="9">103</text>
+        <rect x="170" y="120" width="20" height="20" rx="3" fill="#f9ca24" stroke="#fff" stroke-width="1.5"/>
+        <text x="180" y="134" text-anchor="middle" fill="#1a1a2e" font-size="8">▲</text>
+        <text x="240" y="50" fill="#aaa" font-size="10">— синяя линия: пешеход</text>
+        <text x="240" y="65" fill="#f9ca24" font-size="10">— жёлтый пунктир: лифт</text>
+        <text x="240" y="80" fill="#6bcb77" font-size="10">● зелёный: кабинет</text>
+        <text x="240" y="95" fill="#f9ca24" font-size="10">■ жёлтый: лифт/лестница</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Рабочий процесс администратора</h3>
+  <ol style="font-size:13px;line-height:2">
+    <li>Создать здание, задать название и ID</li>
+    <li>Добавить этажи, загрузить изображение плана каждого этажа</li>
+    <li>Расставить узлы: кликнуть на план → выбрать тип (кабинет / лестница / лифт / вход) → ввести название</li>
+    <li>Провести рёбра: выбрать инструмент «Ребро» → кликнуть два узла → выбрать тип соединения</li>
+    <li>Для лестниц и лифтов: связать узел на этаже N с узлом на этаже N+1 через диалог «Межэтажное соединение»</li>
+    <li>Нажать «Экспорт» → скачать <code>building.json</code> + папку с изображениями (или <code>building.zip</code>)</li>
+  </ol>
+</div>
+
+<div class="section">
+  <h3>Стек React редактора</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+    <div style="background:#1a1a2e;padding:12px;border-radius:6px">
+      <div style="color:#7ec8e3;font-weight:bold;margin-bottom:6px">Ключевые библиотеки</div>
+      <ul style="margin:0;padding-left:16px;line-height:1.8">
+        <li><strong>React + TypeScript</strong></li>
+        <li><strong>Konva.js</strong> — canvas для карты, drag-and-drop узлов</li>
+        <li><strong>Zustand</strong> — управление состоянием</li>
+        <li><strong>Vite</strong> — сборка</li>
+      </ul>
+    </div>
+    <div style="background:#1a1a2e;padding:12px;border-radius:6px">
+      <div style="color:#7ec8e3;font-weight:bold;margin-bottom:6px">Ключевые фичи</div>
+      <ul style="margin:0;padding-left:16px;line-height:1.8">
+        <li>Drag-and-drop узлов по плану</li>
+        <li>Zoom/pan карты</li>
+        <li>Предпросмотр маршрута перед экспортом</li>
+        <li>Валидация графа (нет изолированных узлов)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:24px">Эта секция выглядит правильно?</p>

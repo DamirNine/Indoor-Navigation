@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/building.dart';
 import '../models/route.dart';
@@ -61,6 +62,10 @@ class _RouteScreenState extends State<RouteScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/'),
+        ),
         title: Text(
           '${widget.route.steps.first.from.label} → '
           '${widget.route.steps.last.to.label}',

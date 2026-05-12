@@ -1,0 +1,58 @@
+<h2>Дизайн — Часть 1: Архитектура и формат данных</h2>
+<p class="subtitle">Фундамент всей системы — два независимых приложения + единый JSON-контракт</p>
+
+<div class="section">
+  <h3>Общая схема системы</h3>
+  <div style="font-family:monospace;background:#1a1a2e;color:#e0e0e0;border-radius:8px;padding:20px;font-size:13px;line-height:1.8">
+    <span style="color:#7ec8e3">┌─────────────────────────┐</span>    <span style="color:#7ec8e3">┌─────────────────────────┐</span><br>
+    <span style="color:#7ec8e3">│</span>   <span style="color:#f9ca24">Flutter Mobile App</span>      <span style="color:#7ec8e3">│</span>    <span style="color:#7ec8e3">│</span>  <span style="color:#f9ca24">React Web Editor</span>        <span style="color:#7ec8e3">│</span><br>
+    <span style="color:#7ec8e3">│</span>   Android + iOS          <span style="color:#7ec8e3">│</span>    <span style="color:#7ec8e3">│</span>  (браузер, офлайн SPA)   <span style="color:#7ec8e3">│</span><br>
+    <span style="color:#7ec8e3">│</span>   100% офлайн            <span style="color:#7ec8e3">│</span>    <span style="color:#7ec8e3">│</span>  создание карт → JSON    <span style="color:#7ec8e3">│</span><br>
+    <span style="color:#7ec8e3">└──────────┬──────────────┘</span>    <span style="color:#7ec8e3">└────────────┬────────────┘</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6bcb77">▲ импорт JSON</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6bcb77">▼ экспорт JSON</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">└──────────────────┬──────────────────┘</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f9ca24">building.json</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa">(единый контракт)</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Формат данных: building.json</h3>
+  <p>Здание — это взвешенный граф. Узлы = кабинеты/переходы, рёбра = коридоры/лестницы/лифты.</p>
+  <div style="font-family:monospace;background:#1a1a2e;color:#e0e0e0;border-radius:8px;padding:20px;font-size:12px;line-height:1.7">
+<span style="color:#aaa">{</span><br>
+&nbsp;&nbsp;<span style="color:#7ec8e3">"id"</span>: <span style="color:#6bcb77">"korpus-a"</span>,<br>
+&nbsp;&nbsp;<span style="color:#7ec8e3">"name"</span>: <span style="color:#6bcb77">"Корпус А"</span>,<br>
+&nbsp;&nbsp;<span style="color:#7ec8e3">"floors"</span>: [{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"level"</span>: <span style="color:#f9ca24">1</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"name"</span>: <span style="color:#6bcb77">"1 этаж"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"image"</span>: <span style="color:#6bcb77">"floor1.png"</span>, <span style="color:#aaa">// план этажа</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"nodes"</span>: [{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"id"</span>: <span style="color:#6bcb77">"room-101"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"type"</span>: <span style="color:#6bcb77">"room"</span>, <span style="color:#aaa">// room|stairs|elevator|entrance</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"label"</span>: <span style="color:#6bcb77">"Кабинет 101"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"x"</span>: <span style="color:#f9ca24">120.5</span>, <span style="color:#7ec8e3">"y"</span>: <span style="color:#f9ca24">85.3</span> <span style="color:#aaa">// координаты на плане</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;}],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"edges"</span>: [{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"from"</span>: <span style="color:#6bcb77">"room-101"</span>, <span style="color:#7ec8e3">"to"</span>: <span style="color:#6bcb77">"stairs-1"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"type"</span>: <span style="color:#6bcb77">"walk"</span>, <span style="color:#aaa">// walk|stairs|elevator</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ec8e3">"weight"</span>: <span style="color:#f9ca24">1.0</span> <span style="color:#aaa">// расстояние в метрах</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;}]<br>
+&nbsp;&nbsp;}]<br>
+<span style="color:#aaa">}</span>
+  </div>
+  <p style="margin-top:12px"><strong>Межэтажные переходы:</strong> лестница/лифт — это узел, существующий на двух этажах одновременно. Рёбра типа <code>stairs</code> и <code>elevator</code> связывают его копии на разных этажах.</p>
+</div>
+
+<div class="section">
+  <h3>Алгоритм маршрутизации</h3>
+  <p><strong>A* (или Дейкстра)</strong> на объединённом графе всех этажей здания.</p>
+  <ul>
+    <li><code>walk</code> — вес = евклидово расстояние</li>
+    <li><code>stairs</code> — вес × <em>user_stairs_multiplier</em> (0.5–3.0)</li>
+    <li><code>elevator</code> — вес × <em>user_elevator_multiplier</em> (0.5–3.0)</li>
+  </ul>
+  <p>Пользователь в настройках выбирает предпочтение: <strong>«предпочитаю лифт»</strong> → лестницы получают множитель 3.0; <strong>«предпочитаю лестницы»</strong> → лифты 3.0; <strong>«без разницы»</strong> → оба 1.0.</p>
+</div>
+
+<p class="subtitle" style="margin-top:24px">Эта секция выглядит правильно? Или что-то изменить перед переходом к следующей части?</p>

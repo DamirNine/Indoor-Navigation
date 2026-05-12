@@ -1,0 +1,33 @@
+<h2>Как пользователь указывает своё текущее местоположение?</h2>
+<p class="subtitle">Это ключевой вопрос архитектуры — от него зависит точность навигации и требования к инфраструктуре здания</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>QR-код / NFC на входе в кабинет</h3>
+      <p>Пользователь сканирует метку у двери — приложение мгновенно знает точку старта. Требует расклейки меток по зданию, но не нужен спецоборудование.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Вручную — выбор из списка / на карте</h3>
+      <p>Пользователь сам выбирает «Я нахожусь в кабинете 205». Нулевые требования к инфраструктуре, работает везде. Небольшое неудобство при первом запуске.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>BLE-маяки (Bluetooth beacons)</h3>
+      <p>Автоматическое позиционирование по Bluetooth-меткам в здании. Наиболее точно и удобно, но требует закупки и установки маяков (~$5–20/шт.).</p>
+    </div>
+  </div>
+  <div class="option" data-choice="d" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Комбинация: QR для старта + ручной выбор как fallback</h3>
+      <p>Основной сценарий — скан QR. Если метки нет рядом, пользователь выбирает вручную. Баланс удобства и стоимости внедрения.</p>
+    </div>
+  </div>
+</div>

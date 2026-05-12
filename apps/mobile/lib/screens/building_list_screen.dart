@@ -52,7 +52,26 @@ class _BuildingListScreenState extends State<BuildingListScreen> {
     }
   }
 
-  Future<void> _delete(String id) async {
+  Future<void> _delete(String id, String name) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Удалить здание?'),
+        content: Text('«$name» будет удалено без возможности восстановления.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Удалить'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
     await context.read<StorageService>().deleteBuilding(id);
     await _loadBuildings();
   }
@@ -82,7 +101,7 @@ class _BuildingListScreenState extends State<BuildingListScreen> {
                       subtitle: Text('${b.floors.length} этаж(ей)'),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _delete(b.id),
+                        onPressed: () => _delete(b.id, b.name),
                       ),
                       onTap: () =>
                           context.push('/building/${b.id}/search?mode=from'),

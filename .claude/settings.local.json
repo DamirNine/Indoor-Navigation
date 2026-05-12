@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash \"C:/Users/terek/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/brainstorming/scripts/start-server.sh\" --project-dir \"d:/Claude/Navigation\")",
+      "PowerShell(Get-Command node -ErrorAction SilentlyContinue)",
+      "Read(//usr/**)",
+      "Read(//usr/local/**)",
+      "PowerShell(winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/nodejs\")",
+      "Bash(flutter --version)",
+      "Bash(git status *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git config *)",
+      "Bash(flutter create *)",
+      "Bash(flutter pub *)",
+      "Bash(flutter analyze *)",
+      "Bash(flutter test *)",
+      "Bash(flutter doctor *)",
+      "Bash(flutter devices *)",
+      "Bash(flutter emulators *)",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\terek\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--Claude-Navigation\\\\62a30f28-6711-4cb4-a597-352ecc5e23c9\\\\tasks\\\\balbt6xbu.output' -Wait | Select-String 'Flutter run|Syncing|Running|Error|Exception|FAILED|Built|Installed|debug|hot reload|Quit|✓|√'\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\terek\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--Claude-Navigation\\\\62a30f28-6711-4cb4-a597-352ecc5e23c9\\\\tasks\\\\balbt6xbu.output' -Wait -Tail 5 | Select-String 'Built|Installed|Error|Exception|FAILED|✓|√|debug|hot reload|Running app'\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\terek\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--Claude-Navigation\\\\62a30f28-6711-4cb4-a597-352ecc5e23c9\\\\tasks\\\\b3e1h2rmg.output' -Wait | Select-String 'Built|Error|FAILED|warning'\")",
+      "PowerShell(adb -s emulator-5554 install -r d:\\\\Claude\\\\Navigation\\\\apps\\\\mobile\\\\build\\\\app\\\\outputs\\\\flutter-apk\\\\app-debug.apk 2>&1)",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb -s emulator-5554 install -r d:\\\\Claude\\\\Navigation\\\\apps\\\\mobile\\\\build\\\\app\\\\outputs\\\\flutter-apk\\\\app-debug.apk 2>&1)",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb -s emulator-5554 shell am start -n com.indoor.indoor_nav/.MainActivity 2>&1)",
+      "PowerShell(Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; cd d:\\\\Claude\\\\Navigation\\\\apps\\\\editor; Start-Process powershell -ArgumentList \"-NoProfile -ExecutionPolicy Bypass -Command `\"cd d:\\\\Claude\\\\Navigation\\\\apps\\\\editor; npm run dev`\"\" -WindowStyle Hidden; Start-Sleep -Seconds 5; Write-Host \"Dev server started\")",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "PowerShell($p = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if \\($p\\) { Stop-Process -Id $p.OwningProcess -Force; Write-Host \"Killed PID $\\($p.OwningProcess\\)\" } else { Write-Host \"Nothing on 5173\" })",
+      "PowerShell(Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; cd d:\\\\Claude\\\\Navigation\\\\apps\\\\editor; $job = Start-Job -ScriptBlock { Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; cd d:\\\\Claude\\\\Navigation\\\\apps\\\\editor; npm run dev } ; Start-Sleep 10; Receive-Job $job; $null = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue; Write-Host \"Port 5173 listening: $\\($?\\)\")",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 5)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 5173 -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 5174 -ErrorAction SilentlyContinue)"
+    ]
+  }
+}

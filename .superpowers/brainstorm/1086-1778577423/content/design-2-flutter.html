@@ -1,0 +1,73 @@
+<h2>Дизайн — Часть 2: Flutter приложение</h2>
+<p class="subtitle">Экраны, компоненты и поток данных мобильного приложения</p>
+
+<div class="section">
+  <h3>Экраны приложения</h3>
+  <div style="font-family:monospace;background:#1a1a2e;color:#e0e0e0;border-radius:8px;padding:20px;font-size:12px;line-height:2">
+    <span style="color:#f9ca24">[Выбор здания]</span> → <span style="color:#f9ca24">[Откуда?]</span> → <span style="color:#f9ca24">[Куда?]</span> → <span style="color:#f9ca24">[Маршрут]</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6bcb77">[Карта этажа с маршрутом]</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6bcb77">[Пошаговые инструкции]</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Описание каждого экрана</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <tr style="background:#1a1a2e;color:#7ec8e3">
+      <th style="padding:8px;text-align:left;border:1px solid #333">Экран</th>
+      <th style="padding:8px;text-align:left;border:1px solid #333">Что делает</th>
+    </tr>
+    <tr style="border:1px solid #333">
+      <td style="padding:8px;border:1px solid #333"><strong>Список зданий</strong></td>
+      <td style="padding:8px;border:1px solid #333">Показывает загруженные здания. Кнопка «Импортировать» открывает file picker для выбора building.json. Здания хранятся локально (Hive/SQLite).</td>
+    </tr>
+    <tr style="border:1px solid #333;background:#0d0d1a">
+      <td style="padding:8px;border:1px solid #333"><strong>Откуда?</strong></td>
+      <td style="padding:8px;border:1px solid #333">Поиск + список всех кабинетов здания. Пользователь выбирает текущее местоположение. Последний выбор запоминается.</td>
+    </tr>
+    <tr style="border:1px solid #333">
+      <td style="padding:8px;border:1px solid #333"><strong>Куда?</strong></td>
+      <td style="padding:8px;border:1px solid #333">Аналогично, но для пункта назначения. Поиск по названию/номеру кабинета.</td>
+    </tr>
+    <tr style="border:1px solid #333;background:#0d0d1a">
+      <td style="padding:8px;border:1px solid #333"><strong>Карта маршрута</strong></td>
+      <td style="padding:8px;border:1px solid #333">Интерактивная карта с планом этажа (изображение) и наложенным маршрутом (CustomPainter). Переключение между этажами. Маршрут подсвечен линией.</td>
+    </tr>
+    <tr style="border:1px solid #333">
+      <td style="padding:8px;border:1px solid #333"><strong>Инструкции</strong></td>
+      <td style="padding:8px;border:1px solid #333">Список шагов: «Идите по коридору 30м → Поверните направо → Поднимитесь на лифте на 3 этаж → Кабинет 305 слева».</td>
+    </tr>
+    <tr style="border:1px solid #333;background:#0d0d1a">
+      <td style="padding:8px;border:1px solid #333"><strong>Настройки</strong></td>
+      <td style="padding:8px;border:1px solid #333">Предпочтение маршрута: лифт / лестница / без разницы. Язык интерфейса.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Структура пакетов (Flutter)</h3>
+  <div style="font-family:monospace;background:#1a1a2e;color:#e0e0e0;border-radius:8px;padding:20px;font-size:12px;line-height:1.8">
+    <span style="color:#7ec8e3">lib/</span><br>
+    &nbsp;&nbsp;<span style="color:#f9ca24">models/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa">// Building, Floor, Node, Edge, Route</span><br>
+    &nbsp;&nbsp;<span style="color:#f9ca24">services/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6bcb77">graph_service.dart</span>&nbsp;&nbsp;&nbsp;<span style="color:#aaa">// парсинг JSON → граф</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6bcb77">routing_service.dart</span>&nbsp;<span style="color:#aaa">// A* алгоритм</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6bcb77">storage_service.dart</span>&nbsp;<span style="color:#aaa">// Hive — локальное хранение</span><br>
+    &nbsp;&nbsp;<span style="color:#f9ca24">screens/</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa">// по одному файлу на экран</span><br>
+    &nbsp;&nbsp;<span style="color:#f9ca24">widgets/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6bcb77">floor_map_painter.dart</span>&nbsp;<span style="color:#aaa">// CustomPainter для карты</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6bcb77">route_step_tile.dart</span>&nbsp;&nbsp;<span style="color:#aaa">// один шаг инструкций</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Хранение данных (офлайн)</h3>
+  <ul>
+    <li><strong>Hive</strong> — быстрая NoSQL БД для Flutter, хранит здания локально без сервера</li>
+    <li>Изображения планов этажей — рядом с JSON или упакованы в zip-архив здания</li>
+    <li>Настройки пользователя — <code>SharedPreferences</code></li>
+  </ul>
+</div>
+
+<p class="subtitle" style="margin-top:24px">Эта секция выглядит правильно?</p>

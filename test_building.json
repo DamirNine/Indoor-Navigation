@@ -1,0 +1,159 @@
+{
+  "id": "test-university",
+  "name": "Тестовый корпус",
+  "floors": [
+    {
+      "level": 1,
+      "name": "1 этаж",
+      "nodes": [
+        {
+          "id": "entrance-1",
+          "type": "entrance",
+          "label": "Главный вход",
+          "x": 300.0,
+          "y": 450.0
+        },
+        {
+          "id": "room-101",
+          "type": "room",
+          "label": "Кабинет 101 (Деканат)",
+          "x": 100.0,
+          "y": 300.0
+        },
+        {
+          "id": "room-102",
+          "type": "room",
+          "label": "Кабинет 102 (Бухгалтерия)",
+          "x": 200.0,
+          "y": 300.0
+        },
+        {
+          "id": "room-103",
+          "type": "room",
+          "label": "Кабинет 103 (Библиотека)",
+          "x": 400.0,
+          "y": 300.0
+        },
+        {
+          "id": "room-104",
+          "type": "room",
+          "label": "Кабинет 104 (Столовая)",
+          "x": 500.0,
+          "y": 300.0
+        },
+        {
+          "id": "stairs-a-f1",
+          "type": "stairs",
+          "label": "Лестница А",
+          "x": 300.0,
+          "y": 150.0
+        },
+        {
+          "id": "elevator-1-f1",
+          "type": "elevator",
+          "label": "Лифт",
+          "x": 350.0,
+          "y": 150.0
+        }
+      ],
+      "edges": [
+        { "from": "entrance-1", "to": "room-101", "type": "walk", "weight": 20.0 },
+        { "from": "entrance-1", "to": "room-102", "type": "walk", "weight": 15.0 },
+        { "from": "entrance-1", "to": "room-103", "type": "walk", "weight": 15.0 },
+        { "from": "entrance-1", "to": "room-104", "type": "walk", "weight": 20.0 },
+        { "from": "room-101", "to": "room-102", "type": "walk", "weight": 10.0 },
+        { "from": "room-102", "to": "room-103", "type": "walk", "weight": 20.0 },
+        { "from": "room-103", "to": "room-104", "type": "walk", "weight": 10.0 },
+        { "from": "room-102", "to": "stairs-a-f1", "type": "walk", "weight": 15.0 },
+        { "from": "room-103", "to": "stairs-a-f1", "type": "walk", "weight": 15.0 },
+        { "from": "stairs-a-f1", "to": "elevator-1-f1", "type": "walk", "weight": 5.0 }
+      ]
+    },
+    {
+      "level": 2,
+      "name": "2 этаж",
+      "nodes": [
+        {
+          "id": "room-201",
+          "type": "room",
+          "label": "Аудитория 201",
+          "x": 100.0,
+          "y": 300.0
+        },
+        {
+          "id": "room-202",
+          "type": "room",
+          "label": "Аудитория 202",
+          "x": 200.0,
+          "y": 300.0
+        },
+        {
+          "id": "room-203",
+          "type": "room",
+          "label": "Аудитория 203 (Компьютерный класс)",
+          "x": 400.0,
+          "y": 300.0
+        },
+        {
+          "id": "room-204",
+          "type": "room",
+          "label": "Кабинет 204 (Преподавательская)",
+          "x": 500.0,
+          "y": 300.0
+        },
+        {
+          "id": "room-205",
+          "type": "room",
+          "label": "Конференц-зал 205",
+          "x": 300.0,
+          "y": 400.0
+        },
+        {
+          "id": "stairs-a-f2",
+          "type": "stairs",
+          "label": "Лестница А",
+          "x": 300.0,
+          "y": 150.0
+        },
+        {
+          "id": "elevator-1-f2",
+          "type": "elevator",
+          "label": "Лифт",
+          "x": 350.0,
+          "y": 150.0
+        }
+      ],
+      "edges": [
+        { "from": "stairs-a-f2", "to": "room-201", "type": "walk", "weight": 20.0 },
+        { "from": "stairs-a-f2", "to": "room-202", "type": "walk", "weight": 15.0 },
+        { "from": "stairs-a-f2", "to": "room-203", "type": "walk", "weight": 15.0 },
+        { "from": "stairs-a-f2", "to": "room-204", "type": "walk", "weight": 20.0 },
+        { "from": "stairs-a-f2", "to": "room-205", "type": "walk", "weight": 10.0 },
+        { "from": "elevator-1-f2", "to": "room-201", "type": "walk", "weight": 22.0 },
+        { "from": "elevator-1-f2", "to": "room-202", "type": "walk", "weight": 17.0 },
+        { "from": "elevator-1-f2", "to": "room-203", "type": "walk", "weight": 13.0 },
+        { "from": "elevator-1-f2", "to": "room-204", "type": "walk", "weight": 18.0 },
+        { "from": "room-201", "to": "room-202", "type": "walk", "weight": 10.0 },
+        { "from": "room-202", "to": "room-203", "type": "walk", "weight": 20.0 },
+        { "from": "room-203", "to": "room-204", "type": "walk", "weight": 10.0 },
+        { "from": "room-205", "to": "room-202", "type": "walk", "weight": 12.0 },
+        { "from": "room-205", "to": "room-203", "type": "walk", "weight": 12.0 },
+        { "from": "stairs-a-f2", "to": "elevator-1-f2", "type": "walk", "weight": 5.0 }
+      ]
+    }
+  ],
+  "cross_floor_edges": [
+    {
+      "from": "stairs-a-f1",
+      "to": "stairs-a-f2",
+      "type": "stairs",
+      "weight": 8.0
+    },
+    {
+      "from": "elevator-1-f1",
+      "to": "elevator-1-f2",
+      "type": "elevator",
+      "weight": 15.0
+    }
+  ]
+}

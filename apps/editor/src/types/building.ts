@@ -1,6 +1,6 @@
 export type NodeType = 'room' | 'stairs' | 'elevator' | 'entrance';
 export type EdgeType = 'walk' | 'stairs' | 'elevator';
-export type Tool = 'select' | 'node' | 'edge';
+export type Tool = 'select' | 'node' | 'edge' | 'pan' | 'move';
 
 export interface NavNode {
   id: string;

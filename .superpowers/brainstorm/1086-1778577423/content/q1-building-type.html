@@ -1,0 +1,26 @@
+<h2>Для какого типа здания предназначено приложение?</h2>
+<p class="subtitle">Это определяет архитектуру хранения карт и масштабируемость решения</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Одно конкретное здание</h3>
+      <p>Схема встроена в приложение. Простейшая реализация, минимальный размер APK. Подходит для кастомного решения «под заказ» для конкретного объекта.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Несколько зданий одной организации</h3>
+      <p>Например, корпуса А, Б, В университета или больницы. Карты загружаются как пакет, приложение знает обо всех корпусах заранее.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Универсальная платформа</h3>
+      <p>Любое здание можно добавить через файл конфигурации или admin-панель. Максимальная гибкость, но сложнее в разработке.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+<h2>3 архитектурных подхода</h2>
+<p class="subtitle">Все варианты: Flutter офлайн-приложение + JSON-граф + маршрутизация A* с весами</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Flutter + Flutter Web редактор</h3>
+      <p><strong>Один язык (Dart) на всё.</strong> Мобильное приложение и веб-редактор карт — обе части на Flutter. Общие модели данных, переиспользование логики графа и маршрутизации.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Плюсы</h4><ul><li>Единая кодовая база</li><li>Общие типы и валидация</li><li>Один язык в команде</li></ul></div>
+        <div class="cons"><h4>Минусы</h4><ul><li>Flutter Web хуже для canvas-редакторов</li><li>Меньше библиотек для SVG/drag-and-drop</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Flutter app + React web редактор ⭐ Рекомендую</h3>
+      <p><strong>Лучший инструмент для каждой задачи.</strong> Flutter для мобильного приложения, React + TypeScript для веб-редактора. Карты экспортируются как JSON, импортируются в приложение через file picker.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Плюсы</h4><ul><li>React идеален для drag-and-drop редактора</li><li>Богатая SVG/Canvas экосистема</li><li>Редактор легко хостить отдельно</li></ul></div>
+        <div class="cons"><h4>Минусы</h4><ul><li>Два стека (Dart + TypeScript)</li><li>Формат JSON нужно поддерживать в обоих</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Flutter app + MVP без редактора</h3>
+      <p><strong>Быстрый старт.</strong> Сначала только мобильное приложение с документированным JSON-форматом. Веб-редактор — второй этап после проверки концепции.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Плюсы</h4><ul><li>Фокус на главном — навигации</li><li>Меньший объём первой версии</li><li>Быстрее первый рабочий прототип</li></ul></div>
+        <div class="cons"><h4>Минусы</h4><ul><li>Создание карт требует технических знаний</li><li>Ограничивает целевую аудиторию</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
