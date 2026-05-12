@@ -23,22 +23,52 @@ class RouteInstructionsSheet extends StatelessWidget {
     return adj;
   }
 
-  // BFS from [start] to find nearest node that is a room or entrance.
-  NavNode _nearestLandmark(NavNode start, Map<String, NavNode> nodeMap, Map<String, List<String>> adj) {
+  // Phase 1: BFS level-by-level to collect ALL rooms/entrances at minimum depth.
+  // Phase 2: if multiple candidates and prevNode given, BFS from prevNode to pick nearest.
+  NavNode _nearestLandmark(
+    NavNode start,
+    Map<String, NavNode> nodeMap,
+    Map<String, List<String>> adj, {
+    NavNode? prevNode,
+  }) {
     if (start.type == NodeType.room || start.type == NodeType.entrance) return start;
+
     final visited = <String>{start.id};
-    final queue = Queue<String>()..add(start.id);
-    while (queue.isNotEmpty) {
-      final id = queue.removeFirst();
-      final node = nodeMap[id];
-      if (node != null && (node.type == NodeType.room || node.type == NodeType.entrance)) {
-        return node;
+    var frontier = [start.id];
+    final candidates = <String>[];
+
+    while (frontier.isNotEmpty && candidates.isEmpty) {
+      final next = <String>[];
+      for (final id in frontier) {
+        for (final nb in adj[id] ?? []) {
+          if (!visited.add(nb)) continue;
+          final node = nodeMap[nb];
+          if (node != null && (node.type == NodeType.room || node.type == NodeType.entrance)) {
+            candidates.add(nb);
+          } else {
+            next.add(nb);
+          }
+        }
       }
+      frontier = next;
+    }
+
+    if (candidates.isEmpty) return start;
+    if (candidates.length == 1 || prevNode == null) return nodeMap[candidates.first]!;
+
+    // Phase 2: BFS from prevNode — first candidate reached wins.
+    final candidateSet = candidates.toSet();
+    final visited2 = <String>{prevNode.id};
+    final queue2 = Queue<String>()..add(prevNode.id);
+    while (queue2.isNotEmpty) {
+      final id = queue2.removeFirst();
+      if (candidateSet.contains(id)) return nodeMap[id]!;
       for (final nb in adj[id] ?? []) {
-        if (visited.add(nb)) queue.add(nb);
+        if (visited2.add(nb)) queue2.add(nb);
       }
     }
-    return start;
+
+    return nodeMap[candidates.first]!;
   }
 
   List<RouteStep> _compress(List<RouteStep> steps) {
@@ -61,30 +91,32 @@ class RouteInstructionsSheet extends StatelessWidget {
     }
 
     final result = <RouteStep>[];
+    NavNode prevLandmark = routeStart;
 
     for (final step in steps) {
       final toCorridor = step.to.type == NodeType.corridor;
       final isTransit = step.edgeType != EdgeType.walk;
 
       if (isTransit) {
-        // Stairs / elevator: always show, destination = nearest landmark
-        final dest = _nearestLandmark(step.to, nodeMap, adj);
+        final dest = _nearestLandmark(step.to, nodeMap, adj, prevNode: prevLandmark);
         result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
+        prevLandmark = dest;
         continue;
       }
 
       if (!toCorridor) {
-        // Named destination: always show
         result.add(step);
+        prevLandmark = step.to;
         continue;
       }
 
       // Corridor destination:
       if (skipIds.contains(step.to.id)) continue; // adjacent to start/end — skip
 
-      // Intermediate corridor: show nearest landmark as waypoint
-      final dest = _nearestLandmark(step.to, nodeMap, adj);
+      // Intermediate corridor: show nearest landmark, tie-break by prevLandmark distance.
+      final dest = _nearestLandmark(step.to, nodeMap, adj, prevNode: prevLandmark);
       result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
+      prevLandmark = dest;
     }
     return result;
   }

@@ -33,6 +33,7 @@ interface EditorState {
   deleteEdge: (from: string, to: string) => void;
   addArea: (area: Area) => void;
   deleteArea: (nodeId: string) => void;
+  moveNode: (id: string, newX: number, newY: number) => void;
   addCrossFloorEdge: (edge: CrossFloorEdge) => void;
   deleteCrossFloorEdge: (from: string, to: string) => void;
   setTool: (tool: Tool) => void;
@@ -181,6 +182,25 @@ export const useEditorStore = create<EditorState>()(
             floors: s.building.floors.map(f => ({
               ...f, areas: (f.areas ?? []).filter(a => a.nodeId !== nodeId),
             })),
+          },
+        })),
+
+      moveNode: (id, newX, newY) =>
+        set(s => ({
+          building: {
+            ...s.building,
+            floors: s.building.floors.map(f => {
+              const node = f.nodes.find(n => n.id === id);
+              if (!node) return f;
+              const dx = newX - node.x, dy = newY - node.y;
+              return {
+                ...f,
+                nodes: f.nodes.map(n => n.id === id ? { ...n, x: newX, y: newY } : n),
+                areas: (f.areas ?? []).map(a => a.nodeId !== id ? a : {
+                  ...a, points: a.points.map(p => [p[0] + dx, p[1] + dy]),
+                }),
+              };
+            }),
           },
         })),
 
