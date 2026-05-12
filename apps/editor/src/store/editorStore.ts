@@ -1,9 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Building, NavNode, NavEdge, CrossFloorEdge, Tool } from '../types/building';
+import type { Building, NavNode, NavEdge, CrossFloorEdge, Area, Tool } from '../types/building';
 
 const emptyBuilding = (): Building => ({
   id: '', name: '', floors: [], crossFloorEdges: [],
+});
+
+const emptyFloor = (level: number, name: string) => ({
+  level, name, nodes: [], edges: [], areas: [],
 });
 
 interface EditorState {
@@ -27,6 +31,8 @@ interface EditorState {
   addEdge: (edge: NavEdge) => void;
   updateEdge: (from: string, to: string, updates: Partial<Pick<NavEdge, 'type' | 'weight'>>) => void;
   deleteEdge: (from: string, to: string) => void;
+  addArea: (area: Area) => void;
+  deleteArea: (nodeId: string) => void;
   addCrossFloorEdge: (edge: CrossFloorEdge) => void;
   deleteCrossFloorEdge: (from: string, to: string) => void;
   setTool: (tool: Tool) => void;
@@ -52,7 +58,7 @@ export const useEditorStore = create<EditorState>()(
 
       addFloor: (level, name) =>
         set(s => ({
-          building: { ...s.building, floors: [...s.building.floors, { level, name, nodes: [], edges: [] }] },
+          building: { ...s.building, floors: [...s.building.floors, emptyFloor(level, name)] },
           activeFloorIndex: s.building.floors.length,
         })),
 
@@ -111,6 +117,7 @@ export const useEditorStore = create<EditorState>()(
             ...f,
             nodes: f.nodes.filter(n => n.id !== id),
             edges: f.edges.filter(e => e.from !== id && e.to !== id),
+            areas: f.areas.filter(a => a.nodeId !== id),
           }));
           return {
             building: {
@@ -158,6 +165,25 @@ export const useEditorStore = create<EditorState>()(
           selectedEdgeKey: null,
         })),
 
+      addArea: (area) =>
+        set(s => {
+          const floors = [...s.building.floors];
+          const i = s.activeFloorIndex;
+          const existing = floors[i].areas.filter(a => a.nodeId !== area.nodeId);
+          floors[i] = { ...floors[i], areas: [...existing, area] };
+          return { building: { ...s.building, floors } };
+        }),
+
+      deleteArea: (nodeId) =>
+        set(s => ({
+          building: {
+            ...s.building,
+            floors: s.building.floors.map(f => ({
+              ...f, areas: f.areas.filter(a => a.nodeId !== nodeId),
+            })),
+          },
+        })),
+
       addCrossFloorEdge: (edge) =>
         set(s => ({ building: { ...s.building, crossFloorEdges: [...s.building.crossFloorEdges, edge] } })),
 
@@ -189,6 +215,7 @@ export const useEditorStore = create<EditorState>()(
             imageDataUrl: floor.imageDataUrl,
             nodes: floor.nodes,
             edges: floor.edges,
+            areas: floor.areas,
           })),
         },
         activeFloorIndex: state.activeFloorIndex,

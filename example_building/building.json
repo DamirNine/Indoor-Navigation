@@ -1,0 +1,114 @@
+{
+  "id": "demo-building",
+  "name": "Учебный корпус",
+  "floors": [
+    {
+      "level": 1,
+      "name": "1 этаж",
+      "nodes": [
+        { "id": "entrance-1", "type": "entrance", "label": "Вход",   "x": 2500, "y": 3600 },
+        { "id": "room-101",   "type": "room",     "label": "101",    "x": 1200, "y": 2800 },
+        { "id": "room-102",   "type": "room",     "label": "102",    "x": 2500, "y": 2800 },
+        { "id": "room-103",   "type": "room",     "label": "103",    "x": 3800, "y": 2800 },
+        { "id": "room-104",   "type": "room",     "label": "104",    "x": 1200, "y": 1800 },
+        { "id": "room-105",   "type": "room",     "label": "105",    "x": 2500, "y": 1800 },
+        { "id": "room-106",   "type": "room",     "label": "106",    "x": 3800, "y": 1800 },
+        { "id": "stairs-1",   "type": "stairs",   "label": "Лестн.", "x": 4400, "y": 2300 }
+      ],
+      "edges": [
+        { "from": "entrance-1", "to": "room-102",  "type": "walk", "weight": 1 },
+        { "from": "room-102",   "to": "room-101",  "type": "walk", "weight": 1 },
+        { "from": "room-102",   "to": "room-103",  "type": "walk", "weight": 1 },
+        { "from": "room-102",   "to": "room-105",  "type": "walk", "weight": 1 },
+        { "from": "room-101",   "to": "room-104",  "type": "walk", "weight": 1 },
+        { "from": "room-103",   "to": "room-106",  "type": "walk", "weight": 1 },
+        { "from": "room-105",   "to": "room-104",  "type": "walk", "weight": 1 },
+        { "from": "room-105",   "to": "room-106",  "type": "walk", "weight": 1 },
+        { "from": "room-106",   "to": "stairs-1",  "type": "walk", "weight": 1 }
+      ],
+      "areas": [
+        {
+          "nodeId": "entrance-1",
+          "points": [[2100,3300],[2900,3300],[2900,3900],[2100,3900]]
+        },
+        {
+          "nodeId": "room-101",
+          "points": [[700,2400],[1700,2400],[1700,3200],[700,3200]]
+        },
+        {
+          "nodeId": "room-102",
+          "points": [[2000,2400],[3000,2400],[3000,3200],[2000,3200]]
+        },
+        {
+          "nodeId": "room-103",
+          "points": [[3300,2400],[4200,2400],[4200,3200],[3300,3200]]
+        },
+        {
+          "nodeId": "room-104",
+          "points": [[700,1400],[1700,1400],[1700,2200],[700,2200]]
+        },
+        {
+          "nodeId": "room-105",
+          "points": [[2000,1400],[3000,1400],[3000,2200],[2000,2200]]
+        },
+        {
+          "nodeId": "room-106",
+          "points": [[3300,1400],[4200,1400],[4200,2200],[3300,2200]]
+        },
+        {
+          "nodeId": "stairs-1",
+          "points": [[4200,2000],[4700,2000],[4700,2600],[4200,2600]]
+        }
+      ]
+    },
+    {
+      "level": 2,
+      "name": "2 этаж",
+      "nodes": [
+        { "id": "stairs-2",  "type": "stairs", "label": "Лестн.", "x": 4400, "y": 2300 },
+        { "id": "room-201",  "type": "room",   "label": "201",    "x": 1200, "y": 2800 },
+        { "id": "room-202",  "type": "room",   "label": "202",    "x": 2500, "y": 2800 },
+        { "id": "room-203",  "type": "room",   "label": "203",    "x": 3800, "y": 2800 },
+        { "id": "room-204",  "type": "room",   "label": "204",    "x": 1200, "y": 1800 },
+        { "id": "room-205",  "type": "room",   "label": "205",    "x": 2500, "y": 1800 }
+      ],
+      "edges": [
+        { "from": "stairs-2", "to": "room-203",  "type": "walk", "weight": 1 },
+        { "from": "room-203", "to": "room-202",  "type": "walk", "weight": 1 },
+        { "from": "room-202", "to": "room-201",  "type": "walk", "weight": 1 },
+        { "from": "room-202", "to": "room-205",  "type": "walk", "weight": 1 },
+        { "from": "room-201", "to": "room-204",  "type": "walk", "weight": 1 },
+        { "from": "room-205", "to": "room-204",  "type": "walk", "weight": 1 }
+      ],
+      "areas": [
+        {
+          "nodeId": "stairs-2",
+          "points": [[4200,2000],[4700,2000],[4700,2600],[4200,2600]]
+        },
+        {
+          "nodeId": "room-201",
+          "points": [[700,2400],[1700,2400],[1700,3200],[700,3200]]
+        },
+        {
+          "nodeId": "room-202",
+          "points": [[2000,2400],[3000,2400],[3000,3200],[2000,3200]]
+        },
+        {
+          "nodeId": "room-203",
+          "points": [[3300,2400],[4200,2400],[4200,3200],[3300,3200]]
+        },
+        {
+          "nodeId": "room-204",
+          "points": [[700,1400],[1700,1400],[1700,2200],[700,2200]]
+        },
+        {
+          "nodeId": "room-205",
+          "points": [[2000,1400],[3000,1400],[3000,2200],[2000,2200]]
+        }
+      ]
+    }
+  ],
+  "cross_floor_edges": [
+    { "from": "stairs-1", "to": "stairs-2", "type": "stairs", "weight": 2 }
+  ]
+}

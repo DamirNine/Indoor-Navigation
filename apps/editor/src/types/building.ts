@@ -1,6 +1,6 @@
 export type NodeType = 'room' | 'stairs' | 'elevator' | 'entrance';
 export type EdgeType = 'walk' | 'stairs' | 'elevator';
-export type Tool = 'select' | 'node' | 'edge' | 'pan' | 'move';
+export type Tool = 'select' | 'node' | 'edge' | 'pan' | 'move' | 'zone';
 
 export interface NavNode {
   id: string;
@@ -24,6 +24,11 @@ export interface CrossFloorEdge {
   weight: number;
 }
 
+export interface Area {
+  nodeId: string;
+  points: number[][]; // [[x1,y1], [x2,y2], ...]
+}
+
 export interface Floor {
   level: number;
   name: string;
@@ -32,6 +37,7 @@ export interface Floor {
   imageDataUrl?: string; // in-memory only, NOT serialised
   nodes: NavNode[];
   edges: NavEdge[];
+  areas: Area[];
 }
 
 export interface Building {

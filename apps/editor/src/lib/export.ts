@@ -11,6 +11,7 @@ export function buildingToJson(building: Building): string {
         name: floor.name,
         nodes: floor.nodes,
         edges: floor.edges,
+        areas: floor.areas,
       };
       if (floor.image) f['image'] = floor.image;
       return f;

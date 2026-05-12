@@ -71,12 +71,27 @@ class CrossFloorEdge {
       );
 }
 
+class Area {
+  final String nodeId;
+  final List<List<double>> points; // [[x1,y1],[x2,y2],...]
+
+  const Area({required this.nodeId, required this.points});
+
+  factory Area.fromJson(Map<String, dynamic> json) => Area(
+        nodeId: json['nodeId'] as String,
+        points: (json['points'] as List)
+            .map((p) => (p as List).map((v) => (v as num).toDouble()).toList())
+            .toList(),
+      );
+}
+
 class Floor {
   final int level;
   final String name;
   final String? image;
   final List<NavNode> nodes;
   final List<NavEdge> edges;
+  final List<Area> areas;
 
   const Floor({
     required this.level,
@@ -84,6 +99,7 @@ class Floor {
     this.image,
     required this.nodes,
     required this.edges,
+    this.areas = const [],
   });
 
   factory Floor.fromJson(Map<String, dynamic> json) {
@@ -97,6 +113,9 @@ class Floor {
           .toList(),
       edges: (json['edges'] as List)
           .map((e) => NavEdge.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      areas: (json['areas'] as List? ?? [])
+          .map((a) => Area.fromJson(a as Map<String, dynamic>))
           .toList(),
     );
   }

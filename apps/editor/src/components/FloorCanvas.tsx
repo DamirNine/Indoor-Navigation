@@ -15,6 +15,13 @@ const NODE_COLOR: Record<NodeType, string> = {
   entrance: '#2E7D32',
 };
 
+const AREA_FILL: Record<NodeType, string> = {
+  room: 'rgba(25,118,210,0.15)',
+  stairs: 'rgba(245,124,0,0.18)',
+  elevator: 'rgba(123,31,162,0.18)',
+  entrance: 'rgba(46,125,50,0.18)',
+};
+
 interface Props {
   zoom: number;
   setZoom: (fn: (z: number) => number) => void;
@@ -26,6 +33,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const {
     building, activeFloorIndex, tool, selectedNodeId, selectedEdgeKey, pendingEdgeFromId,
     previewRoute, addNode, selectNode, selectEdge, setPendingEdgeFrom, addEdge, updateNode,
+    addArea, deleteArea,
   } = useEditorStore();
 
   const routeSet = new Set(previewRoute ?? []);
@@ -46,10 +54,17 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [movingNodeId, setMovingNodeId] = useState<string | null>(null);
   const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
   const [stageSize, setStageSize] = useState({ w: 800, h: 500 });
+
+  // Zone tool state
+  const [zoneNodeId, setZoneNodeId] = useState<string | null>(null);
+  const [zonePoints, setZonePoints] = useState<number[][]>([]);
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPinchDist = useRef(0);
   const isPanning = tool === 'pan';
   const isMoving = tool === 'move';
+  const isZone = tool === 'zone';
 
   useEffect(() => {
     const el = containerRef.current;
@@ -69,14 +84,29 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     img.src = floor.imageDataUrl;
   }, [floor?.imageDataUrl]);
 
+  const cancelZone = useCallback(() => {
+    setZoneNodeId(null);
+    setZonePoints([]);
+    setCursorPos(null);
+  }, []);
+
   const handleEscape = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') { setPendingEdgeFrom(null); setPendingEdgeTo(null); }
-  }, [setPendingEdgeFrom]);
+    if (e.key === 'Escape') {
+      setPendingEdgeFrom(null);
+      setPendingEdgeTo(null);
+      cancelZone();
+    }
+  }, [setPendingEdgeFrom, cancelZone]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [handleEscape]);
+
+  // Cancel zone when switching away from zone tool
+  useEffect(() => {
+    if (!isZone) cancelZone();
+  }, [isZone, cancelZone]);
 
   const handleWheel = (e: any) => {
     if (!isPanning) return;
@@ -135,6 +165,12 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     return { x: (ptr.x - stagePos.x) / zoom, y: (ptr.y - stagePos.y) / zoom };
   };
 
+  const handleMouseMove = (e: any) => {
+    if (!isZone || !zoneNodeId) return;
+    const v = toVirtual(e);
+    setCursorPos(v);
+  };
+
   const handleStageClick = (e: any) => {
     if (isPanning) return;
     const className = e.target.getClassName();
@@ -149,6 +185,23 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
 
     if (tool === 'node' && onBackground) {
       setAddNodePos(toVirtual(e));
+      return;
+    }
+
+    if (isZone && zoneNodeId && onBackground) {
+      const { x, y } = toVirtual(e);
+      const newPts = [...zonePoints, [x, y]];
+
+      // Close polygon if clicked near first point (< 20 virtual px) and have >= 3 points
+      if (zonePoints.length >= 3) {
+        const [fx, fy] = zonePoints[0];
+        if (Math.hypot(x - fx, y - fy) < 20) {
+          addArea({ nodeId: zoneNodeId, points: zonePoints });
+          cancelZone();
+          return;
+        }
+      }
+      setZonePoints(newPts);
     }
   };
 
@@ -156,6 +209,14 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     if (isPanning) return;
     if (isMoving) {
       setMovingNodeId(id => id === node.id ? null : node.id);
+      return;
+    }
+    if (isZone) {
+      if (zonePoints.length === 0) {
+        // Start drawing zone for this node
+        setZoneNodeId(node.id);
+        deleteArea(node.id); // clear existing zone if any
+      }
       return;
     }
     if (tool === 'select') { selectNode(node.id); return; }
@@ -179,6 +240,19 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     setPendingEdgeTo(null);
   };
 
+  // Polygon centroid
+  const centroid = (pts: number[][]) => {
+    const x = pts.reduce((s, p) => s + p[0], 0) / pts.length;
+    const y = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+    return { x, y };
+  };
+
+  const zoneHint = isZone
+    ? zoneNodeId
+      ? `${getNode(zoneNodeId)?.label ?? ''} — кликайте чтобы добавить вершины${zonePoints.length >= 3 ? ' • кликните на первую точку чтобы замкнуть' : ''}`
+      : 'Выберите узел для рисования области'
+    : null;
+
   return (
     <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#e0e0e0' }}>
       {pendingEdgeFromId && (
@@ -189,6 +263,11 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
       {isMoving && movingNodeId && (
         <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#F57C00', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, pointerEvents: 'none' }}>
           Нажмите куда переместить узел
+        </div>
+      )}
+      {zoneHint && (
+        <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#37474F', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, pointerEvents: 'none', maxWidth: '80%', textAlign: 'center' }}>
+          {zoneHint}
         </div>
       )}
 
@@ -206,7 +285,8 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         onWheel={handleWheel}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{ cursor: isPanning ? 'grab' : tool === 'node' ? 'crosshair' : isMoving ? 'cell' : 'default' }}
+        onMouseMove={handleMouseMove}
+        style={{ cursor: isPanning ? 'grab' : tool === 'node' ? 'crosshair' : isMoving ? 'cell' : isZone ? 'crosshair' : 'default' }}
       >
         <Layer>
           {bgImage
@@ -214,6 +294,56 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
             : <Rect width={VIRTUAL_W} height={VIRTUAL_H} fill="#e8e8e8" />
           }
 
+          {/* Existing areas */}
+          {floor.areas.map(area => {
+            const node = getNode(area.nodeId);
+            if (!node || area.points.length < 3) return null;
+            const pts = area.points.flatMap(p => p);
+            const c = centroid(area.points);
+            const isZoneTarget = zoneNodeId === area.nodeId;
+            return (
+              <Group key={area.nodeId}>
+                <Line
+                  points={pts}
+                  closed
+                  fill={AREA_FILL[node.type]}
+                  stroke={isZoneTarget ? '#F57C00' : NODE_COLOR[node.type]}
+                  strokeWidth={isZoneTarget ? 2.5 : 1.5}
+                />
+                <Text
+                  text={node.label}
+                  x={c.x - node.label.length * 4}
+                  y={c.y - 7}
+                  fontSize={13}
+                  fill={NODE_COLOR[node.type]}
+                  fontStyle="bold"
+                />
+              </Group>
+            );
+          })}
+
+          {/* Zone being drawn */}
+          {isZone && zonePoints.length > 0 && (() => {
+            const pts = zonePoints.flatMap(p => p);
+            const linePoints = cursorPos
+              ? [...pts, cursorPos.x, cursorPos.y]
+              : pts;
+            return (
+              <Group>
+                {zonePoints.length >= 3 && (
+                  <Line points={pts} closed fill="rgba(55,71,79,0.1)" stroke="#37474F" strokeWidth={1.5} dash={[6, 4]} />
+                )}
+                <Line points={linePoints} stroke="#37474F" strokeWidth={1.5} dash={[6, 4]} />
+                {/* First point marker */}
+                <Circle x={zonePoints[0][0]} y={zonePoints[0][1]} radius={6} fill="#37474F" opacity={0.7} />
+                {zonePoints.map((pt, i) => (
+                  <Circle key={i} x={pt[0]} y={pt[1]} radius={3} fill="#37474F" />
+                ))}
+              </Group>
+            );
+          })()}
+
+          {/* Edges */}
           {floor.edges.map(edge => {
             const from = getNode(edge.from);
             const to = getNode(edge.to);
@@ -232,19 +362,22 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
             );
           })}
 
+          {/* Nodes */}
           {floor.nodes.map(node => {
             const onRoute = routeSet.has(node.id);
+            const isZoneTarget = isZone && zoneNodeId === node.id;
             return (
               <Group key={node.id} x={node.x} y={node.y}
                 onClick={() => handleNodeClick(node)} onTap={() => handleNodeClick(node)}>
                 {onRoute && <Circle radius={20} fill="rgba(67,160,71,0.25)" />}
                 <Circle radius={14} fill={NODE_COLOR[node.type]}
                   stroke={
+                    isZoneTarget ? '#F57C00' :
                     movingNodeId === node.id ? '#F57C00' :
                     selectedNodeId === node.id || pendingEdgeFromId === node.id ? '#f44336' :
                     onRoute ? '#43a047' : 'white'
                   }
-                  strokeWidth={movingNodeId === node.id || selectedNodeId === node.id || pendingEdgeFromId === node.id || onRoute ? 3 : 1.5}
+                  strokeWidth={isZoneTarget || movingNodeId === node.id || selectedNodeId === node.id || pendingEdgeFromId === node.id || onRoute ? 3 : 1.5}
                 />
                 <Text text={node.label} x={-node.label.length * 3} y={16} fontSize={11} fill="#333" />
               </Group>

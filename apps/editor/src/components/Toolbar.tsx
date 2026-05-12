@@ -7,6 +7,7 @@ const TOOLS: { value: Tool; label: string; title: string }[] = [
   { value: 'edge',   label: '—', title: 'Добавить ребро' },
   { value: 'move',   label: '⤢', title: 'Переместить узел' },
   { value: 'pan',    label: '✋', title: 'Перемещение карты и зум' },
+  { value: 'zone',   label: '⬡', title: 'Нарисовать область узла' },
 ];
 
 interface Props {

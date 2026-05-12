@@ -164,6 +164,7 @@ class _FloorViewState extends State<_FloorView> {
               size: Size(constraints.maxWidth, constraints.maxHeight),
               painter: FloorMapPainter(
                 nodes: widget.floor.nodes,
+                areas: widget.floor.areas,
                 stepsOnFloor: widget.steps,
                 imageSize: mapSize,
               ),
