@@ -119,10 +119,11 @@ class FloorMapPainter extends CustomPainter {
       tp.paint(canvas, center - Offset(tp.width / 2, tp.height / 2));
     }
 
-    // Draw nodes without areas as small circles
+    // Draw nodes without areas as small circles (skip corridors)
     final areaNodeIds = {for (final a in areas) a.nodeId};
     for (final node in nodeMap.values) {
       if (areaNodeIds.contains(node.id)) continue;
+      if (node.type == NodeType.corridor) continue;
       final pos = toCanvas(node.x, node.y);
       final onRoute = routeNodeIds.contains(node.id);
       final color = _nodeColors[node.type] ?? Colors.grey;
@@ -136,6 +137,7 @@ class FloorMapPainter extends CustomPainter {
     Set<String> routeNodeIds,
   ) {
     for (final node in nodes) {
+      if (node.type == NodeType.corridor) continue;
       final pos = nodeOffset(node);
       final onRoute = routeNodeIds.contains(node.id);
       final color = switch (node.type) {

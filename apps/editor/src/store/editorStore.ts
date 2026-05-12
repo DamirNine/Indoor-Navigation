@@ -117,7 +117,7 @@ export const useEditorStore = create<EditorState>()(
             ...f,
             nodes: f.nodes.filter(n => n.id !== id),
             edges: f.edges.filter(e => e.from !== id && e.to !== id),
-            areas: f.areas.filter(a => a.nodeId !== id),
+            areas: (f.areas ?? []).filter(a => a.nodeId !== id),
           }));
           return {
             building: {
@@ -169,7 +169,7 @@ export const useEditorStore = create<EditorState>()(
         set(s => {
           const floors = [...s.building.floors];
           const i = s.activeFloorIndex;
-          const existing = floors[i].areas.filter(a => a.nodeId !== area.nodeId);
+          const existing = (floors[i].areas ?? []).filter(a => a.nodeId !== area.nodeId);
           floors[i] = { ...floors[i], areas: [...existing, area] };
           return { building: { ...s.building, floors } };
         }),
@@ -179,7 +179,7 @@ export const useEditorStore = create<EditorState>()(
           building: {
             ...s.building,
             floors: s.building.floors.map(f => ({
-              ...f, areas: f.areas.filter(a => a.nodeId !== nodeId),
+              ...f, areas: (f.areas ?? []).filter(a => a.nodeId !== nodeId),
             })),
           },
         })),
@@ -215,7 +215,7 @@ export const useEditorStore = create<EditorState>()(
             imageDataUrl: floor.imageDataUrl,
             nodes: floor.nodes,
             edges: floor.edges,
-            areas: floor.areas,
+            areas: floor.areas ?? [],
           })),
         },
         activeFloorIndex: state.activeFloorIndex,
