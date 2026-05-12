@@ -1,5 +1,5 @@
 import { useEditorStore } from '../store/editorStore';
-import { NodeType } from '../types/building';
+import type { NodeType } from '../types/building';
 
 export default function NodeProperties() {
   const { building, activeFloorIndex, selectedNodeId, updateNode, deleteNode, selectNode } = useEditorStore();

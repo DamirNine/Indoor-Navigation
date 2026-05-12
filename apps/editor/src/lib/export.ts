@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { Building } from '../types/building';
+import type { Building } from '../types/building';
 
 export function buildingToJson(building: Building): string {
   const output = {

@@ -1,5 +1,5 @@
 import { useEditorStore } from '../store/editorStore';
-import { Tool } from '../types/building';
+import type { Tool } from '../types/building';
 
 const TOOLS: { value: Tool; label: string; title: string }[] = [
   { value: 'select', label: '↖ Выбор', title: 'Выбор и редактирование' },

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Building, NavNode, NavEdge, CrossFloorEdge, Tool } from '../types/building';
+import type { Building, NavNode, NavEdge, CrossFloorEdge, Tool } from '../types/building';
 
 const emptyBuilding = (): Building => ({
   id: '', name: '', floors: [], crossFloorEdges: [],

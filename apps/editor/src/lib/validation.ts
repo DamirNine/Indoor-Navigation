@@ -1,4 +1,4 @@
-import { Building } from '../types/building';
+import type { Building } from '../types/building';
 
 export interface ValidationError { message: string; }
 

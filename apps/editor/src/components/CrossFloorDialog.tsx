@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useEditorStore } from '../store/editorStore';
-import { EdgeType, NavNode } from '../types/building';
+import type { EdgeType, NavNode } from '../types/building';
 
 interface Props { onClose: () => void; }
 

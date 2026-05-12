@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { buildingToJson } from '../../lib/export';
-import { Building } from '../../types/building';
+import type { Building } from '../../types/building';
 
 const building: Building = {
   id: 'test',

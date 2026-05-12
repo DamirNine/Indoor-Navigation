@@ -3,7 +3,7 @@ import { Stage, Layer, Circle, Line, Image as KonvaImage, Rect, Text, Group } fr
 import { useEditorStore } from '../store/editorStore';
 import AddNodeDialog from './AddNodeDialog';
 import AddEdgeDialog from './AddEdgeDialog';
-import { NavNode, NodeType, EdgeType } from '../types/building';
+import type { NavNode, NodeType, EdgeType } from '../types/building';
 
 const STAGE_W = 1000;
 const STAGE_H = 680;

@@ -1,5 +1,5 @@
 import { useEditorStore } from '../store/editorStore';
-import { EdgeType } from '../types/building';
+import type { EdgeType } from '../types/building';
 
 export default function EdgeProperties() {
   const { building, activeFloorIndex, selectedEdgeKey, updateEdge, deleteEdge } = useEditorStore();

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NodeType } from '../types/building';
+import type { NodeType } from '../types/building';
 
 interface Props {
   onConfirm: (type: NodeType, label: string) => void;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { EdgeType } from '../types/building';
+import type { EdgeType } from '../types/building';
 
 interface Props {
   fromLabel: string;

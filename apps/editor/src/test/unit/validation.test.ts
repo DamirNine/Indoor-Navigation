@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { validateBuilding } from '../../lib/validation';
-import { Building } from '../../types/building';
+import type { Building } from '../../types/building';
 
 const makeBuilding = (): Building => ({
   id: 'b1',
