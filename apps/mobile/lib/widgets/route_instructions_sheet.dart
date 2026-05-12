@@ -8,64 +8,83 @@ class RouteInstructionsSheet extends StatelessWidget {
   final Building building;
   const RouteInstructionsSheet({super.key, required this.route, required this.building});
 
-  // BFS over the full building graph to find nearest non-corridor node from [start].
-  NavNode _nearestNamedInGraph(NavNode start) {
-    if (start.type != NodeType.corridor) return start;
+  Map<String, NavNode> get _nodeMap => {for (final n in building.allNodes) n.id: n};
 
-    final nodeMap = {for (final n in building.allNodes) n.id: n};
+  Map<String, List<String>> _buildAdj() {
     final adj = <String, List<String>>{};
-    void addEdge(String a, String b) {
+    void add(String a, String b) {
       adj.putIfAbsent(a, () => []).add(b);
       adj.putIfAbsent(b, () => []).add(a);
     }
     for (final floor in building.floors) {
-      for (final e in floor.edges) { addEdge(e.from, e.to); }
+      for (final e in floor.edges) { add(e.from, e.to); }
     }
-    for (final e in building.crossFloorEdges) { addEdge(e.from, e.to); }
+    for (final e in building.crossFloorEdges) { add(e.from, e.to); }
+    return adj;
+  }
 
+  // BFS from [start] to find nearest node that is a room or entrance.
+  NavNode _nearestLandmark(NavNode start, Map<String, NavNode> nodeMap, Map<String, List<String>> adj) {
+    if (start.type == NodeType.room || start.type == NodeType.entrance) return start;
     final visited = <String>{start.id};
     final queue = Queue<String>()..add(start.id);
     while (queue.isNotEmpty) {
       final id = queue.removeFirst();
       final node = nodeMap[id];
-      if (node != null && node.type != NodeType.corridor) return node;
+      if (node != null && (node.type == NodeType.room || node.type == NodeType.entrance)) {
+        return node;
+      }
       for (final nb in adj[id] ?? []) {
         if (visited.add(nb)) queue.add(nb);
       }
     }
-    return start; // fallback (shouldn't happen in a valid graph)
+    return start;
   }
 
   List<RouteStep> _compress(List<RouteStep> steps) {
-    final result = <RouteStep>[];
-    NavNode? lastFrom = steps.isNotEmpty ? steps.first.from : null;
+    if (steps.isEmpty) return [];
 
-    for (int i = 0; i < steps.length; i++) {
-      final step = steps[i];
+    final nodeMap = _nodeMap;
+    final adj = _buildAdj();
+
+    // Corridors directly adjacent to the route's named start and end
+    final routeStart = steps.first.from;
+    final routeEnd = steps.last.to;
+    final skipIds = <String>{};
+    for (final nbId in adj[routeStart.id] ?? []) {
+      final n = nodeMap[nbId];
+      if (n != null && n.type == NodeType.corridor) skipIds.add(nbId);
+    }
+    for (final nbId in adj[routeEnd.id] ?? []) {
+      final n = nodeMap[nbId];
+      if (n != null && n.type == NodeType.corridor) skipIds.add(nbId);
+    }
+
+    final result = <RouteStep>[];
+
+    for (final step in steps) {
+      final toCorridor = step.to.type == NodeType.corridor;
       final isTransit = step.edgeType != EdgeType.walk;
-      final toIsCorridor = step.to.type == NodeType.corridor;
 
       if (isTransit) {
-        final namedTo = toIsCorridor ? _nearestNamedInGraph(step.to) : step.to;
-        result.add(RouteStep(
-          from: lastFrom ?? step.from,
-          to: namedTo,
-          edgeType: step.edgeType,
-          weight: step.weight,
-        ));
-        lastFrom = namedTo;
+        // Stairs / elevator: always show, destination = nearest landmark
+        final dest = _nearestLandmark(step.to, nodeMap, adj);
+        result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
         continue;
       }
 
-      if (toIsCorridor) continue;
+      if (!toCorridor) {
+        // Named destination: always show
+        result.add(step);
+        continue;
+      }
 
-      result.add(RouteStep(
-        from: lastFrom ?? step.from,
-        to: step.to,
-        edgeType: step.edgeType,
-        weight: step.weight,
-      ));
-      lastFrom = step.to;
+      // Corridor destination:
+      if (skipIds.contains(step.to.id)) continue; // adjacent to start/end — skip
+
+      // Intermediate corridor: show nearest landmark as waypoint
+      final dest = _nearestLandmark(step.to, nodeMap, adj);
+      result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
     }
     return result;
   }

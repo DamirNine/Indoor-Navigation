@@ -15,8 +15,8 @@ class RouteStep {
 
   String get description => switch (edgeType) {
         EdgeType.walk => 'Идите до «${to.label}»',
-        EdgeType.stairs => 'По лестнице на ${to.floor} этаж → «${to.label}»',
-        EdgeType.elevator => 'Лифт на ${to.floor} этаж → «${to.label}»',
+        EdgeType.stairs => 'По лестнице на ${to.floor} этаж',
+        EdgeType.elevator => 'На лифте на ${to.floor} этаж',
       };
 }
 
