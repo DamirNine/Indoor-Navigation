@@ -1,12 +1,9 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Stage, Layer, Circle, Line, Image as KonvaImage, Rect, Text, Group } from 'react-konva';
 import { useEditorStore } from '../store/editorStore';
 import AddNodeDialog from './AddNodeDialog';
 import AddEdgeDialog from './AddEdgeDialog';
 import type { NavNode, NodeType, EdgeType } from '../types/building';
-
-const STAGE_W = 1000;
-const STAGE_H = 680;
 
 const NODE_COLOR: Record<NodeType, string> = {
   room: '#1976D2',
@@ -25,6 +22,19 @@ export default function FloorCanvas() {
   const [addNodePos, setAddNodePos] = useState<{ x: number; y: number } | null>(null);
   const [pendingEdgeTo, setPendingEdgeTo] = useState<NavNode | null>(null);
   const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
+  const [stageSize, setStageSize] = useState({ w: 800, h: 500 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      if (width > 0 && height > 0) setStageSize({ w: Math.floor(width), h: Math.floor(height) });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!floor?.imageDataUrl) { setBgImage(null); return; }
@@ -88,17 +98,17 @@ export default function FloorCanvas() {
   };
 
   return (
-    <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#e0e0e0' }}>
+    <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#e0e0e0' }}>
       {pendingEdgeFromId && (
         <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#1976D2', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, pointerEvents: 'none' }}>
-          Кликните на второй узел • Esc — отмена
+          Нажмите на второй узел
         </div>
       )}
-      <Stage width={STAGE_W} height={STAGE_H} onClick={handleStageClick} style={{ cursor: tool === 'node' ? 'crosshair' : 'default' }}>
+      <Stage width={stageSize.w} height={stageSize.h} onClick={handleStageClick} style={{ cursor: tool === 'node' ? 'crosshair' : 'default' }}>
         <Layer>
           {bgImage
-            ? <KonvaImage image={bgImage} width={STAGE_W} height={STAGE_H} />
-            : <Rect width={STAGE_W} height={STAGE_H} fill="#e8e8e8" />
+            ? <KonvaImage image={bgImage} width={stageSize.w} height={stageSize.h} />
+            : <Rect width={stageSize.w} height={stageSize.h} fill="#e8e8e8" />
           }
 
           {floor.edges.map(edge => {
@@ -122,12 +132,12 @@ export default function FloorCanvas() {
           {floor.nodes.map(node => (
             <Group key={node.id} x={node.x} y={node.y} onClick={() => handleNodeClick(node)}>
               <Circle
-                radius={12}
+                radius={14}
                 fill={NODE_COLOR[node.type]}
                 stroke={selectedNodeId === node.id || pendingEdgeFromId === node.id ? '#f44336' : 'white'}
                 strokeWidth={selectedNodeId === node.id || pendingEdgeFromId === node.id ? 3 : 1.5}
               />
-              <Text text={node.label} x={-node.label.length * 3} y={14} fontSize={11} fill="#333" />
+              <Text text={node.label} x={-node.label.length * 3} y={16} fontSize={11} fill="#333" />
             </Group>
           ))}
         </Layer>

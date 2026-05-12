@@ -13,7 +13,7 @@ export default function AddEdgeDialog({ fromLabel, toLabel, onConfirm, onCancel 
   const [weight, setWeight] = useState('10');
 
   return (
-    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
       <div style={{ background: 'white', padding: 24, borderRadius: 8, minWidth: 280 }}>
         <h3 style={{ margin: '0 0 8px' }}>Добавить связь</h3>
         <p style={{ margin: '0 0 16px', fontSize: 13, color: '#666' }}>{fromLabel} → {toLabel}</p>

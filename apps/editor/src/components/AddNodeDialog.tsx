@@ -11,7 +11,7 @@ export default function AddNodeDialog({ onConfirm, onCancel }: Props) {
   const [label, setLabel] = useState('');
 
   return (
-    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
       <div style={{ background: 'white', padding: 24, borderRadius: 8, minWidth: 280 }}>
         <h3 style={{ margin: '0 0 16px' }}>Добавить узел</h3>
         <label style={{ display: 'block', marginBottom: 12 }}>
