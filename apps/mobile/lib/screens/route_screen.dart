@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
@@ -123,11 +124,19 @@ const _virtualSize = Size(10000, 8000);
 
 class _FloorViewState extends State<_FloorView> {
   File? _imageFile;
+  final _transform = TransformationController();
+  bool _transformSet = false;
 
   @override
   void initState() {
     super.initState();
     _loadImage();
+  }
+
+  @override
+  void dispose() {
+    _transform.dispose();
+    super.dispose();
   }
 
   Future<void> _loadImage() async {
@@ -139,17 +148,72 @@ class _FloorViewState extends State<_FloorView> {
     setState(() => _imageFile = f);
   }
 
+  void _maybeInitTransform(BoxConstraints constraints) {
+    if (_transformSet) return;
+
+    double? minX, minY, maxX, maxY;
+
+    final contour = widget.floor.contour;
+    if (contour != null && contour.length >= 3) {
+      for (final pt in contour) {
+        minX = minX == null ? pt[0] : min(minX, pt[0]);
+        minY = minY == null ? pt[1] : min(minY, pt[1]);
+        maxX = maxX == null ? pt[0] : max(maxX, pt[0]);
+        maxY = maxY == null ? pt[1] : max(maxY, pt[1]);
+      }
+    } else {
+      for (final node in widget.floor.nodes) {
+        minX = minX == null ? node.x : min(minX, node.x);
+        minY = minY == null ? node.y : min(minY, node.y);
+        maxX = maxX == null ? node.x : max(maxX, node.x);
+        maxY = maxY == null ? node.y : max(maxY, node.y);
+      }
+    }
+
+    if (minX == null || minY == null || maxX == null || maxY == null) return;
+    _transformSet = true;
+
+    const pad = 600.0;
+    final bMinX = (minX - pad) / _virtualSize.width * constraints.maxWidth;
+    final bMinY = (minY - pad) / _virtualSize.height * constraints.maxHeight;
+    final bMaxX = (maxX + pad) / _virtualSize.width * constraints.maxWidth;
+    final bMaxY = (maxY + pad) / _virtualSize.height * constraints.maxHeight;
+
+    final bW = bMaxX - bMinX;
+    final bH = bMaxY - bMinY;
+    if (bW <= 0 || bH <= 0) return;
+
+    final s = min(constraints.maxWidth / bW, constraints.maxHeight / bH);
+    final cx = (bMinX + bMaxX) / 2;
+    final cy = (bMinY + bMaxY) / 2;
+    final tx = constraints.maxWidth / 2 - s * cx;
+    final ty = constraints.maxHeight / 2 - s * cy;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final m = Matrix4.identity();
+      m.setEntry(0, 0, s);
+      m.setEntry(1, 1, s);
+      m.setEntry(0, 3, tx);
+      m.setEntry(1, 3, ty);
+      _transform.value = m;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
+      transformationController: _transform,
+      minScale: 0.05,
+      maxScale: 10.0,
       child: LayoutBuilder(builder: (ctx, constraints) {
+        _maybeInitTransform(constraints);
         return Stack(
           children: [
             if (_imageFile != null)
               Image.file(_imageFile!,
                   width: constraints.maxWidth,
                   height: constraints.maxHeight,
-                  // fill matches the virtual 5000×4000 coordinate space
                   fit: BoxFit.fill)
             else
               Container(color: Colors.grey.shade200),

@@ -139,17 +139,17 @@ class _FloorViewState extends State<_FloorView> {
     final contour = widget.floor.contour;
     if (contour != null && contour.length >= 3) {
       for (final pt in contour) {
-        minX = minX == null ? pt[0] : min(minX!, pt[0]);
-        minY = minY == null ? pt[1] : min(minY!, pt[1]);
-        maxX = maxX == null ? pt[0] : max(maxX!, pt[0]);
-        maxY = maxY == null ? pt[1] : max(maxY!, pt[1]);
+        minX = minX == null ? pt[0] : min(minX, pt[0]);
+        minY = minY == null ? pt[1] : min(minY, pt[1]);
+        maxX = maxX == null ? pt[0] : max(maxX, pt[0]);
+        maxY = maxY == null ? pt[1] : max(maxY, pt[1]);
       }
     } else {
       for (final node in widget.floor.nodes) {
-        minX = minX == null ? node.x : min(minX!, node.x);
-        minY = minY == null ? node.y : min(minY!, node.y);
-        maxX = maxX == null ? node.x : max(maxX!, node.x);
-        maxY = maxY == null ? node.y : max(maxY!, node.y);
+        minX = minX == null ? node.x : min(minX, node.x);
+        minY = minY == null ? node.y : min(minY, node.y);
+        maxX = maxX == null ? node.x : max(maxX, node.x);
+        maxY = maxY == null ? node.y : max(maxY, node.y);
       }
     }
 
