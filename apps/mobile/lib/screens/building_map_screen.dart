@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,7 +9,9 @@ import '../services/graph_service.dart';
 import '../services/storage_service.dart';
 import '../widgets/floor_map_painter.dart';
 
-const _virtualSize = Size(5000, 4000);
+const _virtualW = 10000.0;
+const _virtualH = 8000.0;
+const _virtualSize = Size(_virtualW, _virtualH);
 
 class BuildingMapScreen extends StatefulWidget {
   final String buildingId;
@@ -75,10 +78,7 @@ class _BuildingMapScreenState extends State<BuildingMapScreen>
       body: TabBarView(
         controller: _tabController!,
         children: building.floors.map((floor) {
-          return _FloorView(
-            floor: floor,
-            buildingId: building.id,
-          );
+          return _FloorView(floor: floor, buildingId: building.id);
         }).toList(),
       ),
       bottomNavigationBar: SafeArea(
@@ -108,6 +108,8 @@ class _FloorView extends StatefulWidget {
 
 class _FloorViewState extends State<_FloorView> {
   File? _imageFile;
+  final _transform = TransformationController();
+  bool _transformSet = false;
 
   @override
   void initState() {
@@ -115,28 +117,92 @@ class _FloorViewState extends State<_FloorView> {
     _loadImage();
   }
 
+  @override
+  void dispose() {
+    _transform.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadImage() async {
     if (widget.floor.image == null) return;
     final dir = await getApplicationDocumentsDirectory();
-    final f = File(
-        '${dir.path}/buildings/${widget.buildingId}/${widget.floor.image}');
+    final f = File('${dir.path}/buildings/${widget.buildingId}/${widget.floor.image}');
     if (!await f.exists() || !mounted) return;
     setState(() => _imageFile = f);
+  }
+
+  void _maybeInitTransform(BoxConstraints constraints) {
+    if (_transformSet) return;
+
+    double? minX, minY, maxX, maxY;
+
+    final contour = widget.floor.contour;
+    if (contour != null && contour.length >= 3) {
+      for (final pt in contour) {
+        minX = minX == null ? pt[0] : min(minX!, pt[0]);
+        minY = minY == null ? pt[1] : min(minY!, pt[1]);
+        maxX = maxX == null ? pt[0] : max(maxX!, pt[0]);
+        maxY = maxY == null ? pt[1] : max(maxY!, pt[1]);
+      }
+    } else {
+      for (final node in widget.floor.nodes) {
+        minX = minX == null ? node.x : min(minX!, node.x);
+        minY = minY == null ? node.y : min(minY!, node.y);
+        maxX = maxX == null ? node.x : max(maxX!, node.x);
+        maxY = maxY == null ? node.y : max(maxY!, node.y);
+      }
+    }
+
+    if (minX == null || minY == null || maxX == null || maxY == null) return;
+    _transformSet = true;
+
+    final x0 = minX;
+    final y0 = minY;
+    final x1 = maxX;
+    final y1 = maxY;
+
+    const pad = 600.0;
+    final bMinX = (x0 - pad) / _virtualW * constraints.maxWidth;
+    final bMinY = (y0 - pad) / _virtualH * constraints.maxHeight;
+    final bMaxX = (x1 + pad) / _virtualW * constraints.maxWidth;
+    final bMaxY = (y1 + pad) / _virtualH * constraints.maxHeight;
+
+    final bW = bMaxX - bMinX;
+    final bH = bMaxY - bMinY;
+    if (bW <= 0 || bH <= 0) return;
+
+    final s = min(constraints.maxWidth / bW, constraints.maxHeight / bH);
+    final cx = (bMinX + bMaxX) / 2;
+    final cy = (bMinY + bMaxY) / 2;
+    final tx = constraints.maxWidth / 2 - s * cx;
+    final ty = constraints.maxHeight / 2 - s * cy;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final m = Matrix4.identity();
+      m.setEntry(0, 0, s);
+      m.setEntry(1, 1, s);
+      m.setEntry(0, 3, tx);
+      m.setEntry(1, 3, ty);
+      _transform.value = m;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
+      transformationController: _transform,
+      minScale: 0.05,
+      maxScale: 10.0,
       child: LayoutBuilder(builder: (ctx, constraints) {
+        _maybeInitTransform(constraints);
         return Stack(
           children: [
             if (_imageFile != null)
-              Image.file(
-                _imageFile!,
-                width: constraints.maxWidth,
-                height: constraints.maxHeight,
-                fit: BoxFit.fill,
-              )
+              Image.file(_imageFile!,
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  fit: BoxFit.fill)
             else
               Container(color: Colors.grey.shade200),
             CustomPaint(

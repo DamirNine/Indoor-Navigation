@@ -118,8 +118,8 @@ class _FloorView extends StatefulWidget {
   State<_FloorView> createState() => _FloorViewState();
 }
 
-// Virtual canvas size — must match VIRTUAL_W/H in the React editor (5000×4000).
-const _virtualSize = Size(5000, 4000);
+// Virtual canvas size — must match VIRTUAL_W/H in the React editor (10000×8000).
+const _virtualSize = Size(10000, 8000);
 
 class _FloorViewState extends State<_FloorView> {
   File? _imageFile;

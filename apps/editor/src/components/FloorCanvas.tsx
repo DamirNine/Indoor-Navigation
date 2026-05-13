@@ -5,8 +5,8 @@ import AddNodeDialog from './AddNodeDialog';
 import AddEdgeDialog from './AddEdgeDialog';
 import type { NavNode, NodeType, EdgeType } from '../types/building';
 
-const VIRTUAL_W = 5000;
-const VIRTUAL_H = 4000;
+const VIRTUAL_W = 10000;
+const VIRTUAL_H = 8000;
 const SNAP_DIST = 22;
 const SEGMENT_CLICK_DIST = 28;
 
