@@ -43,6 +43,7 @@ interface EditorState {
   setPreviewRoute: (route: string[] | null) => void;
   setFloorContour: (points: number[][]) => void;
   clearFloorContour: () => void;
+  loadBuilding: (building: Building) => void;
 }
 
 export const useEditorStore = create<EditorState>()(
@@ -224,6 +225,15 @@ export const useEditorStore = create<EditorState>()(
       selectEdge: (key) => set({ selectedEdgeKey: key, selectedNodeId: null }),
       setPendingEdgeFrom: (id) => set({ pendingEdgeFromId: id }),
       setPreviewRoute: (route) => set({ previewRoute: route }),
+
+      loadBuilding: (building) => set({
+        building,
+        activeFloorIndex: 0,
+        selectedNodeId: null,
+        selectedEdgeKey: null,
+        pendingEdgeFromId: null,
+        previewRoute: null,
+      }),
 
       setFloorContour: (points) =>
         set(s => {

@@ -7,6 +7,7 @@ import NodeProperties from './components/NodeProperties';
 import EdgeProperties from './components/EdgeProperties';
 import CrossFloorDialog from './components/CrossFloorDialog';
 import ExportButton from './components/ExportButton';
+import ImportButton from './components/ImportButton';
 import RoutePreview from './components/RoutePreview';
 import { useEditorStore } from './store/editorStore';
 
@@ -42,7 +43,7 @@ export default function App() {
             Межэтажные связи
           </button>
         </div>
-        <div style={{ padding: 12 }}><ExportButton /></div>
+        <div style={{ padding: 12 }}><ImportButton /><ExportButton /></div>
       </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
