@@ -110,9 +110,7 @@ class _RoomSearchScreenState extends State<RoomSearchScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: widget.isSelectingOrigin
-              ? () => context.go('/')
-              : () => context.pop(),
+          onPressed: () => context.pop(),
         ),
         title: Text(widget.isSelectingOrigin ? 'Откуда?' : 'Куда?'),
       ),

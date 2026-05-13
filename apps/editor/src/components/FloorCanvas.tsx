@@ -257,6 +257,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   };
 
   const deleteContour = () => {
+    if (!window.confirm('Удалить контур здания? Это действие нельзя отменить.')) return;
     clearFloorContour();
     setContourMode('draw'); setContourPoints([]); setSelectedContourVertex(null);
   };

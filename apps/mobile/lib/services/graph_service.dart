@@ -3,15 +3,16 @@ import '../models/building.dart';
 
 class GraphService {
   Building parseBuilding(String jsonString) {
-    final Map<String, dynamic> json;
     try {
-      json = jsonDecode(jsonString) as Map<String, dynamic>;
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      final building = Building.fromJson(json);
+      _validate(building);
+      return building;
+    } on FormatException {
+      rethrow;
     } catch (e) {
-      throw FormatException('Invalid JSON: $e');
+      throw FormatException('Неверный формат файла: $e');
     }
-    final building = Building.fromJson(json);
-    _validate(building);
-    return building;
   }
 
   void _validate(Building building) {

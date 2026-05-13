@@ -46,8 +46,18 @@ class _BuildingListScreenState extends State<BuildingListScreen> {
       if (building != null) await _loadBuildings();
     } on FormatException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка: ${e.message}')),
+      showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Ошибка импорта'),
+          content: Text(e.message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
       );
     }
   }
@@ -103,8 +113,7 @@ class _BuildingListScreenState extends State<BuildingListScreen> {
                         icon: const Icon(Icons.delete_outline),
                         onPressed: () => _delete(b.id, b.name),
                       ),
-                      onTap: () =>
-                          context.push('/building/${b.id}/search?mode=from'),
+                      onTap: () => context.push('/building/${b.id}'),
                     );
                   },
                 ),

@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'models/building.dart';
 import 'models/route.dart';
 import 'screens/building_list_screen.dart';
+import 'screens/building_map_screen.dart';
 import 'screens/room_search_screen.dart';
 import 'screens/route_screen.dart';
 import 'screens/settings_screen.dart';
@@ -17,6 +18,12 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/',
       builder: (ctx, state) => const BuildingListScreen(),
+    ),
+    GoRoute(
+      path: '/building/:id',
+      builder: (ctx, state) => BuildingMapScreen(
+        buildingId: state.pathParameters['id']!,
+      ),
     ),
     GoRoute(
       path: '/building/:id/search',
