@@ -107,7 +107,8 @@ class RouteInstructionsSheet extends StatelessWidget {
       }
 
       if (!toCorridor) {
-        if (result.isEmpty || result.last.to.id != step.to.id) {
+        // Don't dedup walk against transit — "По лестнице" and "Идите до X" are different
+        if (result.isEmpty || result.last.to.id != step.to.id || result.last.edgeType != EdgeType.walk) {
           result.add(step);
         }
         continue;
@@ -116,7 +117,8 @@ class RouteInstructionsSheet extends StatelessWidget {
       if (skipIds.contains(step.to.id)) continue;
 
       final dest = _nearestLandmark(step.to, nodeMap, adj, destination: routeEnd);
-      if (result.isNotEmpty && result.last.to.id == dest.id) continue;
+      // Only dedup against previous walk steps; never skip the first step after transit
+      if (result.isNotEmpty && result.last.to.id == dest.id && result.last.edgeType == EdgeType.walk) continue;
       result.add(RouteStep(from: step.from, to: dest, edgeType: step.edgeType, weight: step.weight));
     }
     return result;
