@@ -92,7 +92,6 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
 
   const [addNodePos, setAddNodePos] = useState<{ x: number; y: number } | null>(null);
   const [pendingEdgeTo, setPendingEdgeTo] = useState<NavNode | null>(null);
-  const [movingNodeId, setMovingNodeId] = useState<string | null>(null);
   const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
   const [stageSize, setStageSize] = useState({ w: 800, h: 500 });
 
@@ -114,9 +113,11 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [rubberBand, setRubberBand] = useState<{ sx: number; sy: number; ex: number; ey: number } | null>(null);
   const [isArcMode, setIsArcMode] = useState(false);
   const [arcControlPt, setArcControlPt] = useState<[number, number] | null>(null);
+  const [draggingNodePos, setDraggingNodePos] = useState<{ id: string; x: number; y: number } | null>(null);
 
   // Refs for drag tracking (avoid stale closures)
   const dragging = useRef<{ indices: number[]; startMouse: [number, number]; startPts: [number, number][] } | null>(null);
+  const nodeDrag = useRef<{ id: string; startMouse: [number, number]; startPos: [number, number] } | null>(null);
   const didDrag = useRef(false);
   const dragDist = useRef(0);
 
@@ -347,6 +348,13 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
 
   // ── STAGE MOUSE UP → end drag / rubber band ──────────────────────────────
   const handleStageMouseUp = () => {
+    if (nodeDrag.current) {
+      if (draggingNodePos) moveNode(draggingNodePos.id, draggingNodePos.x, draggingNodePos.y);
+      nodeDrag.current = null;
+      setDraggingNodePos(null);
+      setTimeout(() => { didDrag.current = false; }, 10);
+      return;
+    }
     if (dragging.current) {
       dragging.current = null;
       setContourPoints(pts => pts.map(p => [+p[0].toFixed(1), +p[1].toFixed(1)]));
@@ -369,6 +377,14 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   // ── MOUSE MOVE ────────────────────────────────────────────────────────────
   const handleMouseMove = (e: any) => {
     const [x, y] = toVirtXY(e.target.getStage());
+
+    if (nodeDrag.current) {
+      const d = nodeDrag.current;
+      const dx = x - d.startMouse[0], dy = y - d.startMouse[1];
+      if (Math.hypot(dx, dy) > 4) didDrag.current = true;
+      setDraggingNodePos({ id: d.id, x: d.startPos[0] + dx, y: d.startPos[1] + dy });
+      return;
+    }
 
     if (dragging.current) {
       const d = dragging.current;
@@ -409,9 +425,6 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     const className = e.target.getClassName();
     const onBg = className === 'Stage' || className === 'Rect' || className === 'Image';
 
-    if (isMoving && movingNodeId && onBg) {
-      const { x, y } = toVirtual(e); moveNode(movingNodeId, x, y); setMovingNodeId(null); return;
-    }
     if (tool === 'node' && onBg) { setAddNodePos(toVirtual(e)); return; }
 
     if (isZone) {
@@ -468,9 +481,17 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     }
   };
 
+  const handleNodeMouseDown = (e: any, node: NavNode) => {
+    if (!isMoving) return;
+    e.cancelBubble = true;
+    didDrag.current = false;
+    const [mx, my] = toVirtXY(e.target.getStage());
+    nodeDrag.current = { id: node.id, startMouse: [mx, my], startPos: [node.x, node.y] };
+  };
+
   const handleNodeClick = (node: NavNode) => {
     if (isPanning) return;
-    if (isMoving) { setMovingNodeId(id => id === node.id ? null : node.id); return; }
+    if (isMoving) return; // drag-only in move mode
     if (isZone) {
       if (node.type === 'corridor') return;
       if (zoneMode !== 'edit' || zoneNodeId !== node.id) {
@@ -530,7 +551,6 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   return (
     <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#e0e0e0' }}>
       {pendingEdgeFromId && <Hint color="#1976D2">Нажмите на второй узел</Hint>}
-      {isMoving && movingNodeId && <Hint color="#F57C00">Нажмите куда переместить узел</Hint>}
 
       {contourHint && (
         <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#212121', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '90%' }}>
@@ -703,7 +723,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
             const pts = zonePoints.flatMap(p => p);
             const linePoints = cursorPos ? [...pts, cursorPos.x, cursorPos.y] : pts;
             return (
-              <Group>
+              <Group listening={false}>
                 {zonePoints.length >= 3 && (
                   <Line points={pts} closed fill="rgba(55,71,79,0.1)" stroke="#37474F" strokeWidth={1.5} dash={[6, 4]} />
                 )}
@@ -751,15 +771,19 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           {floor.nodes.map(node => {
             const onRoute = routeSet.has(node.id);
             const isZoneTarget = isZone && zoneNodeId === node.id;
+            const isDraggingThis = draggingNodePos?.id === node.id;
+            const nx = isDraggingThis ? draggingNodePos!.x : node.x;
+            const ny = isDraggingThis ? draggingNodePos!.y : node.y;
             return (
-              <Group key={node.id} x={node.x} y={node.y}
-                onClick={() => handleNodeClick(node)} onTap={() => handleNodeClick(node)}>
+              <Group key={node.id} x={nx} y={ny}
+                onClick={() => handleNodeClick(node)} onTap={() => handleNodeClick(node)}
+                onMouseDown={(e: any) => handleNodeMouseDown(e, node)}>
                 {onRoute && <Circle radius={20} fill="rgba(67,160,71,0.25)" />}
                 <Circle radius={14} fill={NODE_COLOR[node.type]}
-                  stroke={isZoneTarget || movingNodeId === node.id ? '#F57C00' :
+                  stroke={isZoneTarget || isDraggingThis ? '#F57C00' :
                     selectedNodeId === node.id || pendingEdgeFromId === node.id ? '#f44336' :
                     onRoute ? '#43a047' : 'white'}
-                  strokeWidth={isZoneTarget || movingNodeId === node.id || selectedNodeId === node.id || pendingEdgeFromId === node.id || onRoute ? 3 : 1.5} />
+                  strokeWidth={isZoneTarget || isDraggingThis || selectedNodeId === node.id || pendingEdgeFromId === node.id || onRoute ? 3 : 1.5} />
                 <Text text={node.label} x={-node.label.length * 3} y={16} fontSize={11} fill="#333" />
               </Group>
             );
