@@ -48,17 +48,25 @@ class FloorMapPainter extends CustomPainter {
 
     final nodeMap = {for (final n in nodes) n.id: n};
 
-    // Draw building contours behind everything
-    for (final contour in contours ?? []) {
-      if (contour.length < 3) continue;
-      final path = Path();
-      path.moveTo(toCanvas(contour[0][0], contour[0][1]).dx, toCanvas(contour[0][0], contour[0][1]).dy);
-      for (int i = 1; i < contour.length; i++) {
-        path.lineTo(toCanvas(contour[i][0], contour[i][1]).dx, toCanvas(contour[i][0], contour[i][1]).dy);
+    // Draw building contours behind everything.
+    // Even-odd fill: if one contour is nested inside another, only the ring
+    // between them is filled (donut / Ш-shape cutouts work automatically).
+    if (contours != null && contours!.isNotEmpty) {
+      final fillPath = Path()..fillType = PathFillType.evenOdd;
+      for (final contour in contours!) {
+        if (contour.length < 3) continue;
+        fillPath.moveTo(toCanvas(contour[0][0], contour[0][1]).dx,
+            toCanvas(contour[0][0], contour[0][1]).dy);
+        for (int i = 1; i < contour.length; i++) {
+          fillPath.lineTo(toCanvas(contour[i][0], contour[i][1]).dx,
+              toCanvas(contour[i][0], contour[i][1]).dy);
+        }
+        fillPath.close();
       }
-      path.close();
-      canvas.drawPath(path, Paint()..color = const Color(0x0A000000)..style = PaintingStyle.fill);
-      canvas.drawPath(path, Paint()..color = Colors.black..strokeWidth = 3.0..style = PaintingStyle.stroke);
+      canvas.drawPath(fillPath,
+          Paint()..color = const Color(0x0A000000)..style = PaintingStyle.fill);
+      canvas.drawPath(fillPath,
+          Paint()..color = Colors.black..strokeWidth = 3.0..style = PaintingStyle.stroke);
     }
 
     if (areas.isNotEmpty) {
