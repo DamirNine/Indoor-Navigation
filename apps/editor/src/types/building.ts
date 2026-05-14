@@ -38,7 +38,7 @@ export interface Floor {
   nodes: NavNode[];
   edges: NavEdge[];
   areas?: Area[];
-  contour?: number[][];  // building outline polygon [[x,y],...]
+  contours?: number[][][];  // building outline polygons [[[x,y],...],...]
 }
 
 export interface Building {

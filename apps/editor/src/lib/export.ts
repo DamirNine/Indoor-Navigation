@@ -14,7 +14,7 @@ export function buildingToJson(building: Building): string {
         areas: floor.areas,
       };
       if (floor.image) f['image'] = floor.image;
-      if (floor.contour) f['contour'] = floor.contour;
+      if (floor.contours?.length) f['contours'] = floor.contours;
       return f;
     }),
     cross_floor_edges: building.crossFloorEdges,

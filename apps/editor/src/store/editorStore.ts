@@ -41,8 +41,9 @@ interface EditorState {
   selectEdge: (key: string | null) => void;
   setPendingEdgeFrom: (id: string | null) => void;
   setPreviewRoute: (route: string[] | null) => void;
-  setFloorContour: (points: number[][]) => void;
-  clearFloorContour: () => void;
+  addFloorContour: (points: number[][]) => void;
+  updateFloorContour: (idx: number, points: number[][]) => void;
+  removeFloorContour: (idx: number) => void;
   loadBuilding: (building: Building) => void;
 }
 
@@ -235,21 +236,30 @@ export const useEditorStore = create<EditorState>()(
         previewRoute: null,
       }),
 
-      setFloorContour: (points) =>
+      addFloorContour: (points: number[][]) =>
         set(s => {
           const floors = [...s.building.floors];
           const i = s.activeFloorIndex;
-          floors[i] = { ...floors[i], contour: points };
+          floors[i] = { ...floors[i], contours: [...(floors[i].contours ?? []), points] };
           return { building: { ...s.building, floors } };
         }),
 
-      clearFloorContour: () =>
+      updateFloorContour: (idx: number, points: number[][]) =>
         set(s => {
           const floors = [...s.building.floors];
           const i = s.activeFloorIndex;
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { contour: _c, ...rest } = floors[i];
-          floors[i] = rest;
+          const contours = [...(floors[i].contours ?? [])];
+          contours[idx] = points;
+          floors[i] = { ...floors[i], contours };
+          return { building: { ...s.building, floors } };
+        }),
+
+      removeFloorContour: (idx: number) =>
+        set(s => {
+          const floors = [...s.building.floors];
+          const i = s.activeFloorIndex;
+          const contours = (floors[i].contours ?? []).filter((_, ci) => ci !== idx);
+          floors[i] = { ...floors[i], contours: contours.length ? contours : undefined };
           return { building: { ...s.building, floors } };
         }),
     }),
@@ -266,7 +276,7 @@ export const useEditorStore = create<EditorState>()(
             nodes: floor.nodes,
             edges: floor.edges,
             areas: floor.areas ?? [],
-            ...(floor.contour ? { contour: floor.contour } : {}),
+            ...(floor.contours?.length ? { contours: floor.contours } : {}),
           })),
         },
         activeFloorIndex: state.activeFloorIndex,

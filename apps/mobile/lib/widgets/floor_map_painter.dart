@@ -7,14 +7,14 @@ class FloorMapPainter extends CustomPainter {
   final List<Area> areas;
   final List<RouteStep> stepsOnFloor;
   final Size imageSize;
-  final List<List<double>>? contour;
+  final List<List<List<double>>>? contours;
 
   FloorMapPainter({
     required this.nodes,
     required this.areas,
     required this.stepsOnFloor,
     required this.imageSize,
-    this.contour,
+    this.contours,
   });
 
   static const _nodeColors = {
@@ -48,12 +48,13 @@ class FloorMapPainter extends CustomPainter {
 
     final nodeMap = {for (final n in nodes) n.id: n};
 
-    // Draw building contour behind everything
-    if (contour != null && contour!.length >= 3) {
+    // Draw building contours behind everything
+    for (final contour in contours ?? []) {
+      if (contour.length < 3) continue;
       final path = Path();
-      path.moveTo(toCanvas(contour![0][0], contour![0][1]).dx, toCanvas(contour![0][0], contour![0][1]).dy);
-      for (int i = 1; i < contour!.length; i++) {
-        path.lineTo(toCanvas(contour![i][0], contour![i][1]).dx, toCanvas(contour![i][0], contour![i][1]).dy);
+      path.moveTo(toCanvas(contour[0][0], contour[0][1]).dx, toCanvas(contour[0][0], contour[0][1]).dy);
+      for (int i = 1; i < contour.length; i++) {
+        path.lineTo(toCanvas(contour[i][0], contour[i][1]).dx, toCanvas(contour[i][0], contour[i][1]).dy);
       }
       path.close();
       canvas.drawPath(path, Paint()..color = const Color(0x0A000000)..style = PaintingStyle.fill);
@@ -170,5 +171,5 @@ class FloorMapPainter extends CustomPainter {
       old.stepsOnFloor != stepsOnFloor ||
       old.nodes != nodes ||
       old.areas != areas ||
-      old.contour != contour;
+      old.contours != contours;
 }

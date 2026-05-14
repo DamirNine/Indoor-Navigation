@@ -38,7 +38,7 @@ function parseJsonText(text: string, imageMap: Map<string, string>): Building {
       nodes: f.nodes ?? [],
       edges: f.edges ?? [],
       areas: f.areas ?? [],
-      ...(f.contour ? { contour: f.contour } : {}),
+      ...(f.contours ? { contours: f.contours } : f.contour ? { contours: [f.contour] } : {}),
     })),
   };
 }

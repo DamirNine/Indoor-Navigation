@@ -41,7 +41,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const {
     building, activeFloorIndex, tool, selectedNodeId, selectedEdgeKey, pendingEdgeFromId,
     previewRoute, addNode, selectNode, selectEdge, setPendingEdgeFrom, addEdge,
-    moveNode, addArea, setFloorContour, clearFloorContour,
+    moveNode, addArea, addFloorContour, updateFloorContour, removeFloorContour,
   } = useEditorStore();
 
   const routeSet = new Set(previewRoute ?? []);
@@ -75,6 +75,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [contourMode, setContourMode] = useState<ZoneMode>(null);
   const [contourPoints, setContourPoints] = useState<number[][]>([]);
   const [selectedContourVertex, setSelectedContourVertex] = useState<number | null>(null);
+  const [editingContourIdx, setEditingContourIdx] = useState<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPinchDist = useRef(0);
@@ -106,7 +107,8 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   }, []);
 
   const cancelContour = useCallback(() => {
-    setContourMode(null); setContourPoints([]); setSelectedContourVertex(null); setCursorPos(null);
+    setContourMode(null); setContourPoints([]); setSelectedContourVertex(null);
+    setEditingContourIdx(null); setCursorPos(null);
   }, []);
 
   const handleEscape = useCallback((e: KeyboardEvent) => {
@@ -133,11 +135,11 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   // Auto-enter draw or edit mode when contour tool is selected / floor changes
   useEffect(() => {
     if (!isContour) { cancelContour(); return; }
-    const existing = floor?.contour;
-    if (existing && existing.length >= 3) {
-      setContourMode('edit'); setContourPoints([...existing]);
+    const existing = floor?.contours;
+    if (existing && existing.length > 0) {
+      setEditingContourIdx(0); setContourMode('edit'); setContourPoints([...existing[0]]);
     } else {
-      setContourMode('draw'); setContourPoints([]);
+      setEditingContourIdx(null); setContourMode('draw'); setContourPoints([]);
     }
     setSelectedContourVertex(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,10 +202,15 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     return [x, y];
   };
 
-  // Snap for contour: area vertices + existing contour vertices (skip excludeIdx)
+  // Snap for contour: area vertices + all saved contour vertices + current drawing points
   const snapContour = (x: number, y: number, excludeIdx?: number): [number, number] => {
     for (const area of (floor.areas ?? [])) {
       for (const [px, py] of area.points) {
+        if (Math.hypot(x - px, y - py) < SNAP_DIST) return [px, py];
+      }
+    }
+    for (const c of (floor.contours ?? [])) {
+      for (const [px, py] of c) {
         if (Math.hypot(x - px, y - py) < SNAP_DIST) return [px, py];
       }
     }
@@ -245,8 +252,25 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   };
 
   const saveContour = () => {
-    if (contourPoints.length >= 3) setFloorContour(contourPoints);
-    setContourMode('edit');
+    if (contourPoints.length < 3) return;
+    if (editingContourIdx !== null) {
+      updateFloorContour(editingContourIdx, contourPoints);
+    } else {
+      const newIdx = floor.contours?.length ?? 0;
+      addFloorContour(contourPoints);
+      setEditingContourIdx(newIdx);
+      setContourMode('edit');
+    }
+    setSelectedContourVertex(null);
+  };
+
+  const startNewContour = () => {
+    if (editingContourIdx !== null && contourPoints.length >= 3) {
+      updateFloorContour(editingContourIdx, contourPoints);
+    }
+    setEditingContourIdx(null);
+    setContourMode('draw');
+    setContourPoints([]);
     setSelectedContourVertex(null);
   };
 
@@ -257,9 +281,20 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   };
 
   const deleteContour = () => {
-    if (!window.confirm('Удалить контур здания? Это действие нельзя отменить.')) return;
-    clearFloorContour();
-    setContourMode('draw'); setContourPoints([]); setSelectedContourVertex(null);
+    if (editingContourIdx === null) return;
+    if (!window.confirm('Удалить контур? Это действие нельзя отменить.')) return;
+    removeFloorContour(editingContourIdx);
+    setContourMode('draw'); setContourPoints([]); setSelectedContourVertex(null); setEditingContourIdx(null);
+  };
+
+  const switchToContour = (ci: number, pts: number[][]) => {
+    if (editingContourIdx !== null && contourPoints.length >= 3) {
+      updateFloorContour(editingContourIdx, contourPoints);
+    }
+    setEditingContourIdx(ci);
+    setContourPoints([...pts]);
+    setContourMode('edit');
+    setSelectedContourVertex(null);
   };
 
   // ── STAGE CLICK ──────────────────────────────────────────────────────────
@@ -379,12 +414,13 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   };
 
   // ── HINT TEXT ─────────────────────────────────────────────────────────────
+  const totalContours = floor.contours?.length ?? 0;
   const contourHint = isContour
     ? contourMode === 'draw'
-      ? `Контур — кликайте чтобы добавить вершины${contourPoints.length >= 3 ? ' • нажмите на первую точку чтобы замкнуть' : ''}`
+      ? `Новый контур — кликайте чтобы добавить вершины${contourPoints.length >= 3 ? ' • нажмите на первую точку чтобы замкнуть' : ''}`
       : selectedContourVertex !== null
       ? 'Нажмите куда переместить вершину'
-      : 'Нажмите вершину чтобы переместить • нажмите на линию чтобы вставить вершину'
+      : `Контур${totalContours > 1 ? ` ${(editingContourIdx ?? 0) + 1}/${totalContours}` : ''} — нажмите вершину чтобы переместить • нажмите на сегмент чтобы вставить вершину`
     : null;
 
   const zoneHint = isZone
@@ -407,6 +443,9 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           <span>{contourHint}</span>
           {contourMode === 'edit' && selectedContourVertex !== null && contourPoints.length > 3 && (
             <button onClick={deleteContourVertex} style={{ padding: '2px 8px', background: '#c62828', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Удалить вершину</button>
+          )}
+          {contourMode === 'edit' && (
+            <button onClick={startNewContour} style={{ padding: '2px 8px', background: '#1565c0', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>+ Новый контур</button>
           )}
           {contourMode === 'edit' && (
             <button onClick={saveContour} style={{ padding: '2px 8px', background: '#43a047', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Сохранить</button>
@@ -453,51 +492,62 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
             : <Rect width={VIRTUAL_W} height={VIRTUAL_H} fill="#e8e8e8" />
           }
 
-          {/* Saved contour — thick black outline behind areas */}
-          {(() => {
-            const pts = (isContour ? contourPoints : floor.contour ?? []);
+          {/* All saved contours — behind areas */}
+          {(floor.contours ?? []).map((savedPts, ci) => {
+            const pts = (isContour && contourMode === 'edit' && ci === editingContourIdx)
+              ? contourPoints : savedPts;
             if (pts.length < 3) return null;
             return (
-              <Line points={pts.flatMap(p => p)} closed
-                stroke="black" strokeWidth={3} fill="rgba(0,0,0,0.04)"
-                listening={false}
+              <Line key={`contour-${ci}`} points={pts.flatMap((p: number[]) => p)} closed
+                stroke="black" strokeWidth={ci === editingContourIdx && isContour ? 3 : 2}
+                fill="rgba(0,0,0,0.04)" listening={false}
               />
             );
-          })()}
+          })}
 
-          {/* Contour being drawn */}
+          {/* Non-active contour vertices (click to switch editing to that contour) */}
+          {isContour && contourMode === 'edit' && (floor.contours ?? []).map((cPts, ci) => {
+            if (ci === editingContourIdx) return null;
+            return cPts.map((pt: number[], i: number) => (
+              <Circle key={`cv-${ci}-${i}`} x={pt[0]} y={pt[1]} radius={5}
+                fill="#bdbdbd" stroke="#555" strokeWidth={1.5}
+                onClick={() => switchToContour(ci, cPts)}
+                onTap={() => switchToContour(ci, cPts)}
+              />
+            ));
+          })}
+
+          {/* Contour being drawn (new) */}
           {isContour && contourMode === 'draw' && contourPoints.length > 0 && (() => {
-            const pts = contourPoints.flatMap(p => p);
+            const pts = contourPoints.flatMap((p: number[]) => p);
             const linePoints = cursorPos ? [...pts, cursorPos.x, cursorPos.y] : pts;
             return (
-              <Group>
+              <Group listening={false}>
                 {contourPoints.length >= 3 && (
                   <Line points={pts} closed fill="rgba(0,0,0,0.06)" stroke="black" strokeWidth={3} dash={[8, 5]} />
                 )}
                 <Line points={linePoints} stroke="black" strokeWidth={3} dash={[8, 5]} />
                 <Circle x={contourPoints[0][0]} y={contourPoints[0][1]} radius={9} fill="black" opacity={0.6} />
-                {contourPoints.map((pt, i) => (
+                {contourPoints.map((pt: number[], i: number) => (
                   <Circle key={i} x={pt[0]} y={pt[1]} radius={4} fill="black" />
                 ))}
               </Group>
             );
           })()}
 
-          {/* Contour edit — vertex handles */}
-          {isContour && contourMode === 'edit' && contourPoints.length >= 3 && (() => {
-            return (
-              <Group>
-                {contourPoints.map((pt, i) => (
-                  <Circle key={i} x={pt[0]} y={pt[1]} radius={selectedContourVertex === i ? 10 : 7}
-                    fill={selectedContourVertex === i ? 'black' : 'white'}
-                    stroke="black" strokeWidth={2.5}
-                    onClick={() => setSelectedContourVertex(idx => idx === i ? null : i)}
-                    onTap={() => setSelectedContourVertex(idx => idx === i ? null : i)}
-                  />
-                ))}
-              </Group>
-            );
-          })()}
+          {/* Active contour edit — vertex handles */}
+          {isContour && contourMode === 'edit' && editingContourIdx !== null && contourPoints.length >= 3 && (
+            <Group>
+              {contourPoints.map((pt: number[], i: number) => (
+                <Circle key={i} x={pt[0]} y={pt[1]} radius={selectedContourVertex === i ? 10 : 7}
+                  fill={selectedContourVertex === i ? 'black' : 'white'}
+                  stroke="black" strokeWidth={2.5}
+                  onClick={() => setSelectedContourVertex(idx => idx === i ? null : i)}
+                  onTap={() => setSelectedContourVertex(idx => idx === i ? null : i)}
+                />
+              ))}
+            </Group>
+          )}
 
           {/* Saved areas */}
           {(floor.areas ?? []).map(area => {
