@@ -110,14 +110,15 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   // Multi-select, drag, rubber-band, arc
   const [shiftKey, setShiftKey] = useState(false);
   const [selVerts, setSelVerts] = useState<number[]>([]);
+  const [selNodeIds, setSelNodeIds] = useState<string[]>([]);
   const [rubberBand, setRubberBand] = useState<{ sx: number; sy: number; ex: number; ey: number } | null>(null);
   const [isArcMode, setIsArcMode] = useState(false);
   const [arcControlPt, setArcControlPt] = useState<[number, number] | null>(null);
-  const [draggingNodePos, setDraggingNodePos] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [draggingNodePos, setDraggingNodePos] = useState<{ ids: string[]; dx: number; dy: number } | null>(null);
 
   // Refs for drag tracking (avoid stale closures)
   const dragging = useRef<{ indices: number[]; startMouse: [number, number]; startPts: [number, number][] } | null>(null);
-  const nodeDrag = useRef<{ id: string; startMouse: [number, number]; startPos: [number, number] } | null>(null);
+  const nodeDrag = useRef<{ ids: string[]; startMouse: [number, number]; startPositions: { [id: string]: [number, number] } } | null>(null);
   const didDrag = useRef(false);
   const dragDist = useRef(0);
 
@@ -339,9 +340,15 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   // ── STAGE MOUSE DOWN → rubber band ──────────────────────────────────────
   const handleStageMouseDown = (e: any) => {
     didDrag.current = false; dragDist.current = 0;
-    if (!isContour || contourMode !== 'edit' || isPanning) return;
+    if (isPanning) return;
     if (e.target.getClassName() === 'Circle') return;
     const [x, y] = toVirtXY(e.target.getStage());
+    if (isMoving) {
+      setRubberBand({ sx: x, sy: y, ex: x, ey: y });
+      if (!shiftKey) setSelNodeIds([]);
+      return;
+    }
+    if (!isContour || contourMode !== 'edit') return;
     setRubberBand({ sx: x, sy: y, ex: x, ey: y });
     if (!shiftKey) setSelVerts([]);
   };
@@ -349,7 +356,12 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   // ── STAGE MOUSE UP → end drag / rubber band ──────────────────────────────
   const handleStageMouseUp = () => {
     if (nodeDrag.current) {
-      if (draggingNodePos) moveNode(draggingNodePos.id, draggingNodePos.x, draggingNodePos.y);
+      if (draggingNodePos) {
+        for (const id of nodeDrag.current.ids) {
+          const orig = nodeDrag.current.startPositions[id];
+          if (orig) moveNode(id, +(orig[0] + draggingNodePos.dx).toFixed(1), +(orig[1] + draggingNodePos.dy).toFixed(1));
+        }
+      }
       nodeDrag.current = null;
       setDraggingNodePos(null);
       setTimeout(() => { didDrag.current = false; }, 10);
@@ -365,10 +377,17 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
       const { sx, sy, ex, ey } = rubberBand;
       const minX = Math.min(sx, ex), maxX = Math.max(sx, ex);
       const minY = Math.min(sy, ey), maxY = Math.max(sy, ey);
-      const sel = contourPoints.map(([px, py], i) =>
-        px >= minX && px <= maxX && py >= minY && py <= maxY ? i : -1
-      ).filter(i => i >= 0);
-      setSelVerts(shiftKey ? prev => [...new Set([...prev, ...sel])] : sel);
+      if (isMoving) {
+        const sel = floor.nodes
+          .filter(n => n.x >= minX && n.x <= maxX && n.y >= minY && n.y <= maxY)
+          .map(n => n.id);
+        setSelNodeIds(shiftKey ? prev => [...new Set([...prev, ...sel])] : sel);
+      } else {
+        const sel = contourPoints.map(([px, py], i) =>
+          px >= minX && px <= maxX && py >= minY && py <= maxY ? i : -1
+        ).filter(i => i >= 0);
+        setSelVerts(shiftKey ? prev => [...new Set([...prev, ...sel])] : sel);
+      }
       didDrag.current = true;
     }
     setRubberBand(null);
@@ -382,7 +401,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
       const d = nodeDrag.current;
       const dx = x - d.startMouse[0], dy = y - d.startMouse[1];
       if (Math.hypot(dx, dy) > 4) didDrag.current = true;
-      setDraggingNodePos({ id: d.id, x: d.startPos[0] + dx, y: d.startPos[1] + dy });
+      setDraggingNodePos({ ids: d.ids, dx, dy });
       return;
     }
 
@@ -484,9 +503,22 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const handleNodeMouseDown = (e: any, node: NavNode) => {
     if (!isMoving) return;
     e.cancelBubble = true;
+
+    if (shiftKey) {
+      setSelNodeIds(prev => prev.includes(node.id) ? prev.filter(id => id !== node.id) : [...prev, node.id]);
+      return;
+    }
+
     didDrag.current = false;
     const [mx, my] = toVirtXY(e.target.getStage());
-    nodeDrag.current = { id: node.id, startMouse: [mx, my], startPos: [node.x, node.y] };
+    const ids = selNodeIds.includes(node.id) ? selNodeIds : [node.id];
+    if (!selNodeIds.includes(node.id)) setSelNodeIds([node.id]);
+    const startPositions: { [id: string]: [number, number] } = {};
+    for (const id of ids) {
+      const n = floor.nodes.find(n => n.id === id);
+      if (n) startPositions[id] = [n.x, n.y];
+    }
+    nodeDrag.current = { ids, startMouse: [mx, my], startPositions };
   };
 
   const handleNodeClick = (node: NavNode) => {
@@ -718,7 +750,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           )}
 
           {/* Rubber band selection rect */}
-          {isContour && contourMode === 'edit' && rubberBand && dragDist.current > 8 && (
+          {(isMoving || (isContour && contourMode === 'edit')) && rubberBand && dragDist.current > 8 && (
             <Rect
               x={Math.min(rubberBand.sx, rubberBand.ex)} y={Math.min(rubberBand.sy, rubberBand.ey)}
               width={Math.abs(rubberBand.ex - rubberBand.sx)} height={Math.abs(rubberBand.ey - rubberBand.sy)}
@@ -797,19 +829,22 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           {floor.nodes.map(node => {
             const onRoute = routeSet.has(node.id);
             const isZoneTarget = isZone && zoneNodeId === node.id;
-            const isDraggingThis = draggingNodePos?.id === node.id;
-            const nx = isDraggingThis ? draggingNodePos!.x : node.x;
-            const ny = isDraggingThis ? draggingNodePos!.y : node.y;
+            const isDraggingThis = draggingNodePos !== null && draggingNodePos.ids.includes(node.id);
+            const isSelected = isMoving && selNodeIds.includes(node.id);
+            const nx = isDraggingThis ? node.x + draggingNodePos!.dx : node.x;
+            const ny = isDraggingThis ? node.y + draggingNodePos!.dy : node.y;
             return (
               <Group key={node.id} x={nx} y={ny}
                 onClick={() => handleNodeClick(node)} onTap={() => handleNodeClick(node)}
                 onMouseDown={(e: any) => handleNodeMouseDown(e, node)}>
                 {onRoute && <Circle radius={20} fill="rgba(67,160,71,0.25)" />}
+                {isSelected && <Circle radius={18} fill="rgba(25,118,210,0.18)" stroke="#1976D2" strokeWidth={2} />}
                 <Circle radius={14} fill={NODE_COLOR[node.type]}
                   stroke={isZoneTarget || isDraggingThis ? '#F57C00' :
+                    isSelected ? '#1976D2' :
                     selectedNodeId === node.id || pendingEdgeFromId === node.id ? '#f44336' :
                     onRoute ? '#43a047' : 'white'}
-                  strokeWidth={isZoneTarget || isDraggingThis || selectedNodeId === node.id || pendingEdgeFromId === node.id || onRoute ? 3 : 1.5} />
+                  strokeWidth={isZoneTarget || isDraggingThis || isSelected || selectedNodeId === node.id || pendingEdgeFromId === node.id || onRoute ? 3 : 1.5} />
                 <Text text={node.label} x={-node.label.length * 3} y={16} fontSize={11} fill="#333" />
               </Group>
             );
