@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Stage, Layer, Circle, Line, Image as KonvaImage, Rect, Text, Group } from 'react-konva';
+import { Stage, Layer, Circle, Line, Image as KonvaImage, Rect, Text, Group, Shape } from 'react-konva';
 import { useEditorStore } from '../store/editorStore';
 import AddNodeDialog from './AddNodeDialog';
 import AddEdgeDialog from './AddEdgeDialog';
@@ -620,16 +620,42 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
             : <Rect width={VIRTUAL_W} height={VIRTUAL_H} fill="#e8e8e8" />
           }
 
-          {/* Saved contours */}
-          {(floor.contours ?? []).map((savedPts, ci) => {
-            const pts = (isContour && contourMode === 'edit' && ci === editingContourIdx) ? contourPoints : savedPts;
-            if (pts.length < 3) return null;
-            return (
-              <Line key={`c-${ci}`} points={pts.flatMap((p: number[]) => p)} closed
-                stroke="black" strokeWidth={ci === editingContourIdx && isContour ? 3 : 2}
-                fill="rgba(0,0,0,0.04)" listening={false} />
+          {/* Saved contours — even-odd fill: nested contours punch holes */}
+          {(() => {
+            const allC = (floor.contours ?? []).map((savedPts, ci) =>
+              (isContour && contourMode === 'edit' && ci === editingContourIdx) ? contourPoints : savedPts
             );
-          })}
+            if (allC.every(pts => pts.length < 3)) return null;
+            return (
+              <Shape
+                key="contours"
+                listening={false}
+                sceneFunc={(ctx: any) => {
+                  const nc: CanvasRenderingContext2D = ctx._context;
+                  nc.beginPath();
+                  for (const pts of allC) {
+                    if (pts.length < 3) continue;
+                    nc.moveTo(pts[0][0], pts[0][1]);
+                    for (let i = 1; i < pts.length; i++) nc.lineTo(pts[i][0], pts[i][1]);
+                    nc.closePath();
+                  }
+                  nc.fillStyle = 'rgba(0,0,0,0.04)';
+                  nc.fill('evenodd');
+                  for (let ci = 0; ci < allC.length; ci++) {
+                    const pts = allC[ci];
+                    if (pts.length < 3) continue;
+                    nc.beginPath();
+                    nc.moveTo(pts[0][0], pts[0][1]);
+                    for (let i = 1; i < pts.length; i++) nc.lineTo(pts[i][0], pts[i][1]);
+                    nc.closePath();
+                    nc.strokeStyle = 'black';
+                    nc.lineWidth = (isContour && ci === editingContourIdx) ? 3 : 2;
+                    nc.stroke();
+                  }
+                }}
+              />
+            );
+          })()}
 
           {/* Non-active contour vertices (click to switch) */}
           {isContour && contourMode === 'edit' && (floor.contours ?? []).map((cPts, ci) => {
