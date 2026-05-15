@@ -50,6 +50,14 @@ function arcThrough3Pts(A: [number, number], B: [number, number], C: [number, nu
   });
 }
 
+function applyCtxTransform(px: number, py: number, cx: number, cy: number, t: { tx: number; ty: number; scale: number; rot: number }): [number, number] {
+  const dx = px - cx, dy = py - cy;
+  const sx = dx * t.scale, sy = dy * t.scale;
+  const rx = sx * Math.cos(t.rot) - sy * Math.sin(t.rot);
+  const ry = sx * Math.sin(t.rot) + sy * Math.cos(t.rot);
+  return [rx + cx + t.tx, ry + cy + t.ty];
+}
+
 const NODE_COLOR: Record<NodeType, string> = {
   room: '#1976D2', stairs: '#F57C00', elevator: '#7B1FA2',
   entrance: '#2E7D32', corridor: '#757575',
@@ -115,12 +123,15 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [isArcMode, setIsArcMode] = useState(false);
   const [arcControlPt, setArcControlPt] = useState<[number, number] | null>(null);
   const [draggingNodePos, setDraggingNodePos] = useState<{ ids: string[]; dx: number; dy: number } | null>(null);
+  const [ctxMode, setCtxMode] = useState(false);
+  const [ctxTx, setCtxTx] = useState({ tx: 0, ty: 0, scale: 1, rot: 0 });
 
   // Refs for drag tracking (avoid stale closures)
   const dragging = useRef<{ indices: number[]; startMouse: [number, number]; startPts: [number, number][] } | null>(null);
   const nodeDrag = useRef<{ ids: string[]; startMouse: [number, number]; startPositions: { [id: string]: [number, number] } } | null>(null);
   const didDrag = useRef(false);
   const dragDist = useRef(0);
+  const ctxDrag = useRef<{ type: 'move' | 'scale' | 'rotate'; startMouse: [number, number]; startTx: { tx: number; ty: number; scale: number; rot: number }; pivotX: number; pivotY: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPinchDist = useRef(0);
@@ -161,7 +172,8 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const cancelContour = useCallback(() => {
     setContourMode(null); setContourPoints([]); setEditingContourIdx(null); setCursorPos(null);
     setSelVerts([]); setRubberBand(null); setIsArcMode(false); setArcControlPt(null);
-    dragging.current = null;
+    dragging.current = null; ctxDrag.current = null;
+    setCtxMode(false); setCtxTx({ tx: 0, ty: 0, scale: 1, rot: 0 });
   }, []);
 
   const handleEscape = useCallback((e: KeyboardEvent) => {
@@ -236,6 +248,15 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   );
 
   const getNode = (id: string) => floor.nodes.find(n => n.id === id);
+
+  const ctxAllPts = (floor.contours ?? []).flat();
+  const ctxBbox = ctxAllPts.length >= 2 ? (() => {
+    const xs = ctxAllPts.map((p: number[]) => p[0]);
+    const ys = ctxAllPts.map((p: number[]) => p[1]);
+    return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+  })() : null;
+  const ctxCx = ctxBbox ? (ctxBbox.minX + ctxBbox.maxX) / 2 : 0;
+  const ctxCy = ctxBbox ? (ctxBbox.minY + ctxBbox.maxY) / 2 : 0;
 
   const toVirtXY = (stage: any): [number, number] => {
     const ptr = stage.getPointerPosition();
@@ -341,6 +362,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const handleStageMouseDown = (e: any) => {
     didDrag.current = false; dragDist.current = 0;
     if (isPanning) return;
+    if (ctxMode) return;
     if (e.target.getClassName() === 'Circle') return;
     const [x, y] = toVirtXY(e.target.getStage());
     if (isMoving) {
@@ -355,6 +377,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
 
   // ── STAGE MOUSE UP → end drag / rubber band ──────────────────────────────
   const handleStageMouseUp = () => {
+    if (ctxDrag.current) { ctxDrag.current = null; return; }
     if (nodeDrag.current) {
       if (draggingNodePos) {
         for (const id of nodeDrag.current.ids) {
@@ -396,6 +419,23 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   // ── MOUSE MOVE ────────────────────────────────────────────────────────────
   const handleMouseMove = (e: any) => {
     const [x, y] = toVirtXY(e.target.getStage());
+
+    if (ctxDrag.current) {
+      const d = ctxDrag.current;
+      if (d.type === 'move') {
+        setCtxTx({ ...d.startTx, tx: d.startTx.tx + (x - d.startMouse[0]), ty: d.startTx.ty + (y - d.startMouse[1]) });
+      } else if (d.type === 'scale') {
+        const startDist = Math.hypot(d.startMouse[0] - d.pivotX, d.startMouse[1] - d.pivotY);
+        if (startDist > 5) {
+          const curDist = Math.hypot(x - d.pivotX, y - d.pivotY);
+          setCtxTx({ ...d.startTx, scale: Math.max(0.05, d.startTx.scale * curDist / startDist) });
+        }
+      } else {
+        const startAngle = Math.atan2(d.startMouse[1] - d.pivotY, d.startMouse[0] - d.pivotX);
+        setCtxTx({ ...d.startTx, rot: d.startTx.rot + (Math.atan2(y - d.pivotY, x - d.pivotX) - startAngle) });
+      }
+      return;
+    }
 
     if (nodeDrag.current) {
       const d = nodeDrag.current;
@@ -553,6 +593,42 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     setPendingEdgeFrom(null); setPendingEdgeTo(null);
   };
 
+  const handleCtxBodyMouseDown = (e: any) => {
+    e.cancelBubble = true;
+    const [mx, my] = toVirtXY(e.target.getStage());
+    ctxDrag.current = { type: 'move', startMouse: [mx, my], startTx: { ...ctxTx }, pivotX: ctxCx + ctxTx.tx, pivotY: ctxCy + ctxTx.ty };
+  };
+
+  const handleCtxCornerMouseDown = (e: any) => {
+    e.cancelBubble = true;
+    const [mx, my] = toVirtXY(e.target.getStage());
+    ctxDrag.current = { type: 'scale', startMouse: [mx, my], startTx: { ...ctxTx }, pivotX: ctxCx + ctxTx.tx, pivotY: ctxCy + ctxTx.ty };
+  };
+
+  const handleCtxRotateMouseDown = (e: any) => {
+    e.cancelBubble = true;
+    const [mx, my] = toVirtXY(e.target.getStage());
+    ctxDrag.current = { type: 'rotate', startMouse: [mx, my], startTx: { ...ctxTx }, pivotX: ctxCx + ctxTx.tx, pivotY: ctxCy + ctxTx.ty };
+  };
+
+  const applyCtxTxAll = () => {
+    if (!floor.contours || !ctxBbox) return;
+    for (let i = 0; i < floor.contours.length; i++) {
+      const newPts: number[][] = floor.contours[i].map(([px, py]: number[]) => {
+        const [nx, ny] = applyCtxTransform(px, py, ctxCx, ctxCy, ctxTx);
+        return [+nx.toFixed(1), +ny.toFixed(1)];
+      });
+      updateFloorContour(i, newPts);
+    }
+    setCtxTx({ tx: 0, ty: 0, scale: 1, rot: 0 });
+    setCtxMode(false);
+  };
+
+  const cancelCtxMode = () => {
+    setCtxTx({ tx: 0, ty: 0, scale: 1, rot: 0 });
+    setCtxMode(false);
+  };
+
   // ── ARC PREVIEW POINTS ────────────────────────────────────────────────────
   const arcPreview = (isContour && contourMode === 'draw' && isArcMode && arcControlPt && cursorPos && contourPoints.length > 0)
     ? arcThrough3Pts(contourPoints[contourPoints.length - 1] as [number, number], arcControlPt, [cursorPos.x, cursorPos.y])
@@ -584,7 +660,15 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#e0e0e0' }}>
       {pendingEdgeFromId && <Hint color="#1976D2">Нажмите на второй узел</Hint>}
 
-      {contourHint && (
+      {ctxMode && ctxBbox && (
+        <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#E65100', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '90%' }}>
+          <span>Трансформация: bbox — переместить, углы — масштаб, ● — повернуть</span>
+          <button onClick={applyCtxTxAll} style={{ padding: '2px 8px', background: '#43a047', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Применить</button>
+          <button onClick={cancelCtxMode} style={{ padding: '2px 8px', background: 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Отмена</button>
+        </div>
+      )}
+
+      {contourHint && !ctxMode && (
         <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#212121', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '90%' }}>
           <span>{contourHint}</span>
           {contourMode === 'draw' && (
@@ -605,6 +689,9 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           )}
           {contourMode === 'edit' && (
             <button onClick={saveContour} style={{ padding: '2px 8px', background: '#43a047', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Сохранить</button>
+          )}
+          {contourMode === 'edit' && totalContours > 0 && (
+            <button onClick={() => setCtxMode(true)} style={{ padding: '2px 8px', background: '#E65100', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>⤢ Трансформировать все</button>
           )}
           {contourMode === 'edit' && (
             <button onClick={deleteContour} style={{ padding: '2px 8px', background: '#b71c1c', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Удалить контур</button>
@@ -654,8 +741,11 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
 
           {/* Saved contours — even-odd fill: nested contours punch holes */}
           {(() => {
-            const allC = (floor.contours ?? []).map((savedPts, ci) =>
+            let allC = (floor.contours ?? []).map((savedPts, ci) =>
               (isContour && contourMode === 'edit' && ci === editingContourIdx) ? contourPoints : savedPts
+            );
+            if (ctxMode && ctxBbox) allC = allC.map(pts =>
+              pts.map(([px, py]: number[]) => applyCtxTransform(px, py, ctxCx, ctxCy, ctxTx))
             );
             if (allC.every(pts => pts.length < 3)) return null;
             return (
@@ -690,7 +780,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           })()}
 
           {/* Non-active contour vertices (click to switch) */}
-          {isContour && contourMode === 'edit' && (floor.contours ?? []).map((cPts, ci) => {
+          {isContour && !ctxMode && contourMode === 'edit' && (floor.contours ?? []).map((cPts, ci) => {
             if (ci === editingContourIdx) return null;
             return cPts.map((pt: number[], i: number) => (
               <Circle key={`cv-${ci}-${i}`} x={pt[0]} y={pt[1]} radius={5}
@@ -726,7 +816,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           })()}
 
           {/* Edit mode vertex handles */}
-          {isContour && contourMode === 'edit' && editingContourIdx !== null && contourPoints.length >= 3 && (
+          {isContour && !ctxMode && contourMode === 'edit' && editingContourIdx !== null && contourPoints.length >= 3 && (
             <Group>
               {contourPoints.map((pt: number[], i: number) => {
                 const isSel = selVerts.includes(i);
@@ -758,6 +848,33 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
               fill="rgba(25,118,210,0.08)" listening={false}
             />
           )}
+
+          {/* Contour group transform handles */}
+          {ctxMode && ctxBbox && (() => {
+            const { minX, maxX, minY, maxY } = ctxBbox;
+            const corners: [number, number][] = [[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY]];
+            const tCorners = corners.map(([px, py]) => applyCtxTransform(px, py, ctxCx, ctxCy, ctxTx));
+            const topMid = applyCtxTransform(ctxCx, minY - 150, ctxCx, ctxCy, ctxTx);
+            const topCenter = applyCtxTransform((minX + maxX) / 2, minY, ctxCx, ctxCy, ctxTx);
+            const bboxFlat = tCorners.flatMap(p => p);
+            return (
+              <Group key="ctx-handles">
+                <Line points={bboxFlat} closed stroke="#FF6F00" strokeWidth={2 / zoom}
+                  dash={[8 / zoom, 4 / zoom]} fill="rgba(255,111,0,0.06)"
+                  onMouseDown={handleCtxBodyMouseDown} />
+                {tCorners.map(([tx, ty], i) => (
+                  <Circle key={`cc${i}`} x={tx} y={ty} radius={8 / zoom}
+                    fill="white" stroke="#FF6F00" strokeWidth={2 / zoom}
+                    onMouseDown={handleCtxCornerMouseDown} />
+                ))}
+                <Line points={[topCenter[0], topCenter[1], topMid[0], topMid[1]]}
+                  stroke="#FF6F00" strokeWidth={1.5 / zoom} dash={[4 / zoom, 3 / zoom]} listening={false} />
+                <Circle x={topMid[0]} y={topMid[1]} radius={10 / zoom}
+                  fill="#FF6F00" stroke="white" strokeWidth={2 / zoom}
+                  onMouseDown={handleCtxRotateMouseDown} />
+              </Group>
+            );
+          })()}
 
           {/* Saved areas */}
           {(floor.areas ?? []).map(area => {
