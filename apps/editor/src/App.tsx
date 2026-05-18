@@ -35,7 +35,7 @@ export default function App() {
       <div className={`sidebar ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
         style={{ width: 260, borderRight: '1px solid #ddd', display: 'flex', flexDirection: 'column', overflowY: 'auto', background: '#fafafa', flexShrink: 0, zIndex: 60 }}>
         <div style={{ padding: '4px 12px', background: '#f0f0f0', borderBottom: '1px solid #ddd', fontSize: 11, color: '#999', textAlign: 'right' }}>
-          v1.6.0
+          v1.7.0
         </div>
         <div style={{ padding: 12, borderBottom: '1px solid #eee' }}><BuildingPanel /></div>
         <div style={{ padding: 12, borderBottom: '1px solid #eee', flex: 1 }}><FloorList /></div>

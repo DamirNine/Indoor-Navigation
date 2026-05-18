@@ -154,25 +154,22 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const isZone = tool === 'zone';
   const isContour = tool === 'contour';
 
-  const stretchAnchorIds = (() => {
-    if (!isMoving || selNodeIds.length < 2) return new Set<string>();
+  // Map<nodeId, anchorColor> — green=min fixed, red=max fixed
+  const stretchAnchorMap = (() => {
+    const m = new Map<string, string>();
+    if (!isMoving || selNodeIds.length < 2) return m;
     const nodes = selNodeIds.map(id => floor.nodes.find(n => n.id === id)).filter(Boolean) as NavNode[];
     const vals = nodes.map(n => stretchAxis === 'x' ? n.x : n.y);
     const minV = Math.min(...vals), maxV = Math.max(...vals);
-    if (stretchAnchor === 'min') {
-      const n = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === minV);
-      return new Set(n ? [n.id] : []);
-    } else if (stretchAnchor === 'max') {
-      const n = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === maxV);
-      return new Set(n ? [n.id] : []);
-    } else {
-      const ids: string[] = [];
-      const nMin = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === minV);
-      const nMax = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === maxV);
-      if (nMin) ids.push(nMin.id);
-      if (nMax && nMax.id !== nMin?.id) ids.push(nMax.id);
-      return new Set(ids);
+    const nMin = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === minV);
+    const nMax = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === maxV);
+    if (stretchAnchor === 'min' && nMin) m.set(nMin.id, '#43A047');
+    else if (stretchAnchor === 'max' && nMax) m.set(nMax.id, '#E53935');
+    else {
+      if (nMin) m.set(nMin.id, '#43A047');
+      if (nMax && nMax.id !== nMin?.id) m.set(nMax.id, '#E53935');
     }
+    return m;
   })();
 
   useEffect(() => {
@@ -1024,8 +1021,14 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
                 onClick={() => handleNodeClick(node)} onTap={() => handleNodeClick(node)}
                 onMouseDown={(e: any) => handleNodeMouseDown(e, node)}>
                 {onRoute && <Circle radius={20} fill="rgba(67,160,71,0.25)" />}
-                {stretchAnchorIds.has(node.id) && <Circle radius={22} fill="rgba(255,152,0,0.25)" stroke="#FF9800" strokeWidth={2.5} />}
-                {isSelected && <Circle radius={18} fill="rgba(25,118,210,0.18)" stroke="#1976D2" strokeWidth={2} />}
+                {stretchAnchorMap.has(node.id) && (() => {
+                  const c = stretchAnchorMap.get(node.id)!;
+                  return <Circle radius={24} fill={c + '44'} stroke={c} strokeWidth={3} />;
+                })()}
+                {isSelected && <>
+                  <Circle radius={20} fill="white" opacity={0.7} />
+                  <Circle radius={20} fill="rgba(25,118,210,0.35)" stroke="#1976D2" strokeWidth={3} />
+                </>}
                 <Circle radius={14} fill={NODE_COLOR[node.type]}
                   stroke={isZoneTarget || isDraggingThis ? '#F57C00' :
                     isSelected ? '#1976D2' :
@@ -1090,9 +1093,18 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
               </div>
 
               <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
-                {([['min', 'Мин'], ['center', 'Центр'], ['max', 'Макс']] as const).map(([v, label]) => (
+                {([
+                  ['min',    '● Мин',   '#43A047', '#E8F5E9'],
+                  ['center', '● Центр', '#555',    '#eee'],
+                  ['max',    '● Макс',  '#E53935', '#FFEBEE'],
+                ] as const).map(([v, label, activeColor, activeBg]) => (
                   <button key={v} onClick={() => setStretchAnchor(v)}
-                    style={{ ...btnBase, background: stretchAnchor === v ? '#388E3C' : '#eee', color: stretchAnchor === v ? 'white' : '#333' }}>
+                    style={{ ...btnBase,
+                      background: stretchAnchor === v ? activeBg : '#eee',
+                      color: stretchAnchor === v ? activeColor : '#333',
+                      fontWeight: stretchAnchor === v ? 700 : 400,
+                      border: stretchAnchor === v ? `1.5px solid ${activeColor}` : '1.5px solid transparent',
+                    }}>
                     {label}
                   </button>
                 ))}
