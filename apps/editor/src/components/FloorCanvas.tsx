@@ -164,7 +164,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     const nMin = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === minV);
     const nMax = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === maxV);
     if (stretchAnchor === 'min' && nMin) {
-      m.set(nMin.id, '#43A047');
+      m.set(nMin.id, '#E53935');
     } else if (stretchAnchor === 'max' && nMax) {
       m.set(nMax.id, '#E53935');
     } else {
@@ -174,7 +174,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         const bv = stretchAxis === 'x' ? best.x : best.y;
         return Math.abs(v - midV) < Math.abs(bv - midV) ? n : best;
       });
-      m.set(nCenter.id, '#FF9800');
+      m.set(nCenter.id, '#E53935');
     }
     return m;
   })();
@@ -1030,7 +1030,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
                 {onRoute && <Circle radius={20} fill="rgba(67,160,71,0.25)" />}
                 {stretchAnchorMap.has(node.id) && (() => {
                   const c = stretchAnchorMap.get(node.id)!;
-                  return <Circle radius={24} fill={c + '44'} stroke={c} strokeWidth={3} />;
+                  return <Circle radius={48} fill={c + '33'} stroke={c} strokeWidth={3} />;
                 })()}
                 {isSelected && <>
                   <Circle radius={20} fill="white" opacity={0.7} />
@@ -1101,8 +1101,8 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
 
               <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
                 {([
-                  ['min',    '● Мин',   '#43A047', '#E8F5E9'],
-                  ['center', '● Центр', '#E65100', '#FFF3E0'],
+                  ['min',    '● Мин',   '#E53935', '#FFEBEE'],
+                  ['center', '● Центр', '#E53935', '#FFEBEE'],
                   ['max',    '● Макс',  '#E53935', '#FFEBEE'],
                 ] as const).map(([v, label, activeColor, activeBg]) => (
                   <button key={v} onClick={() => setStretchAnchor(v)}
