@@ -65,9 +65,14 @@ class _BuildingMapScreenState extends State<BuildingMapScreen>
   }
 
   void _applyIncrementalRotation(double angle) {
-    final size = MediaQuery.of(context).size;
-    final cx = size.width / 2;
-    final cy = size.height / 2;
+    final mq = MediaQuery.of(context);
+    final topPadding = mq.padding.top;
+    final appBarH = kToolbarHeight + topPadding;
+    final tabBarH = (_building != null && _building!.floors.length > 1)
+        ? kTextTabBarHeight
+        : 0.0;
+    final cx = mq.size.width / 2;
+    final cy = appBarH + tabBarH + (mq.size.height - appBarH - tabBarH) / 2;
     final step = Matrix4.identity()
       ..translateByDouble(cx, cy, 0, 1)
       ..rotateZ(angle)
