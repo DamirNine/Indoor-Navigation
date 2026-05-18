@@ -203,7 +203,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       setShiftKey(e.shiftKey);
-      if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) { e.preventDefault(); undo(); }
+      if ((e.key === 'z' || e.key === 'я') && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.repeat) { e.preventDefault(); undo(); }
     };
     window.addEventListener('keydown', onKey);
     window.addEventListener('keyup', onKey);

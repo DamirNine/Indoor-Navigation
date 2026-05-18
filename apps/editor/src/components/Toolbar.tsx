@@ -20,7 +20,7 @@ interface Props {
 }
 
 export default function Toolbar({ onMenuClick, zoom, onZoomIn, onZoomOut, onZoomReset }: Props) {
-  const { tool, setTool } = useEditorStore();
+  const { tool, setTool, undo, past } = useEditorStore();
 
   const btn = (active: boolean): React.CSSProperties => ({
     padding: '6px 10px', fontSize: 15, minWidth: 36, height: 34,
@@ -41,6 +41,13 @@ export default function Toolbar({ onMenuClick, zoom, onZoomIn, onZoomOut, onZoom
           {t.label}
         </button>
       ))}
+
+      <div style={{ width: 1, height: 24, background: '#ddd', margin: '0 2px' }} />
+
+      <button onClick={undo} disabled={past.length === 0} title="Отменить (Ctrl+Z)"
+        style={{ ...btn(false), opacity: past.length === 0 ? 0.4 : 1, fontSize: 13 }}>
+        ↩
+      </button>
 
       <div style={{ width: 1, height: 24, background: '#ddd', margin: '0 2px' }} />
 

@@ -14,6 +14,7 @@ const snap = (past: Building[], building: Building): Building[] => [...past.slic
 
 interface EditorState {
   building: Building;
+  otherBuildings: Building[];
   past: Building[];
   activeFloorIndex: number;
   tool: Tool;
@@ -23,6 +24,9 @@ interface EditorState {
   previewRoute: string[] | null;
 
   undo: () => void;
+  addOtherBuilding: (building: Building) => void;
+  switchBuilding: (index: number) => void;
+  removeOtherBuilding: (index: number) => void;
   setBuildingInfo: (id: string, name: string) => void;
   addFloor: (level: number, name: string) => void;
   removeFloor: (index: number) => void;
@@ -57,6 +61,7 @@ export const useEditorStore = create<EditorState>()(
   persist(
     (set) => ({
       building: emptyBuilding(),
+      otherBuildings: [],
       past: [],
       activeFloorIndex: 0,
       tool: 'select',
@@ -72,6 +77,20 @@ export const useEditorStore = create<EditorState>()(
           const building = past.pop()!;
           return { past, building };
         }),
+
+      addOtherBuilding: (building) =>
+        set(s => ({ otherBuildings: [...s.otherBuildings, building] })),
+
+      switchBuilding: (index) =>
+        set(s => {
+          const otherBuildings = [...s.otherBuildings];
+          const target = otherBuildings[index];
+          otherBuildings[index] = s.building;
+          return { building: target, otherBuildings, activeFloorIndex: 0, selectedNodeId: null, selectedEdgeKey: null, past: [] };
+        }),
+
+      removeOtherBuilding: (index) =>
+        set(s => ({ otherBuildings: s.otherBuildings.filter((_, i) => i !== index) })),
 
       setBuildingInfo: (id, name) =>
         set(s => ({ building: { ...s.building, id, name } })),
@@ -321,22 +340,21 @@ export const useEditorStore = create<EditorState>()(
     }),
     {
       name: 'indoor-nav-editor',
-      partialize: (state) => ({
-        building: {
-          ...state.building,
-          floors: state.building.floors.map(floor => ({
-            level: floor.level,
-            name: floor.name,
-            image: floor.image,
-            imageDataUrl: floor.imageDataUrl,
-            nodes: floor.nodes,
-            edges: floor.edges,
-            areas: floor.areas ?? [],
-            ...(floor.contours?.length ? { contours: floor.contours } : {}),
+      partialize: (state) => {
+        const ser = (b: Building) => ({
+          ...b,
+          floors: b.floors.map(f => ({
+            level: f.level, name: f.name, image: f.image, imageDataUrl: f.imageDataUrl,
+            nodes: f.nodes, edges: f.edges, areas: f.areas ?? [],
+            ...(f.contours?.length ? { contours: f.contours } : {}),
           })),
-        },
-        activeFloorIndex: state.activeFloorIndex,
-      }),
+        });
+        return {
+          building: ser(state.building),
+          otherBuildings: state.otherBuildings.map(ser),
+          activeFloorIndex: state.activeFloorIndex,
+        };
+      },
     }
   )
 );
