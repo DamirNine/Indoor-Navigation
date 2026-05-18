@@ -81,7 +81,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const {
     building, activeFloorIndex, tool, selectedNodeId, selectedEdgeKey, pendingEdgeFromId,
     previewRoute, addNode, selectNode, selectEdge, setPendingEdgeFrom, addEdge,
-    moveNode, addArea, addFloorContour, updateFloorContour, updateAllFloorsContours, removeFloorContour,
+    moveNode, moveNodes, undo, addArea, addFloorContour, updateFloorContour, updateAllFloorsContours, removeFloorContour,
   } = useEditorStore();
 
   const routeSet = new Set(previewRoute ?? []);
@@ -154,6 +154,27 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const isZone = tool === 'zone';
   const isContour = tool === 'contour';
 
+  const stretchAnchorIds = (() => {
+    if (!isMoving || selNodeIds.length < 2) return new Set<string>();
+    const nodes = selNodeIds.map(id => floor.nodes.find(n => n.id === id)).filter(Boolean) as NavNode[];
+    const vals = nodes.map(n => stretchAxis === 'x' ? n.x : n.y);
+    const minV = Math.min(...vals), maxV = Math.max(...vals);
+    if (stretchAnchor === 'min') {
+      const n = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === minV);
+      return new Set(n ? [n.id] : []);
+    } else if (stretchAnchor === 'max') {
+      const n = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === maxV);
+      return new Set(n ? [n.id] : []);
+    } else {
+      const ids: string[] = [];
+      const nMin = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === minV);
+      const nMax = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === maxV);
+      if (nMin) ids.push(nMin.id);
+      if (nMax && nMax.id !== nMin?.id) ids.push(nMax.id);
+      return new Set(ids);
+    }
+  })();
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -175,7 +196,10 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   }, [floor?.imageDataUrl]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => setShiftKey(e.shiftKey);
+    const onKey = (e: KeyboardEvent) => {
+      setShiftKey(e.shiftKey);
+      if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) { e.preventDefault(); undo(); }
+    };
     window.addEventListener('keydown', onKey);
     window.addEventListener('keyup', onKey);
     return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('keyup', onKey); };
@@ -649,12 +673,11 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   };
 
   const applyGroupMove = () => {
-    selNodeIds.forEach(id => {
-      const n = floor.nodes.find(nd => nd.id === id);
-      if (n) moveNode(id, n.x + precDx, n.y + precDy);
-    });
-    setPrecDx(0);
-    setPrecDy(0);
+    const moves = selNodeIds
+      .map(id => floor.nodes.find(nd => nd.id === id))
+      .filter(Boolean)
+      .map(n => ({ id: n!.id, x: n!.x + precDx, y: n!.y + precDy }));
+    if (moves.length) moveNodes(moves);
   };
 
   const applyStretch = () => {
@@ -667,12 +690,12 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     if (span === 0) return;
     const ratio = stretchTarget / span;
     const anchorV = stretchAnchor === 'min' ? minV : stretchAnchor === 'max' ? maxV : (minV + maxV) / 2;
-    nodes.forEach(n => {
+    const moves = nodes.map(n => {
       const v = stretchAxis === 'x' ? n.x : n.y;
       const nv = +(anchorV + (v - anchorV) * ratio).toFixed(1);
-      if (stretchAxis === 'x') moveNode(n.id, nv, n.y);
-      else moveNode(n.id, n.x, nv);
+      return stretchAxis === 'x' ? { id: n.id, x: nv, y: n.y } : { id: n.id, x: n.x, y: nv };
     });
+    moveNodes(moves);
   };
 
   // ── ARC PREVIEW POINTS ────────────────────────────────────────────────────
@@ -1001,6 +1024,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
                 onClick={() => handleNodeClick(node)} onTap={() => handleNodeClick(node)}
                 onMouseDown={(e: any) => handleNodeMouseDown(e, node)}>
                 {onRoute && <Circle radius={20} fill="rgba(67,160,71,0.25)" />}
+                {stretchAnchorIds.has(node.id) && <Circle radius={22} fill="rgba(255,152,0,0.25)" stroke="#FF9800" strokeWidth={2.5} />}
                 {isSelected && <Circle radius={18} fill="rgba(25,118,210,0.18)" stroke="#1976D2" strokeWidth={2} />}
                 <Circle radius={14} fill={NODE_COLOR[node.type]}
                   stroke={isZoneTarget || isDraggingThis ? '#F57C00' :

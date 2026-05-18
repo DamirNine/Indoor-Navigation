@@ -10,8 +10,11 @@ const emptyFloor = (level: number, name: string) => ({
   level, name, nodes: [], edges: [], areas: [],
 });
 
+const snap = (past: Building[], building: Building): Building[] => [...past.slice(-49), building];
+
 interface EditorState {
   building: Building;
+  past: Building[];
   activeFloorIndex: number;
   tool: Tool;
   selectedNodeId: string | null;
@@ -19,6 +22,7 @@ interface EditorState {
   pendingEdgeFromId: string | null;
   previewRoute: string[] | null;
 
+  undo: () => void;
   setBuildingInfo: (id: string, name: string) => void;
   addFloor: (level: number, name: string) => void;
   removeFloor: (index: number) => void;
@@ -34,6 +38,7 @@ interface EditorState {
   addArea: (area: Area) => void;
   deleteArea: (nodeId: string) => void;
   moveNode: (id: string, newX: number, newY: number) => void;
+  moveNodes: (moves: Array<{ id: string; x: number; y: number }>) => void;
   addCrossFloorEdge: (edge: CrossFloorEdge) => void;
   deleteCrossFloorEdge: (from: string, to: string) => void;
   setTool: (tool: Tool) => void;
@@ -52,12 +57,21 @@ export const useEditorStore = create<EditorState>()(
   persist(
     (set) => ({
       building: emptyBuilding(),
+      past: [],
       activeFloorIndex: 0,
       tool: 'select',
       selectedNodeId: null,
       selectedEdgeKey: null,
       pendingEdgeFromId: null,
       previewRoute: null,
+
+      undo: () =>
+        set(s => {
+          if (s.past.length === 0) return s;
+          const past = [...s.past];
+          const building = past.pop()!;
+          return { past, building };
+        }),
 
       setBuildingInfo: (id, name) =>
         set(s => ({ building: { ...s.building, id, name } })),
@@ -104,11 +118,12 @@ export const useEditorStore = create<EditorState>()(
           const floors = [...s.building.floors];
           const i = s.activeFloorIndex;
           floors[i] = { ...floors[i], nodes: [...floors[i].nodes, node] };
-          return { building: { ...s.building, floors } };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
         }),
 
       updateNode: (id, updates) =>
         set(s => ({
+          past: snap(s.past, s.building),
           building: {
             ...s.building,
             floors: s.building.floors.map(f => ({
@@ -126,6 +141,7 @@ export const useEditorStore = create<EditorState>()(
             areas: (f.areas ?? []).filter(a => a.nodeId !== id),
           }));
           return {
+            past: snap(s.past, s.building),
             building: {
               ...s.building, floors,
               crossFloorEdges: s.building.crossFloorEdges.filter(e => e.from !== id && e.to !== id),
@@ -140,7 +156,7 @@ export const useEditorStore = create<EditorState>()(
           const floors = [...s.building.floors];
           const i = s.activeFloorIndex;
           floors[i] = { ...floors[i], edges: [...floors[i].edges, edge] };
-          return { building: { ...s.building, floors } };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
         }),
 
       updateEdge: (from, to, updates) =>
@@ -159,6 +175,7 @@ export const useEditorStore = create<EditorState>()(
 
       deleteEdge: (from, to) =>
         set(s => ({
+          past: snap(s.past, s.building),
           building: {
             ...s.building,
             floors: s.building.floors.map(f => ({
@@ -177,11 +194,12 @@ export const useEditorStore = create<EditorState>()(
           const i = s.activeFloorIndex;
           const existing = (floors[i].areas ?? []).filter(a => a.nodeId !== area.nodeId);
           floors[i] = { ...floors[i], areas: [...existing, area] };
-          return { building: { ...s.building, floors } };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
         }),
 
       deleteArea: (nodeId) =>
         set(s => ({
+          past: snap(s.past, s.building),
           building: {
             ...s.building,
             floors: s.building.floors.map(f => ({
@@ -192,6 +210,7 @@ export const useEditorStore = create<EditorState>()(
 
       moveNode: (id, newX, newY) =>
         set(s => ({
+          past: snap(s.past, s.building),
           building: {
             ...s.building,
             floors: s.building.floors.map(f => {
@@ -208,6 +227,32 @@ export const useEditorStore = create<EditorState>()(
             }),
           },
         })),
+
+      moveNodes: (moves) =>
+        set(s => {
+          const moveMap = new Map(moves.map(m => [m.id, m]));
+          return {
+            past: snap(s.past, s.building),
+            building: {
+              ...s.building,
+              floors: s.building.floors.map(f => ({
+                ...f,
+                nodes: f.nodes.map(n => {
+                  const m = moveMap.get(n.id);
+                  return m ? { ...n, x: m.x, y: m.y } : n;
+                }),
+                areas: (f.areas ?? []).map(a => {
+                  const m = moveMap.get(a.nodeId);
+                  if (!m) return a;
+                  const node = f.nodes.find(n => n.id === a.nodeId);
+                  if (!node) return a;
+                  const dx = m.x - node.x, dy = m.y - node.y;
+                  return { ...a, points: a.points.map(p => [p[0] + dx, p[1] + dy]) };
+                }),
+              })),
+            },
+          };
+        }),
 
       addCrossFloorEdge: (edge) =>
         set(s => ({ building: { ...s.building, crossFloorEdges: [...s.building.crossFloorEdges, edge] } })),
@@ -230,6 +275,7 @@ export const useEditorStore = create<EditorState>()(
 
       loadBuilding: (building) => set({
         building,
+        past: [],
         activeFloorIndex: 0,
         selectedNodeId: null,
         selectedEdgeKey: null,
@@ -242,7 +288,7 @@ export const useEditorStore = create<EditorState>()(
           const floors = [...s.building.floors];
           const i = s.activeFloorIndex;
           floors[i] = { ...floors[i], contours: [...(floors[i].contours ?? []), points] };
-          return { building: { ...s.building, floors } };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
         }),
 
       updateFloorContour: (idx: number, points: number[][]) =>
@@ -252,7 +298,7 @@ export const useEditorStore = create<EditorState>()(
           const contours = [...(floors[i].contours ?? [])];
           contours[idx] = points;
           floors[i] = { ...floors[i], contours };
-          return { building: { ...s.building, floors } };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
         }),
 
       updateAllFloorsContours: (contoursByFloor: Array<number[][][] | undefined>) =>
@@ -261,7 +307,7 @@ export const useEditorStore = create<EditorState>()(
             const c = contoursByFloor[i];
             return c !== undefined ? { ...f, contours: c } : f;
           });
-          return { building: { ...s.building, floors } };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
         }),
 
       removeFloorContour: (idx: number) =>
@@ -270,7 +316,7 @@ export const useEditorStore = create<EditorState>()(
           const i = s.activeFloorIndex;
           const contours = (floors[i].contours ?? []).filter((_, ci) => ci !== idx);
           floors[i] = { ...floors[i], contours: contours.length ? contours : undefined };
-          return { building: { ...s.building, floors } };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
         }),
     }),
     {
