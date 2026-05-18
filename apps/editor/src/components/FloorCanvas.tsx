@@ -126,6 +126,20 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [ctxMode, setCtxMode] = useState(false);
   const [ctxTx, setCtxTx] = useState({ tx: 0, ty: 0, scale: 1, rot: 0 });
 
+  // Precision panel state
+  const [precDx, setPrecDx] = useState(0);
+  const [precDy, setPrecDy] = useState(0);
+  const [stretchAxis, setStretchAxis] = useState<'x' | 'y'>('x');
+  const [stretchAnchor, setStretchAnchor] = useState<'min' | 'center' | 'max'>('center');
+  const [stretchTarget, setStretchTarget] = useState(0);
+
+  useEffect(() => {
+    if (selNodeIds.length < 2) return;
+    const nodes = selNodeIds.map(id => floor.nodes.find(n => n.id === id)).filter(Boolean) as NavNode[];
+    const vals = nodes.map(n => stretchAxis === 'x' ? n.x : n.y);
+    setStretchTarget(Math.round(Math.max(...vals) - Math.min(...vals)));
+  }, [selNodeIds.join(','), stretchAxis]);
+
   // Refs for drag tracking (avoid stale closures)
   const dragging = useRef<{ indices: number[]; startMouse: [number, number]; startPts: [number, number][] } | null>(null);
   const nodeDrag = useRef<{ ids: string[]; startMouse: [number, number]; startPositions: { [id: string]: [number, number] } } | null>(null);
@@ -634,6 +648,33 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     setCtxMode(false);
   };
 
+  const applyGroupMove = () => {
+    selNodeIds.forEach(id => {
+      const n = floor.nodes.find(nd => nd.id === id);
+      if (n) moveNode(id, n.x + precDx, n.y + precDy);
+    });
+    setPrecDx(0);
+    setPrecDy(0);
+  };
+
+  const applyStretch = () => {
+    if (selNodeIds.length < 2) return;
+    const nodes = selNodeIds.map(id => floor.nodes.find(n => n.id === id)).filter(Boolean) as NavNode[];
+    const vals = nodes.map(n => stretchAxis === 'x' ? n.x : n.y);
+    const minV = Math.min(...vals);
+    const maxV = Math.max(...vals);
+    const span = maxV - minV;
+    if (span === 0) return;
+    const ratio = stretchTarget / span;
+    const anchorV = stretchAnchor === 'min' ? minV : stretchAnchor === 'max' ? maxV : (minV + maxV) / 2;
+    nodes.forEach(n => {
+      const v = stretchAxis === 'x' ? n.x : n.y;
+      const nv = +(anchorV + (v - anchorV) * ratio).toFixed(1);
+      if (stretchAxis === 'x') moveNode(n.id, nv, n.y);
+      else moveNode(n.id, n.x, nv);
+    });
+  };
+
   // ── ARC PREVIEW POINTS ────────────────────────────────────────────────────
   const arcPreview = (isContour && contourMode === 'draw' && isArcMode && arcControlPt && cursorPos && contourPoints.length > 0)
     ? arcThrough3Pts(contourPoints[contourPoints.length - 1] as [number, number], arcControlPt, [cursorPos.x, cursorPos.y])
@@ -982,6 +1023,73 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
             onConfirm={handleAddEdge}
             onCancel={() => { setPendingEdgeTo(null); setPendingEdgeFrom(null); }} />
         ) : null;
+      })()}
+
+      {isMoving && selNodeIds.length > 0 && (() => {
+        const selNodes = selNodeIds.map(id => floor.nodes.find(n => n.id === id)).filter(Boolean) as NavNode[];
+        const vals = selNodes.map(n => stretchAxis === 'x' ? n.x : n.y);
+        const currentSpan = selNodes.length > 1 ? Math.round(Math.max(...vals) - Math.min(...vals)) : 0;
+        const sliderMax = Math.max(currentSpan * 3, 200);
+        const btnBase: React.CSSProperties = { flex: 1, padding: '3px 0', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 };
+        return (
+          <div style={{ position: 'absolute', bottom: 16, right: 16, background: 'white', border: '1px solid #ccc', borderRadius: 6, padding: 12, zIndex: 20, width: 250, boxShadow: '0 2px 8px rgba(0,0,0,0.18)', fontSize: 13 }}>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>Точное перемещение · {selNodeIds.length} узл.</div>
+
+            {/* ── Сдвиг группы ── */}
+            <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>Сдвиг по пикселям</div>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', marginBottom: 10 }}>
+              <label style={{ flex: 1, fontSize: 11 }}>dx
+                <input type="number" value={precDx} onChange={e => setPrecDx(+e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', marginTop: 2 }} />
+              </label>
+              <label style={{ flex: 1, fontSize: 11 }}>dy
+                <input type="number" value={precDy} onChange={e => setPrecDy(+e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', marginTop: 2 }} />
+              </label>
+              <button onClick={applyGroupMove}
+                style={{ padding: '4px 10px', marginBottom: 1, background: '#1976D2', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
+                →
+              </button>
+            </div>
+
+            {/* ── Растяжение ── */}
+            {selNodes.length >= 2 && (<>
+              <div style={{ borderTop: '1px solid #eee', paddingTop: 8, fontSize: 11, color: '#666', marginBottom: 6 }}>Растяжение / сжатие</div>
+
+              <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                {(['x', 'y'] as const).map(ax => (
+                  <button key={ax} onClick={() => setStretchAxis(ax)}
+                    style={{ ...btnBase, background: stretchAxis === ax ? '#1976D2' : '#eee', color: stretchAxis === ax ? 'white' : '#333' }}>
+                    Ось {ax.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                {([['min', 'Мин'], ['center', 'Центр'], ['max', 'Макс']] as const).map(([v, label]) => (
+                  <button key={v} onClick={() => setStretchAnchor(v)}
+                    style={{ ...btnBase, background: stretchAnchor === v ? '#388E3C' : '#eee', color: stretchAnchor === v ? 'white' : '#333' }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ fontSize: 11, color: '#999', marginBottom: 4 }}>Текущее: {currentSpan} px</div>
+              <input type="range" min={0} max={sliderMax} value={stretchTarget}
+                onChange={e => setStretchTarget(+e.target.value)}
+                style={{ width: '100%', marginBottom: 4 }} />
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <input type="number" value={stretchTarget} min={0}
+                  onChange={e => setStretchTarget(+e.target.value)}
+                  style={{ flex: 1, boxSizing: 'border-box' }} />
+                <button onClick={applyStretch}
+                  style={{ padding: '4px 10px', background: '#388E3C', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
+                  Применить
+                </button>
+              </div>
+            </>)}
+          </div>
+        );
       })()}
     </div>
   );
