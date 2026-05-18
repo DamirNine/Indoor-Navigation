@@ -1,0 +1,4572 @@
+{
+  "id": "1",
+  "name": "ГЗ",
+  "floors": [
+    {
+      "level": 1,
+      "name": "1 этаж",
+      "nodes": [
+        {
+          "id": "room-mp5gr785",
+          "type": "entrance",
+          "label": "Главный вход",
+          "x": 3526,
+          "y": 4555
+        },
+        {
+          "id": "corridor-mp5grq42",
+          "type": "corridor",
+          "label": "",
+          "x": 3526,
+          "y": 4330
+        },
+        {
+          "id": "stairs-mp5gwovl",
+          "type": "stairs",
+          "label": "Лестница2",
+          "x": 3526,
+          "y": 4120
+        },
+        {
+          "id": "corridor-mp5gx1rv",
+          "type": "corridor",
+          "label": "",
+          "x": 3752,
+          "y": 4330
+        },
+        {
+          "id": "elevator-mp5gxp2d",
+          "type": "elevator",
+          "label": "Лифт",
+          "x": 3752,
+          "y": 4118
+        },
+        {
+          "id": "corridor-mp5gy6nn",
+          "type": "corridor",
+          "label": "",
+          "x": 3338,
+          "y": 4330
+        },
+        {
+          "id": "elevator-mp5gycs9",
+          "type": "elevator",
+          "label": "Лифт1",
+          "x": 3338,
+          "y": 4110
+        },
+        {
+          "id": "corridor-mp5h00c2",
+          "type": "corridor",
+          "label": "",
+          "x": 3820,
+          "y": 4330
+        },
+        {
+          "id": "room-mp5h17ql",
+          "type": "room",
+          "label": "190",
+          "x": 3820,
+          "y": 4120
+        },
+        {
+          "id": "corridor-mp5h1g6u",
+          "type": "corridor",
+          "label": "",
+          "x": 3886,
+          "y": 4331
+        },
+        {
+          "id": "room-mp5h1wdu",
+          "type": "room",
+          "label": "Туалет М",
+          "x": 3886,
+          "y": 4115
+        },
+        {
+          "id": "corridor-mp5h2aax",
+          "type": "corridor",
+          "label": "",
+          "x": 3979,
+          "y": 4331
+        },
+        {
+          "id": "room-mp5h2fso",
+          "type": "room",
+          "label": "186",
+          "x": 3979,
+          "y": 4134
+        },
+        {
+          "id": "room-mp5h2jye",
+          "type": "room",
+          "label": "187",
+          "x": 3979,
+          "y": 4530
+        },
+        {
+          "id": "corridor-mp5h2xoq",
+          "type": "corridor",
+          "label": "",
+          "x": 4088,
+          "y": 4331
+        },
+        {
+          "id": "room-mp5h36jq",
+          "type": "room",
+          "label": "187б",
+          "x": 4088,
+          "y": 4154
+        },
+        {
+          "id": "room-mp5h3be9",
+          "type": "room",
+          "label": "187а",
+          "x": 4088,
+          "y": 4525
+        },
+        {
+          "id": "corridor-mp5h3sln",
+          "type": "corridor",
+          "label": "",
+          "x": 4220,
+          "y": 4331
+        },
+        {
+          "id": "room-mp5h5ajr",
+          "type": "room",
+          "label": "185",
+          "x": 4220,
+          "y": 4538
+        },
+        {
+          "id": "room-mp5h66rk",
+          "type": "room",
+          "label": "195",
+          "x": 4220,
+          "y": 4164
+        },
+        {
+          "id": "room-mp5h6ltr",
+          "type": "room",
+          "label": "195.7",
+          "x": 4361,
+          "y": 4164
+        },
+        {
+          "id": "corridor-mp5h70rt",
+          "type": "corridor",
+          "label": "",
+          "x": 4220,
+          "y": 3988
+        },
+        {
+          "id": "room-mp5h774m",
+          "type": "room",
+          "label": "195.1",
+          "x": 4220,
+          "y": 3855
+        },
+        {
+          "id": "stairs-mp5h7eru",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 4372,
+          "y": 3988
+        },
+        {
+          "id": "stairs-mp5h8fbh",
+          "type": "stairs",
+          "label": "Лестница3",
+          "x": 4362,
+          "y": 4331
+        },
+        {
+          "id": "corridor-mp5hadug",
+          "type": "corridor",
+          "label": "",
+          "x": 3269,
+          "y": 4330
+        },
+        {
+          "id": "room-mp5hahpk",
+          "type": "room",
+          "label": "192",
+          "x": 3269,
+          "y": 4117
+        },
+        {
+          "id": "corridor-mp5has4c",
+          "type": "corridor",
+          "label": "",
+          "x": 3199,
+          "y": 4330
+        },
+        {
+          "id": "room-mp5haz2w",
+          "type": "room",
+          "label": "Туалет Ж",
+          "x": 3199,
+          "y": 4120
+        },
+        {
+          "id": "stairs-mp5hbg9x",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 3381,
+          "y": 4555
+        },
+        {
+          "id": "stairs-mp5hbmw0",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 3646,
+          "y": 4555
+        },
+        {
+          "id": "corridor-mp5hca25",
+          "type": "corridor",
+          "label": "",
+          "x": 3107,
+          "y": 4329
+        },
+        {
+          "id": "room-mp5hcdxa",
+          "type": "room",
+          "label": "192а",
+          "x": 3107,
+          "y": 4134
+        },
+        {
+          "id": "room-mp5hcibt",
+          "type": "room",
+          "label": "189",
+          "x": 3107,
+          "y": 4504
+        },
+        {
+          "id": "corridor-mp5hcszy",
+          "type": "corridor",
+          "label": "",
+          "x": 3004,
+          "y": 4329
+        },
+        {
+          "id": "room-mp5hcwji",
+          "type": "room",
+          "label": "192б",
+          "x": 3004,
+          "y": 4139
+        },
+        {
+          "id": "room-mp5hd0q0",
+          "type": "room",
+          "label": "189а",
+          "x": 3004,
+          "y": 4524
+        },
+        {
+          "id": "corridor-mp5hddo3",
+          "type": "corridor",
+          "label": "",
+          "x": 2887,
+          "y": 4329
+        },
+        {
+          "id": "room-mp5hdxko",
+          "type": "room",
+          "label": "191",
+          "x": 2887,
+          "y": 4568
+        },
+        {
+          "id": "room-mp5he47h",
+          "type": "room",
+          "label": "194",
+          "x": 2887,
+          "y": 4173
+        },
+        {
+          "id": "stairs-mp5henlk",
+          "type": "stairs",
+          "label": "Лестница1",
+          "x": 2797,
+          "y": 4329
+        },
+        {
+          "id": "stairs-mp5iqg13",
+          "type": "stairs",
+          "label": "Лестница12",
+          "x": 4506,
+          "y": 2084
+        },
+        {
+          "id": "entrance-mp5iqoa9",
+          "type": "entrance",
+          "label": "Вход",
+          "x": 4395,
+          "y": 2084
+        },
+        {
+          "id": "stairs-mp5jca8v",
+          "type": "stairs",
+          "label": "Лестница14",
+          "x": 1964,
+          "y": 1721
+        },
+        {
+          "id": "entrance-mp5jcff9",
+          "type": "entrance",
+          "label": "Вход",
+          "x": 2100,
+          "y": 1721
+        }
+      ],
+      "edges": [
+        {
+          "from": "room-mp5gr785",
+          "to": "corridor-mp5grq42",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "stairs-mp5gwovl",
+          "to": "corridor-mp5grq42",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5grq42",
+          "to": "corridor-mp5gx1rv",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "elevator-mp5gxp2d",
+          "to": "corridor-mp5gx1rv",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5grq42",
+          "to": "corridor-mp5gy6nn",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5gy6nn",
+          "to": "elevator-mp5gycs9",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5gx1rv",
+          "to": "corridor-mp5h00c2",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h00c2",
+          "to": "room-mp5h17ql",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h00c2",
+          "to": "corridor-mp5h1g6u",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5h1wdu",
+          "to": "corridor-mp5h1g6u",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h2aax",
+          "to": "corridor-mp5h1g6u",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h2aax",
+          "to": "room-mp5h2fso",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h2aax",
+          "to": "room-mp5h2jye",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h2aax",
+          "to": "corridor-mp5h2xoq",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h2xoq",
+          "to": "room-mp5h36jq",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h2xoq",
+          "to": "room-mp5h3be9",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h2xoq",
+          "to": "corridor-mp5h3sln",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h3sln",
+          "to": "room-mp5h5ajr",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h3sln",
+          "to": "room-mp5h66rk",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5h66rk",
+          "to": "room-mp5h6ltr",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5h66rk",
+          "to": "corridor-mp5h70rt",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h70rt",
+          "to": "stairs-mp5h7eru",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h70rt",
+          "to": "room-mp5h774m",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5h3sln",
+          "to": "stairs-mp5h8fbh",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5hahpk",
+          "to": "corridor-mp5hadug",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hadug",
+          "to": "corridor-mp5gy6nn",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hadug",
+          "to": "corridor-mp5has4c",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5has4c",
+          "to": "room-mp5haz2w",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "stairs-mp5hbg9x",
+          "to": "room-mp5gr785",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5gr785",
+          "to": "stairs-mp5hbmw0",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5has4c",
+          "to": "corridor-mp5hca25",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hca25",
+          "to": "room-mp5hcdxa",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hca25",
+          "to": "room-mp5hcibt",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hcszy",
+          "to": "corridor-mp5hca25",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hcszy",
+          "to": "room-mp5hcwji",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hcszy",
+          "to": "room-mp5hd0q0",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hcszy",
+          "to": "corridor-mp5hddo3",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hddo3",
+          "to": "room-mp5hdxko",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hddo3",
+          "to": "room-mp5he47h",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hddo3",
+          "to": "stairs-mp5henlk",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "entrance-mp5iqoa9",
+          "to": "stairs-mp5iqg13",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "stairs-mp5jca8v",
+          "to": "entrance-mp5jcff9",
+          "type": "walk",
+          "weight": 10
+        }
+      ],
+      "areas": [],
+      "contours": [
+        [
+          [
+            599.2,
+            4062.2
+          ],
+          [
+            0,
+            4062.2
+          ],
+          [
+            -7,
+            214.2
+          ],
+          [
+            95.4,
+            112
+          ],
+          [
+            1679.4,
+            112
+          ],
+          [
+            1679.4,
+            425.2
+          ],
+          [
+            1579.4,
+            425.2
+          ],
+          [
+            1611.2,
+            509.4
+          ],
+          [
+            1652.3,
+            578.7
+          ],
+          [
+            1715.8,
+            650.2
+          ],
+          [
+            1780.2,
+            715.6
+          ],
+          [
+            1854.6,
+            769.4
+          ],
+          [
+            1937,
+            810.2
+          ],
+          [
+            2024.8,
+            836.8
+          ],
+          [
+            2115.8,
+            848.8
+          ],
+          [
+            2207.6,
+            845.4
+          ],
+          [
+            2323.4,
+            845.4
+          ],
+          [
+            2323.4,
+            689.2
+          ],
+          [
+            2998.4,
+            689.2
+          ],
+          [
+            2998.4,
+            836.6
+          ],
+          [
+            3140,
+            836.6
+          ],
+          [
+            3222.4,
+            835.6
+          ],
+          [
+            3304,
+            823.2
+          ],
+          [
+            3383.2,
+            800.2
+          ],
+          [
+            3458.6,
+            766.4
+          ],
+          [
+            3528.8,
+            723
+          ],
+          [
+            3592.4,
+            670.4
+          ],
+          [
+            3648.2,
+            609.8
+          ],
+          [
+            3695.4,
+            542
+          ],
+          [
+            3733.2,
+            468.6
+          ],
+          [
+            3760.4,
+            390.6
+          ],
+          [
+            3671,
+            390.6
+          ],
+          [
+            3671,
+            102.2
+          ],
+          [
+            5081.2,
+            102.2
+          ],
+          [
+            5169.6,
+            190.6
+          ],
+          [
+            5169.6,
+            4186.2
+          ],
+          [
+            4603.4,
+            4186.2
+          ],
+          [
+            4603.4,
+            3430
+          ],
+          [
+            3084.6,
+            3430
+          ],
+          [
+            3084.6,
+            3151.8
+          ],
+          [
+            2306.6,
+            3151.8
+          ],
+          [
+            2306.6,
+            3463.2
+          ],
+          [
+            592.4,
+            3463.2
+          ]
+        ],
+        [
+          [
+            568.9,
+            3056.4
+          ],
+          [
+            572.4,
+            2010.1
+          ],
+          [
+            438.8,
+            2010.1
+          ],
+          [
+            438.8,
+            473
+          ],
+          [
+            1232.9,
+            473
+          ],
+          [
+            1259.6,
+            600.4
+          ],
+          [
+            1298.4,
+            696
+          ],
+          [
+            1348.8,
+            785.8
+          ],
+          [
+            1410,
+            868.6
+          ],
+          [
+            1481.2,
+            943.2
+          ],
+          [
+            1561,
+            1008.2
+          ],
+          [
+            1648.4,
+            1062.8
+          ],
+          [
+            1741.8,
+            1106
+          ],
+          [
+            1840,
+            1137.4
+          ],
+          [
+            1941.4,
+            1156
+          ],
+          [
+            1941.4,
+            3063.9
+          ]
+        ],
+        [
+          [
+            2274,
+            1255.8
+          ],
+          [
+            3047.4,
+            1255.8
+          ],
+          [
+            3173,
+            1255.8
+          ],
+          [
+            3170.9,
+            2683.7
+          ],
+          [
+            2857.3,
+            2679.5
+          ],
+          [
+            2860.1,
+            2598.1
+          ],
+          [
+            2842.7,
+            2530.1
+          ],
+          [
+            2800.9,
+            2494.7
+          ],
+          [
+            2748.9,
+            2477.3
+          ],
+          [
+            2694.3,
+            2480.9
+          ],
+          [
+            2644.9,
+            2504.7
+          ],
+          [
+            2608.1,
+            2545.3
+          ],
+          [
+            2589.3,
+            2596.7
+          ],
+          [
+            2583.3,
+            2674.9
+          ],
+          [
+            2283.8,
+            2673
+          ]
+        ],
+        [
+          [
+            3627.4,
+            3119.4
+          ],
+          [
+            3405.2,
+            3119.4
+          ],
+          [
+            3405.2,
+            1144.6
+          ],
+          [
+            3495.4,
+            1107.6
+          ],
+          [
+            3581.4,
+            1061.6
+          ],
+          [
+            3662.4,
+            1007.2
+          ],
+          [
+            3737.4,
+            945
+          ],
+          [
+            3805.8,
+            875.4
+          ],
+          [
+            3867,
+            799.4
+          ],
+          [
+            3920,
+            717.6
+          ],
+          [
+            3964.6,
+            630.8
+          ],
+          [
+            4000.4,
+            540
+          ],
+          [
+            4026.6,
+            446.2
+          ],
+          [
+            4826.6,
+            446.2
+          ],
+          [
+            4826.6,
+            1943.6
+          ],
+          [
+            4724.8,
+            1943.6
+          ],
+          [
+            4724.8,
+            3064
+          ],
+          [
+            4224.4,
+            3064
+          ],
+          [
+            4224.4,
+            2630.8
+          ],
+          [
+            3959.2,
+            2630.8
+          ],
+          [
+            3959.2,
+            3019.8
+          ],
+          [
+            3871.4,
+            3019.8
+          ],
+          [
+            3871.4,
+            2630.8
+          ],
+          [
+            3623.6,
+            2630.8
+          ]
+        ]
+      ]
+    },
+    {
+      "level": 2,
+      "name": "2 этаж",
+      "nodes": [
+        {
+          "id": "stairs-mp5hggkn",
+          "type": "stairs",
+          "label": "Лестница1",
+          "x": 2963,
+          "y": 4704
+        },
+        {
+          "id": "room-mp5hhexr",
+          "type": "room",
+          "label": "296а",
+          "x": 3384,
+          "y": 4511
+        },
+        {
+          "id": "room-mp5hhifh",
+          "type": "room",
+          "label": "296",
+          "x": 3384,
+          "y": 4897
+        },
+        {
+          "id": "corridor-mp5hhzg8",
+          "type": "corridor",
+          "label": "",
+          "x": 3562,
+          "y": 4704
+        },
+        {
+          "id": "room-mp5hi2fp",
+          "type": "room",
+          "label": "298",
+          "x": 3562,
+          "y": 4511
+        },
+        {
+          "id": "room-mp5hi9u1",
+          "type": "room",
+          "label": "297в",
+          "x": 3562,
+          "y": 4897
+        },
+        {
+          "id": "corridor-mp5hin4u",
+          "type": "corridor",
+          "label": "",
+          "x": 3798,
+          "y": 4703
+        },
+        {
+          "id": "room-mp5hix12",
+          "type": "room",
+          "label": "Таулет Ж",
+          "x": 3798,
+          "y": 4510
+        },
+        {
+          "id": "room-mp5hj2yk",
+          "type": "room",
+          "label": "297б",
+          "x": 3798,
+          "y": 4896
+        },
+        {
+          "id": "corridor-mp5hjb5y",
+          "type": "corridor",
+          "label": "",
+          "x": 4023,
+          "y": 4702
+        },
+        {
+          "id": "room-mp5hjl0j",
+          "type": "room",
+          "label": "294г",
+          "x": 4023,
+          "y": 4509
+        },
+        {
+          "id": "corridor-mp5hjvyi",
+          "type": "corridor",
+          "label": "",
+          "x": 4141,
+          "y": 4702
+        },
+        {
+          "id": "elevator-mp5hk50p",
+          "type": "elevator",
+          "label": "Лифт1",
+          "x": 4141,
+          "y": 4542
+        },
+        {
+          "id": "room-mp5hkazi",
+          "type": "room",
+          "label": "297а",
+          "x": 4141,
+          "y": 4895
+        },
+        {
+          "id": "stairs-mp5hkuqf",
+          "type": "stairs",
+          "label": "Лестница2",
+          "x": 4392,
+          "y": 4520
+        },
+        {
+          "id": "corridor-mp5hlb98",
+          "type": "corridor",
+          "label": "",
+          "x": 4392,
+          "y": 4701
+        },
+        {
+          "id": "corridor-mp5ho1al",
+          "type": "corridor",
+          "label": "",
+          "x": 4717,
+          "y": 4701
+        },
+        {
+          "id": "elevator-mp5ho8xw",
+          "type": "elevator",
+          "label": "Лифт",
+          "x": 4717,
+          "y": 4492
+        },
+        {
+          "id": "room-mp5hocr3",
+          "type": "room",
+          "label": "297",
+          "x": 4717,
+          "y": 4894
+        },
+        {
+          "id": "corridor-mp5hpr71",
+          "type": "corridor",
+          "label": "",
+          "x": 4824,
+          "y": 4700
+        },
+        {
+          "id": "room-mp5hpv69",
+          "type": "room",
+          "label": "294а",
+          "x": 4824,
+          "y": 4507
+        },
+        {
+          "id": "corridor-mp5hq5t7",
+          "type": "corridor",
+          "label": "",
+          "x": 5064,
+          "y": 4700
+        },
+        {
+          "id": "room-mp5hqe8l",
+          "type": "room",
+          "label": "299б",
+          "x": 5064,
+          "y": 4893
+        },
+        {
+          "id": "room-mp5hqjai",
+          "type": "room",
+          "label": "294б",
+          "x": 5064,
+          "y": 4507
+        },
+        {
+          "id": "corridor-mp5hqwyb",
+          "type": "corridor",
+          "label": "",
+          "x": 5226,
+          "y": 4700
+        },
+        {
+          "id": "room-mp5hr0t5",
+          "type": "room",
+          "label": "294в",
+          "x": 5226,
+          "y": 4507
+        },
+        {
+          "id": "room-mp5hr8os",
+          "type": "room",
+          "label": "299ав",
+          "x": 5226,
+          "y": 4893
+        },
+        {
+          "id": "corridor-mp5hs5rq",
+          "type": "corridor",
+          "label": "",
+          "x": 5571,
+          "y": 4700
+        },
+        {
+          "id": "corridor-mp5ht11u",
+          "type": "corridor",
+          "label": "",
+          "x": 5679,
+          "y": 4700
+        },
+        {
+          "id": "stairs-mp5htagq",
+          "type": "stairs",
+          "label": "Лестница3",
+          "x": 5820,
+          "y": 4700
+        },
+        {
+          "id": "corridor-mp5htllf",
+          "type": "corridor",
+          "label": "",
+          "x": 5571,
+          "y": 4517
+        },
+        {
+          "id": "corridor-mp5htuz5",
+          "type": "corridor",
+          "label": "",
+          "x": 5765,
+          "y": 4810
+        },
+        {
+          "id": "corridor-mp5husqt",
+          "type": "corridor",
+          "label": "",
+          "x": 3384,
+          "y": 4704
+        },
+        {
+          "id": "corridor-mp5huzhz",
+          "type": "corridor",
+          "label": "",
+          "x": 3160,
+          "y": 4704
+        },
+        {
+          "id": "corridor-mp5hvfrn",
+          "type": "corridor",
+          "label": "",
+          "x": 3160,
+          "y": 4610
+        },
+        {
+          "id": "corridor-mp5i00wn",
+          "type": "corridor",
+          "label": "",
+          "x": 5857,
+          "y": 4903
+        },
+        {
+          "id": "room-mp5i0dc4",
+          "type": "room",
+          "label": "294",
+          "x": 6050,
+          "y": 4808
+        },
+        {
+          "id": "corridor-mp5i0kop",
+          "type": "corridor",
+          "label": "",
+          "x": 6020,
+          "y": 4993
+        },
+        {
+          "id": "room-mp5i139l",
+          "type": "room",
+          "label": "292",
+          "x": 6213,
+          "y": 4878
+        },
+        {
+          "id": "corridor-mp5i17bc",
+          "type": "corridor",
+          "label": "",
+          "x": 6208,
+          "y": 5055
+        },
+        {
+          "id": "room-mp5i1aw1",
+          "type": "room",
+          "label": "290",
+          "x": 6401,
+          "y": 4948
+        },
+        {
+          "id": "corridor-mp5i1qsm",
+          "type": "corridor",
+          "label": "",
+          "x": 6390,
+          "y": 5151
+        },
+        {
+          "id": "room-mp5i1tgk",
+          "type": "room",
+          "label": "288",
+          "x": 6476,
+          "y": 4958
+        },
+        {
+          "id": "corridor-mp5i26bq",
+          "type": "corridor",
+          "label": "",
+          "x": 6464,
+          "y": 5278
+        },
+        {
+          "id": "room-mp5i29ha",
+          "type": "room",
+          "label": "286",
+          "x": 6657,
+          "y": 5151
+        },
+        {
+          "id": "room-mp5i2ess",
+          "type": "room",
+          "label": "284",
+          "x": 6697,
+          "y": 5381
+        },
+        {
+          "id": "corridor-mp5i2hfu",
+          "type": "corridor",
+          "label": "",
+          "x": 6504,
+          "y": 5447
+        },
+        {
+          "id": "corridor-mp5i55vh",
+          "type": "corridor",
+          "label": "",
+          "x": 6510,
+          "y": 5622
+        },
+        {
+          "id": "room-mp5i5buf",
+          "type": "room",
+          "label": "299в",
+          "x": 6317,
+          "y": 5645
+        },
+        {
+          "id": "corridor-mp5i5q8l",
+          "type": "corridor",
+          "label": "",
+          "x": 6533,
+          "y": 5789
+        },
+        {
+          "id": "corridor-mp5i5u70",
+          "type": "corridor",
+          "label": "",
+          "x": 6785,
+          "y": 5789
+        },
+        {
+          "id": "room-mp5i60j4",
+          "type": "room",
+          "label": "299б",
+          "x": 6340,
+          "y": 5790
+        },
+        {
+          "id": "room-mp5i679d",
+          "type": "room",
+          "label": "299а",
+          "x": 6533,
+          "y": 5982
+        },
+        {
+          "id": "stairs-mp5i83f3",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 6785,
+          "y": 5601
+        },
+        {
+          "id": "room-mp5i87hr",
+          "type": "room",
+          "label": "295",
+          "x": 6785,
+          "y": 5982
+        },
+        {
+          "id": "corridor-mp5i8o1d",
+          "type": "corridor",
+          "label": "",
+          "x": 7003,
+          "y": 5788
+        },
+        {
+          "id": "room-mp5i8qxn",
+          "type": "room",
+          "label": "282",
+          "x": 7003,
+          "y": 5595
+        },
+        {
+          "id": "corridor-mp5i9mpl",
+          "type": "corridor",
+          "label": "",
+          "x": 7133,
+          "y": 5787
+        },
+        {
+          "id": "corridor-mp5i9pce",
+          "type": "corridor",
+          "label": "",
+          "x": 7306,
+          "y": 5786
+        },
+        {
+          "id": "room-mp5i9ryo",
+          "type": "room",
+          "label": "280",
+          "x": 7133,
+          "y": 5594
+        },
+        {
+          "id": "room-mp5i9vcp",
+          "type": "room",
+          "label": "295",
+          "x": 7133,
+          "y": 5980
+        },
+        {
+          "id": "room-mp5ia7ti",
+          "type": "room",
+          "label": "278",
+          "x": 7644,
+          "y": 5592
+        },
+        {
+          "id": "room-mp5iabgq",
+          "type": "room",
+          "label": "293",
+          "x": 7306,
+          "y": 5979
+        },
+        {
+          "id": "corridor-mp5iao9w",
+          "type": "corridor",
+          "label": "",
+          "x": 7470,
+          "y": 5785
+        },
+        {
+          "id": "room-mp5iarql",
+          "type": "room",
+          "label": "291",
+          "x": 7470,
+          "y": 5978
+        },
+        {
+          "id": "corridor-mp5iavxs",
+          "type": "corridor",
+          "label": "",
+          "x": 7644,
+          "y": 5785
+        },
+        {
+          "id": "corridor-mp5ico5o",
+          "type": "corridor",
+          "label": "",
+          "x": 7848,
+          "y": 5784
+        },
+        {
+          "id": "room-mp5icrjz",
+          "type": "room",
+          "label": "276а",
+          "x": 7848,
+          "y": 5591
+        },
+        {
+          "id": "corridor-mp5id06l",
+          "type": "corridor",
+          "label": "",
+          "x": 8026,
+          "y": 5783
+        },
+        {
+          "id": "room-mp5id29t",
+          "type": "room",
+          "label": "276",
+          "x": 8026,
+          "y": 5590
+        },
+        {
+          "id": "room-mp5id58v",
+          "type": "room",
+          "label": "289",
+          "x": 8026,
+          "y": 5976
+        },
+        {
+          "id": "corridor-mp5idg5x",
+          "type": "corridor",
+          "label": "",
+          "x": 8206,
+          "y": 5783
+        },
+        {
+          "id": "room-mp5idjk6",
+          "type": "room",
+          "label": "287",
+          "x": 8206,
+          "y": 5976
+        },
+        {
+          "id": "corridor-mp5idsfb",
+          "type": "corridor",
+          "label": "",
+          "x": 8399,
+          "y": 5782
+        },
+        {
+          "id": "room-mp5idvr1",
+          "type": "room",
+          "label": "274а",
+          "x": 8399,
+          "y": 5589
+        },
+        {
+          "id": "room-mp5idzn3",
+          "type": "room",
+          "label": "285",
+          "x": 8399,
+          "y": 5975
+        },
+        {
+          "id": "corridor-mp5ieft1",
+          "type": "corridor",
+          "label": "",
+          "x": 8603,
+          "y": 5782
+        },
+        {
+          "id": "room-mp5iei3s",
+          "type": "room",
+          "label": "272",
+          "x": 8603,
+          "y": 5589
+        },
+        {
+          "id": "room-mp5ielg8",
+          "type": "room",
+          "label": "283",
+          "x": 8603,
+          "y": 5975
+        },
+        {
+          "id": "corridor-mp5iezyx",
+          "type": "corridor",
+          "label": "",
+          "x": 8776,
+          "y": 5782
+        },
+        {
+          "id": "room-mp5if6g0",
+          "type": "room",
+          "label": "281",
+          "x": 8969,
+          "y": 5781
+        },
+        {
+          "id": "corridor-mp5ifht8",
+          "type": "corridor",
+          "label": "",
+          "x": 8776,
+          "y": 5565
+        },
+        {
+          "id": "room-mp5iflyj",
+          "type": "room",
+          "label": "279",
+          "x": 8969,
+          "y": 5565
+        },
+        {
+          "id": "corridor-mp5ig6e3",
+          "type": "corridor",
+          "label": "",
+          "x": 8776,
+          "y": 5299
+        },
+        {
+          "id": "room-mp5ig9ab",
+          "type": "room",
+          "label": "275",
+          "x": 8776,
+          "y": 5106
+        },
+        {
+          "id": "room-mp5igbnu",
+          "type": "room",
+          "label": "277",
+          "x": 8969,
+          "y": 5299
+        },
+        {
+          "id": "stairs-mp5igiv7",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 8560,
+          "y": 5299
+        },
+        {
+          "id": "corridor-mp5ij4jq",
+          "type": "corridor",
+          "label": "",
+          "x": 5571,
+          "y": 4174
+        },
+        {
+          "id": "corridor-mp5ijin3",
+          "type": "corridor",
+          "label": "",
+          "x": 5572,
+          "y": 3751
+        },
+        {
+          "id": "corridor-mp5ikc02",
+          "type": "corridor",
+          "label": "",
+          "x": 5745,
+          "y": 3751
+        },
+        {
+          "id": "room-mp5ikha4",
+          "type": "room",
+          "label": "223",
+          "x": 5745,
+          "y": 3944
+        },
+        {
+          "id": "stairs-mp5ikokv",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 5959,
+          "y": 3751
+        },
+        {
+          "id": "corridor-mp5il504",
+          "type": "corridor",
+          "label": "",
+          "x": 5572,
+          "y": 3436
+        },
+        {
+          "id": "room-mp5il8id",
+          "type": "room",
+          "label": "201а",
+          "x": 5765,
+          "y": 3436
+        },
+        {
+          "id": "corridor-mp5ilhyd",
+          "type": "corridor",
+          "label": "",
+          "x": 5572,
+          "y": 3066
+        },
+        {
+          "id": "room-mp5ilre0",
+          "type": "room",
+          "label": "219",
+          "x": 5765,
+          "y": 3066
+        },
+        {
+          "id": "corridor-mp5ima9y",
+          "type": "corridor",
+          "label": "",
+          "x": 5573,
+          "y": 2765
+        },
+        {
+          "id": "room-mp5img08",
+          "type": "room",
+          "label": "225",
+          "x": 5380,
+          "y": 2765
+        },
+        {
+          "id": "corridor-mp5imyqm",
+          "type": "corridor",
+          "label": "",
+          "x": 5573,
+          "y": 2434
+        },
+        {
+          "id": "corridor-mp5in2gr",
+          "type": "corridor",
+          "label": "",
+          "x": 5382,
+          "y": 2434
+        },
+        {
+          "id": "stairs-mp5iowa1",
+          "type": "stairs",
+          "label": "Лестница12",
+          "x": 5573,
+          "y": 2207
+        },
+        {
+          "id": "corridor-mp5ipawx",
+          "type": "corridor",
+          "label": "",
+          "x": 5573,
+          "y": 2323
+        },
+        {
+          "id": "corridor-mp5ipfdl",
+          "type": "corridor",
+          "label": "",
+          "x": 5810,
+          "y": 2323
+        },
+        {
+          "id": "room-mp5ipxs6",
+          "type": "room",
+          "label": "251а",
+          "x": 5810,
+          "y": 2130
+        },
+        {
+          "id": "corridor-mp5irgzf",
+          "type": "corridor",
+          "label": "",
+          "x": 6002,
+          "y": 2322
+        },
+        {
+          "id": "room-mp5irkmt",
+          "type": "room",
+          "label": "251",
+          "x": 6002,
+          "y": 2129
+        },
+        {
+          "id": "corridor-mp5irteq",
+          "type": "corridor",
+          "label": "",
+          "x": 6151,
+          "y": 2322
+        },
+        {
+          "id": "room-mp5isa1o",
+          "type": "room",
+          "label": "Столовая",
+          "x": 6371,
+          "y": 2515
+        },
+        {
+          "id": "corridor-mp5isptc",
+          "type": "corridor",
+          "label": "",
+          "x": 6371,
+          "y": 2322
+        },
+        {
+          "id": "room-mp5itf7q",
+          "type": "room",
+          "label": "Столовая",
+          "x": 6371,
+          "y": 2129
+        },
+        {
+          "id": "corridor-mp5iu0lt",
+          "type": "corridor",
+          "label": "",
+          "x": 6547,
+          "y": 2321
+        },
+        {
+          "id": "room-mp5iu5jf",
+          "type": "room",
+          "label": "253.1",
+          "x": 6547,
+          "y": 2128
+        },
+        {
+          "id": "corridor-mp5iuhrl",
+          "type": "corridor",
+          "label": "",
+          "x": 6719,
+          "y": 2321
+        },
+        {
+          "id": "room-mp5iun0h",
+          "type": "room",
+          "label": "Пиццерия",
+          "x": 6719,
+          "y": 2128
+        },
+        {
+          "id": "corridor-mp5iuzn9",
+          "type": "corridor",
+          "label": "",
+          "x": 6962,
+          "y": 2321
+        },
+        {
+          "id": "room-mp5iv3n0",
+          "type": "room",
+          "label": "257",
+          "x": 6962,
+          "y": 2128
+        },
+        {
+          "id": "corridor-mp5ivfgn",
+          "type": "corridor",
+          "label": "",
+          "x": 7219,
+          "y": 2321
+        },
+        {
+          "id": "room-mp5ivi36",
+          "type": "room",
+          "label": "259",
+          "x": 7219,
+          "y": 2128
+        },
+        {
+          "id": "corridor-mp5ivui2",
+          "type": "corridor",
+          "label": "",
+          "x": 7401,
+          "y": 2320
+        },
+        {
+          "id": "room-mp5ivwj4",
+          "type": "room",
+          "label": "260",
+          "x": 7401,
+          "y": 2127
+        },
+        {
+          "id": "corridor-mp5iw9bf",
+          "type": "corridor",
+          "label": "",
+          "x": 7518,
+          "y": 2320
+        },
+        {
+          "id": "corridor-mp5iwbm7",
+          "type": "corridor",
+          "label": "",
+          "x": 7685,
+          "y": 2320
+        },
+        {
+          "id": "room-mp5iwh3m",
+          "type": "room",
+          "label": "Таулет М",
+          "x": 7518,
+          "y": 2127
+        },
+        {
+          "id": "room-mp5iwmtn",
+          "type": "room",
+          "label": "Туалет Ж",
+          "x": 7685,
+          "y": 2127
+        },
+        {
+          "id": "corridor-mp5ix3vo",
+          "type": "corridor",
+          "label": "",
+          "x": 7898,
+          "y": 2320
+        },
+        {
+          "id": "stairs-mp5ixa0m",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 8084,
+          "y": 2320
+        },
+        {
+          "id": "corridor-mp5ixp66",
+          "type": "corridor",
+          "label": "",
+          "x": 7899,
+          "y": 2125
+        },
+        {
+          "id": "corridor-mp5ixu62",
+          "type": "corridor",
+          "label": "",
+          "x": 7898,
+          "y": 2618
+        },
+        {
+          "id": "room-mp5iyrcl",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 7642,
+          "y": 2618
+        },
+        {
+          "id": "stairs-mp5iz250",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 8112,
+          "y": 2618
+        },
+        {
+          "id": "room-mp5izjj3",
+          "type": "room",
+          "label": "249(Дом физики)",
+          "x": 7898,
+          "y": 2811
+        },
+        {
+          "id": "room-mp5j093o",
+          "type": "room",
+          "label": "261",
+          "x": 8092,
+          "y": 2125
+        },
+        {
+          "id": "corridor-mp5j0eud",
+          "type": "corridor",
+          "label": "",
+          "x": 7900,
+          "y": 1939
+        },
+        {
+          "id": "room-mp5j0wcc",
+          "type": "room",
+          "label": "262",
+          "x": 7707,
+          "y": 1939
+        },
+        {
+          "id": "corridor-mp5j1bjs",
+          "type": "corridor",
+          "label": "",
+          "x": 7901,
+          "y": 1728
+        },
+        {
+          "id": "room-mp5j1g4h",
+          "type": "room",
+          "label": "263",
+          "x": 8094,
+          "y": 1728
+        },
+        {
+          "id": "corridor-mp5j1rs6",
+          "type": "corridor",
+          "label": "",
+          "x": 7901,
+          "y": 1490
+        },
+        {
+          "id": "room-mp5j1wh8",
+          "type": "room",
+          "label": "264",
+          "x": 7708,
+          "y": 1490
+        },
+        {
+          "id": "room-mp5j1za2",
+          "type": "room",
+          "label": "265",
+          "x": 8094,
+          "y": 1490
+        },
+        {
+          "id": "corridor-mp5j2bh5",
+          "type": "corridor",
+          "label": "",
+          "x": 7902,
+          "y": 1231
+        },
+        {
+          "id": "room-mp5j2h0k",
+          "type": "room",
+          "label": "266",
+          "x": 7709,
+          "y": 1231
+        },
+        {
+          "id": "room-mp5j2kvh",
+          "type": "room",
+          "label": "267",
+          "x": 8095,
+          "y": 1231
+        },
+        {
+          "id": "corridor-mp5j3011",
+          "type": "corridor",
+          "label": "",
+          "x": 7902,
+          "y": 1036
+        },
+        {
+          "id": "room-mp5j388g",
+          "type": "room",
+          "label": "268",
+          "x": 7709,
+          "y": 1036
+        },
+        {
+          "id": "room-mp5j3ch1",
+          "type": "room",
+          "label": "269",
+          "x": 8095,
+          "y": 1036
+        },
+        {
+          "id": "corridor-mp5j3rh0",
+          "type": "corridor",
+          "label": "",
+          "x": 7902,
+          "y": 801
+        },
+        {
+          "id": "room-mp5j3vac",
+          "type": "room",
+          "label": "270",
+          "x": 7709,
+          "y": 801
+        },
+        {
+          "id": "corridor-mp5j40v5",
+          "type": "corridor",
+          "label": "",
+          "x": 7902,
+          "y": 592
+        },
+        {
+          "id": "room-mp5j43is",
+          "type": "room",
+          "label": "272",
+          "x": 7709,
+          "y": 592
+        },
+        {
+          "id": "room-mp5j468a",
+          "type": "room",
+          "label": "271",
+          "x": 8095,
+          "y": 592
+        },
+        {
+          "id": "corridor-mp5j77t8",
+          "type": "corridor",
+          "label": "",
+          "x": 5116,
+          "y": 2434
+        },
+        {
+          "id": "corridor-mp5j7d2m",
+          "type": "corridor",
+          "label": "",
+          "x": 4786,
+          "y": 2434
+        },
+        {
+          "id": "stairs-mp5j873h",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 4786,
+          "y": 2760
+        },
+        {
+          "id": "corridor-mp5j989j",
+          "type": "corridor",
+          "label": "",
+          "x": 4365,
+          "y": 2434
+        },
+        {
+          "id": "room-mp5j9dlp",
+          "type": "room",
+          "label": "227",
+          "x": 4365,
+          "y": 2627
+        },
+        {
+          "id": "corridor-mp5j9rc4",
+          "type": "corridor",
+          "label": "",
+          "x": 3973,
+          "y": 2434
+        },
+        {
+          "id": "stairs-mp5j9wyr",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 3973,
+          "y": 2816
+        },
+        {
+          "id": "corridor-mp5jab7h",
+          "type": "corridor",
+          "label": "",
+          "x": 3594,
+          "y": 2434
+        },
+        {
+          "id": "corridor-mp5jafto",
+          "type": "corridor",
+          "label": "",
+          "x": 3159,
+          "y": 2434
+        },
+        {
+          "id": "corridor-mp5jax7j",
+          "type": "corridor",
+          "label": "",
+          "x": 3159,
+          "y": 2835
+        },
+        {
+          "id": "corridor-mp5jb0r7",
+          "type": "corridor",
+          "label": "",
+          "x": 3159,
+          "y": 2210
+        },
+        {
+          "id": "stairs-mp5jbjy5",
+          "type": "stairs",
+          "label": "Лестница14",
+          "x": 3159,
+          "y": 1916
+        },
+        {
+          "id": "corridor-mp5jdadk",
+          "type": "corridor",
+          "label": "",
+          "x": 2818,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5jddg9",
+          "type": "room",
+          "label": "241б",
+          "x": 2818,
+          "y": 2403
+        },
+        {
+          "id": "room-mp5jdiyu",
+          "type": "room",
+          "label": "245а",
+          "x": 2818,
+          "y": 2017
+        },
+        {
+          "id": "corridor-mp5jdtiy",
+          "type": "corridor",
+          "label": "",
+          "x": 2596,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5je6m8",
+          "type": "room",
+          "label": "245",
+          "x": 2596,
+          "y": 2017
+        },
+        {
+          "id": "corridor-mp5jerdh",
+          "type": "corridor",
+          "label": "",
+          "x": 2321,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5jevk9",
+          "type": "room",
+          "label": "244",
+          "x": 2321,
+          "y": 2017
+        },
+        {
+          "id": "corridor-mp5jf6sr",
+          "type": "corridor",
+          "label": "",
+          "x": 2186,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5jf9k9",
+          "type": "room",
+          "label": "242",
+          "x": 2186,
+          "y": 2017
+        },
+        {
+          "id": "corridor-mp5jfkvm",
+          "type": "corridor",
+          "label": "",
+          "x": 2042,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5jfnld",
+          "type": "room",
+          "label": "240",
+          "x": 2042,
+          "y": 2017
+        },
+        {
+          "id": "corridor-mp5jhuit",
+          "type": "corridor",
+          "label": "",
+          "x": 1909,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5jhwqy",
+          "type": "room",
+          "label": "232",
+          "x": 1909,
+          "y": 2017
+        },
+        {
+          "id": "corridor-mp5jilud",
+          "type": "corridor",
+          "label": "",
+          "x": 1765,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5jisth",
+          "type": "room",
+          "label": "230",
+          "x": 1765,
+          "y": 2017
+        },
+        {
+          "id": "corridor-mp5jjsh3",
+          "type": "corridor",
+          "label": "",
+          "x": 1705.3,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5jjvgw",
+          "type": "room",
+          "label": "228",
+          "x": 1705.3,
+          "y": 2017
+        },
+        {
+          "id": "room-mp5jjydu",
+          "type": "room",
+          "label": "229",
+          "x": 1705.3,
+          "y": 2403
+        },
+        {
+          "id": "corridor-mp5jk81r",
+          "type": "corridor",
+          "label": "",
+          "x": 1645.5,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5jkaib",
+          "type": "room",
+          "label": "226",
+          "x": 1645.5,
+          "y": 2017
+        },
+        {
+          "id": "corridor-mp5jkj7l",
+          "type": "corridor",
+          "label": "",
+          "x": 1585.8,
+          "y": 2210
+        },
+        {
+          "id": "room-mp5jkl0d",
+          "type": "room",
+          "label": "224",
+          "x": 1585.8,
+          "y": 2017
+        },
+        {
+          "id": "corridor-mp5jkty8",
+          "type": "corridor",
+          "label": "",
+          "x": 1526,
+          "y": 2209
+        },
+        {
+          "id": "room-mp5jkvwv",
+          "type": "room",
+          "label": "222",
+          "x": 1526,
+          "y": 2016
+        },
+        {
+          "id": "corridor-mp5jl7nd",
+          "type": "corridor",
+          "label": "",
+          "x": 1466.3,
+          "y": 2209
+        },
+        {
+          "id": "room-mp5jlarx",
+          "type": "room",
+          "label": "220",
+          "x": 1466.3,
+          "y": 2016
+        },
+        {
+          "id": "corridor-mp5jm5id",
+          "type": "corridor",
+          "label": "",
+          "x": 1346.8,
+          "y": 2209
+        },
+        {
+          "id": "corridor-mp5jm7rp",
+          "type": "corridor",
+          "label": "",
+          "x": 1287,
+          "y": 2209
+        },
+        {
+          "id": "corridor-mp5jmixs",
+          "type": "corridor",
+          "label": "",
+          "x": 1406.5,
+          "y": 2209
+        },
+        {
+          "id": "room-mp5jmuhe",
+          "type": "room",
+          "label": "Туалет Ж",
+          "x": 1346.8,
+          "y": 2016
+        },
+        {
+          "id": "room-mp5jmzvt",
+          "type": "room",
+          "label": "Туалет М",
+          "x": 1287,
+          "y": 2016
+        },
+        {
+          "id": "stairs-mp5jnhyl",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 1258.5,
+          "y": 2209
+        },
+        {
+          "id": "corridor-mp5jntyp",
+          "type": "corridor",
+          "label": "",
+          "x": 1329,
+          "y": 2380
+        },
+        {
+          "id": "corridor-mp5jnx8t",
+          "type": "corridor",
+          "label": "",
+          "x": 1334,
+          "y": 1874
+        },
+        {
+          "id": "room-mp5jodro",
+          "type": "room",
+          "label": "212",
+          "x": 1141,
+          "y": 1874
+        },
+        {
+          "id": "corridor-mp5jok0g",
+          "type": "corridor",
+          "label": "",
+          "x": 1335,
+          "y": 1669
+        },
+        {
+          "id": "room-mp5jos3p",
+          "type": "room",
+          "label": "210",
+          "x": 1142,
+          "y": 1669
+        },
+        {
+          "id": "room-mp5jov5f",
+          "type": "room",
+          "label": "211",
+          "x": 1528,
+          "y": 1669
+        },
+        {
+          "id": "corridor-mp5jp6mv",
+          "type": "corridor",
+          "label": "",
+          "x": 1337,
+          "y": 1495
+        },
+        {
+          "id": "room-mp5jpact",
+          "type": "room",
+          "label": "210а",
+          "x": 1144,
+          "y": 1495
+        },
+        {
+          "id": "room-mp5jpcto",
+          "type": "room",
+          "label": "209",
+          "x": 1530,
+          "y": 1495
+        },
+        {
+          "id": "corridor-mp5jpyqq",
+          "type": "corridor",
+          "label": "",
+          "x": 1339,
+          "y": 1289
+        },
+        {
+          "id": "room-mp5jq1c8",
+          "type": "room",
+          "label": "208",
+          "x": 1146,
+          "y": 1289
+        },
+        {
+          "id": "corridor-mp5jq54v",
+          "type": "corridor",
+          "label": "",
+          "x": 1340,
+          "y": 1137
+        },
+        {
+          "id": "room-mp5jq79s",
+          "type": "room",
+          "label": "206",
+          "x": 1147,
+          "y": 1137
+        },
+        {
+          "id": "room-mp5jqahx",
+          "type": "room",
+          "label": "207",
+          "x": 1533,
+          "y": 1137
+        },
+        {
+          "id": "corridor-mp5jqxl9",
+          "type": "corridor",
+          "label": "",
+          "x": 1341,
+          "y": 963
+        },
+        {
+          "id": "room-mp5jr13f",
+          "type": "room",
+          "label": "204",
+          "x": 1148,
+          "y": 963
+        },
+        {
+          "id": "room-mp5jr3m9",
+          "type": "room",
+          "label": "205",
+          "x": 1534,
+          "y": 963
+        },
+        {
+          "id": "corridor-mp5jrecm",
+          "type": "corridor",
+          "label": "",
+          "x": 1342,
+          "y": 783
+        },
+        {
+          "id": "room-mp5jrjp8",
+          "type": "room",
+          "label": "202",
+          "x": 1149,
+          "y": 783
+        },
+        {
+          "id": "room-mp5jrlrn",
+          "type": "room",
+          "label": "203",
+          "x": 1535,
+          "y": 783
+        },
+        {
+          "id": "corridor-mp5jruet",
+          "type": "corridor",
+          "label": "",
+          "x": 1342,
+          "y": 591
+        },
+        {
+          "id": "room-mp5jrzs6",
+          "type": "room",
+          "label": "200",
+          "x": 1149,
+          "y": 591
+        },
+        {
+          "id": "room-mp5js1yd",
+          "type": "room",
+          "label": "201",
+          "x": 1535,
+          "y": 591
+        },
+        {
+          "id": "corridor-mp5jscoo",
+          "type": "corridor",
+          "label": "",
+          "x": 1342,
+          "y": 379
+        },
+        {
+          "id": "stairs-mp5jsj0l",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 1593,
+          "y": 379
+        },
+        {
+          "id": "room-mp5jufl9",
+          "type": "room",
+          "label": "214",
+          "x": 1136,
+          "y": 2380
+        },
+        {
+          "id": "stairs-mp5jum3w",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 1457,
+          "y": 2380
+        },
+        {
+          "id": "corridor-mp5juv4x",
+          "type": "corridor",
+          "label": "",
+          "x": 1328,
+          "y": 2445
+        },
+        {
+          "id": "room-mp5jux8q",
+          "type": "room",
+          "label": "215",
+          "x": 1521,
+          "y": 2445
+        },
+        {
+          "id": "corridor-mp5jv5jg",
+          "type": "corridor",
+          "label": "",
+          "x": 1328,
+          "y": 2557
+        },
+        {
+          "id": "room-mp5jv7z5",
+          "type": "room",
+          "label": "216",
+          "x": 1135,
+          "y": 2557
+        },
+        {
+          "id": "corridor-mp5jvx21",
+          "type": "corridor",
+          "label": "",
+          "x": 1328,
+          "y": 2707
+        },
+        {
+          "id": "room-mp5jw2wp",
+          "type": "room",
+          "label": "218",
+          "x": 1135,
+          "y": 2707
+        },
+        {
+          "id": "stairs-mp5jwsnb",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 1485,
+          "y": 2707
+        },
+        {
+          "id": "room-mp5jzi6a",
+          "type": "room",
+          "label": "241а",
+          "x": 3352,
+          "y": 2835
+        },
+        {
+          "id": "corridor-mp5jzok7",
+          "type": "corridor",
+          "label": "",
+          "x": 3159,
+          "y": 3069
+        },
+        {
+          "id": "room-mp5jzrej",
+          "type": "room",
+          "label": "241",
+          "x": 2966,
+          "y": 3069
+        },
+        {
+          "id": "corridor-mp5k03gd",
+          "type": "corridor",
+          "label": "",
+          "x": 3159,
+          "y": 3239
+        },
+        {
+          "id": "room-mp5k06td",
+          "type": "room",
+          "label": "246",
+          "x": 3352,
+          "y": 3239
+        },
+        {
+          "id": "corridor-mp5k0nkw",
+          "type": "corridor",
+          "label": "",
+          "x": 3159,
+          "y": 3519
+        },
+        {
+          "id": "room-mp5k0smm",
+          "type": "room",
+          "label": "243",
+          "x": 2966,
+          "y": 3519
+        },
+        {
+          "id": "corridor-mp5k12gs",
+          "type": "corridor",
+          "label": "",
+          "x": 3160,
+          "y": 3842
+        },
+        {
+          "id": "room-mp5k14y1",
+          "type": "room",
+          "label": "247",
+          "x": 2967,
+          "y": 3842
+        },
+        {
+          "id": "corridor-mp5k1i8w",
+          "type": "corridor",
+          "label": "",
+          "x": 3160,
+          "y": 4118
+        },
+        {
+          "id": "stairs-mp5k1pdd",
+          "type": "stairs",
+          "label": "Лестница",
+          "x": 2940,
+          "y": 4118
+        },
+        {
+          "id": "corridor-mp5k2acu",
+          "type": "corridor",
+          "label": "",
+          "x": 3160,
+          "y": 4425
+        },
+        {
+          "id": "room-mp5k2e57",
+          "type": "room",
+          "label": "248",
+          "x": 2967,
+          "y": 4425
+        }
+      ],
+      "edges": [
+        {
+          "from": "corridor-mp5hhzg8",
+          "to": "room-mp5hi2fp",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hhzg8",
+          "to": "room-mp5hi9u1",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hhzg8",
+          "to": "corridor-mp5hin4u",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hin4u",
+          "to": "room-mp5hix12",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hin4u",
+          "to": "room-mp5hj2yk",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hin4u",
+          "to": "corridor-mp5hjb5y",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hjb5y",
+          "to": "room-mp5hjl0j",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hjb5y",
+          "to": "corridor-mp5hjvyi",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hjvyi",
+          "to": "room-mp5hkazi",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hjvyi",
+          "to": "elevator-mp5hk50p",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hjvyi",
+          "to": "corridor-mp5hlb98",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hlb98",
+          "to": "stairs-mp5hkuqf",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ho1al",
+          "to": "corridor-mp5hlb98",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ho1al",
+          "to": "elevator-mp5ho8xw",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ho1al",
+          "to": "room-mp5hocr3",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ho1al",
+          "to": "corridor-mp5hpr71",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hpr71",
+          "to": "room-mp5hpv69",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hpr71",
+          "to": "corridor-mp5hq5t7",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hq5t7",
+          "to": "room-mp5hqe8l",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hq5t7",
+          "to": "room-mp5hqjai",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hq5t7",
+          "to": "corridor-mp5hqwyb",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hqwyb",
+          "to": "room-mp5hr0t5",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hqwyb",
+          "to": "room-mp5hr8os",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hqwyb",
+          "to": "corridor-mp5hs5rq",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hs5rq",
+          "to": "corridor-mp5ht11u",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ht11u",
+          "to": "stairs-mp5htagq",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hs5rq",
+          "to": "corridor-mp5htllf",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ht11u",
+          "to": "corridor-mp5htuz5",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5hhexr",
+          "to": "corridor-mp5husqt",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5husqt",
+          "to": "room-mp5hhifh",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5huzhz",
+          "to": "corridor-mp5husqt",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5hvfrn",
+          "to": "corridor-mp5huzhz",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5husqt",
+          "to": "corridor-mp5hhzg8",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5htuz5",
+          "to": "corridor-mp5i00wn",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i00wn",
+          "to": "room-mp5i0dc4",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i0kop",
+          "to": "corridor-mp5i00wn",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i0kop",
+          "to": "room-mp5i139l",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i0kop",
+          "to": "corridor-mp5i17bc",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i17bc",
+          "to": "room-mp5i1aw1",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i17bc",
+          "to": "corridor-mp5i1qsm",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i1qsm",
+          "to": "room-mp5i1tgk",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i26bq",
+          "to": "corridor-mp5i2hfu",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i26bq",
+          "to": "room-mp5i29ha",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i2hfu",
+          "to": "room-mp5i2ess",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i1qsm",
+          "to": "corridor-mp5i26bq",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i55vh",
+          "to": "corridor-mp5i2hfu",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i55vh",
+          "to": "room-mp5i5buf",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i55vh",
+          "to": "corridor-mp5i5q8l",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i5q8l",
+          "to": "room-mp5i60j4",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i5q8l",
+          "to": "corridor-mp5i5u70",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i5q8l",
+          "to": "room-mp5i679d",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i5u70",
+          "to": "stairs-mp5i83f3",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i5u70",
+          "to": "room-mp5i87hr",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i5u70",
+          "to": "corridor-mp5i8o1d",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i8o1d",
+          "to": "room-mp5i8qxn",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i8o1d",
+          "to": "corridor-mp5i9mpl",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i9mpl",
+          "to": "room-mp5i9vcp",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i9mpl",
+          "to": "room-mp5i9ryo",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i9mpl",
+          "to": "corridor-mp5i9pce",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i9pce",
+          "to": "room-mp5iabgq",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5i9pce",
+          "to": "corridor-mp5iao9w",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iao9w",
+          "to": "room-mp5iarql",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iao9w",
+          "to": "corridor-mp5iavxs",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5ia7ti",
+          "to": "corridor-mp5iavxs",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iavxs",
+          "to": "corridor-mp5ico5o",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ico5o",
+          "to": "room-mp5icrjz",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ico5o",
+          "to": "corridor-mp5id06l",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5id06l",
+          "to": "room-mp5id29t",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5id06l",
+          "to": "room-mp5id58v",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5id06l",
+          "to": "corridor-mp5idg5x",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5idg5x",
+          "to": "room-mp5idjk6",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5idg5x",
+          "to": "corridor-mp5idsfb",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5idsfb",
+          "to": "room-mp5idvr1",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5idsfb",
+          "to": "room-mp5idzn3",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5idsfb",
+          "to": "corridor-mp5ieft1",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ieft1",
+          "to": "room-mp5ielg8",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ieft1",
+          "to": "room-mp5iei3s",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iezyx",
+          "to": "room-mp5if6g0",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iezyx",
+          "to": "corridor-mp5ieft1",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ifht8",
+          "to": "corridor-mp5iezyx",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ifht8",
+          "to": "room-mp5iflyj",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "stairs-mp5igiv7",
+          "to": "corridor-mp5ig6e3",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ig6e3",
+          "to": "room-mp5ig9ab",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ig6e3",
+          "to": "room-mp5igbnu",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ig6e3",
+          "to": "corridor-mp5ifht8",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ij4jq",
+          "to": "corridor-mp5htllf",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ijin3",
+          "to": "corridor-mp5ij4jq",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ijin3",
+          "to": "corridor-mp5ikc02",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5ikha4",
+          "to": "corridor-mp5ikc02",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ikc02",
+          "to": "stairs-mp5ikokv",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ijin3",
+          "to": "corridor-mp5il504",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5il504",
+          "to": "room-mp5il8id",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ilhyd",
+          "to": "corridor-mp5il504",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ilhyd",
+          "to": "room-mp5ilre0",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ima9y",
+          "to": "corridor-mp5ilhyd",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5img08",
+          "to": "corridor-mp5ima9y",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5in2gr",
+          "to": "corridor-mp5imyqm",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5imyqm",
+          "to": "corridor-mp5ima9y",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5imyqm",
+          "to": "corridor-mp5ipawx",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ipawx",
+          "to": "stairs-mp5iowa1",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ipawx",
+          "to": "corridor-mp5ipfdl",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5ipxs6",
+          "to": "corridor-mp5ipfdl",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ipfdl",
+          "to": "corridor-mp5irgzf",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5irgzf",
+          "to": "room-mp5irkmt",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5irgzf",
+          "to": "corridor-mp5irteq",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5irteq",
+          "to": "corridor-mp5isptc",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5isptc",
+          "to": "room-mp5isa1o",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5itf7q",
+          "to": "corridor-mp5isptc",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5isptc",
+          "to": "corridor-mp5iu0lt",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iu0lt",
+          "to": "room-mp5iu5jf",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iu0lt",
+          "to": "corridor-mp5iuhrl",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iuhrl",
+          "to": "room-mp5iun0h",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iuhrl",
+          "to": "corridor-mp5iuzn9",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iuzn9",
+          "to": "room-mp5iv3n0",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iuzn9",
+          "to": "corridor-mp5ivfgn",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ivfgn",
+          "to": "room-mp5ivi36",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ivfgn",
+          "to": "corridor-mp5ivui2",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ivui2",
+          "to": "room-mp5ivwj4",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ivui2",
+          "to": "corridor-mp5iw9bf",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iw9bf",
+          "to": "corridor-mp5iwbm7",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iw9bf",
+          "to": "room-mp5iwh3m",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iwbm7",
+          "to": "room-mp5iwmtn",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5iwbm7",
+          "to": "corridor-mp5ix3vo",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ix3vo",
+          "to": "corridor-mp5ixp66",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ix3vo",
+          "to": "stairs-mp5ixa0m",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ix3vo",
+          "to": "corridor-mp5ixu62",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ixu62",
+          "to": "room-mp5iyrcl",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ixu62",
+          "to": "room-mp5izjj3",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ixu62",
+          "to": "stairs-mp5iz250",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5ixp66",
+          "to": "room-mp5j093o",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j0eud",
+          "to": "room-mp5j0wcc",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j0eud",
+          "to": "corridor-mp5ixp66",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j1bjs",
+          "to": "corridor-mp5j0eud",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j1bjs",
+          "to": "room-mp5j1g4h",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5j1wh8",
+          "to": "corridor-mp5j1rs6",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j1rs6",
+          "to": "corridor-mp5j1bjs",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j1rs6",
+          "to": "room-mp5j1za2",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j1rs6",
+          "to": "corridor-mp5j2bh5",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5j2h0k",
+          "to": "corridor-mp5j2bh5",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j2bh5",
+          "to": "room-mp5j2kvh",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j2bh5",
+          "to": "corridor-mp5j3011",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5j388g",
+          "to": "corridor-mp5j3011",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j3011",
+          "to": "room-mp5j3ch1",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j40v5",
+          "to": "corridor-mp5j3rh0",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j3rh0",
+          "to": "corridor-mp5j3011",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j3rh0",
+          "to": "room-mp5j3vac",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j40v5",
+          "to": "room-mp5j43is",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j40v5",
+          "to": "room-mp5j468a",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j77t8",
+          "to": "corridor-mp5in2gr",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j77t8",
+          "to": "corridor-mp5j7d2m",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j7d2m",
+          "to": "stairs-mp5j873h",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j989j",
+          "to": "room-mp5j9dlp",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j989j",
+          "to": "corridor-mp5j7d2m",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5j989j",
+          "to": "corridor-mp5j9rc4",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "stairs-mp5j9wyr",
+          "to": "corridor-mp5j9rc4",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jafto",
+          "to": "corridor-mp5jab7h",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jab7h",
+          "to": "corridor-mp5j9rc4",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jafto",
+          "to": "corridor-mp5jb0r7",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jafto",
+          "to": "corridor-mp5jax7j",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jb0r7",
+          "to": "stairs-mp5jbjy5",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jdadk",
+          "to": "corridor-mp5jb0r7",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jdadk",
+          "to": "room-mp5jddg9",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jdadk",
+          "to": "room-mp5jdiyu",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jdadk",
+          "to": "corridor-mp5jdtiy",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jdtiy",
+          "to": "room-mp5je6m8",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jerdh",
+          "to": "room-mp5jevk9",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jerdh",
+          "to": "corridor-mp5jdtiy",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jf6sr",
+          "to": "room-mp5jf9k9",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jf6sr",
+          "to": "corridor-mp5jerdh",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jfkvm",
+          "to": "corridor-mp5jf6sr",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jfkvm",
+          "to": "room-mp5jfnld",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jhuit",
+          "to": "corridor-mp5jfkvm",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jhuit",
+          "to": "room-mp5jhwqy",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jilud",
+          "to": "corridor-mp5jhuit",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5jisth",
+          "to": "corridor-mp5jilud",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jjsh3",
+          "to": "corridor-mp5jilud",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jjsh3",
+          "to": "room-mp5jjydu",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jjsh3",
+          "to": "room-mp5jjvgw",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jjsh3",
+          "to": "corridor-mp5jk81r",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jk81r",
+          "to": "room-mp5jkaib",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jk81r",
+          "to": "corridor-mp5jkj7l",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jkj7l",
+          "to": "room-mp5jkl0d",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jkj7l",
+          "to": "corridor-mp5jkty8",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jkty8",
+          "to": "room-mp5jkvwv",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jl7nd",
+          "to": "corridor-mp5jkty8",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jl7nd",
+          "to": "room-mp5jlarx",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jl7nd",
+          "to": "corridor-mp5jm5id",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jm5id",
+          "to": "corridor-mp5jm7rp",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jm7rp",
+          "to": "corridor-mp5jmixs",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jm7rp",
+          "to": "room-mp5jmzvt",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jm5id",
+          "to": "room-mp5jmuhe",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jmixs",
+          "to": "stairs-mp5jnhyl",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jmixs",
+          "to": "corridor-mp5jntyp",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jmixs",
+          "to": "corridor-mp5jnx8t",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jok0g",
+          "to": "corridor-mp5jnx8t",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jnx8t",
+          "to": "room-mp5jodro",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5jos3p",
+          "to": "corridor-mp5jok0g",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jok0g",
+          "to": "room-mp5jov5f",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jok0g",
+          "to": "corridor-mp5jp6mv",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5jpact",
+          "to": "corridor-mp5jp6mv",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jp6mv",
+          "to": "room-mp5jpcto",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5jq1c8",
+          "to": "corridor-mp5jpyqq",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jpyqq",
+          "to": "corridor-mp5jp6mv",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jpyqq",
+          "to": "corridor-mp5jq54v",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jq54v",
+          "to": "room-mp5jq79s",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jq54v",
+          "to": "room-mp5jqahx",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jqxl9",
+          "to": "corridor-mp5jq54v",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jqxl9",
+          "to": "room-mp5jr13f",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jqxl9",
+          "to": "room-mp5jr3m9",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5jrjp8",
+          "to": "corridor-mp5jrecm",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jrecm",
+          "to": "corridor-mp5jqxl9",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jrecm",
+          "to": "room-mp5jrlrn",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jruet",
+          "to": "room-mp5jrzs6",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jruet",
+          "to": "corridor-mp5jrecm",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jruet",
+          "to": "room-mp5js1yd",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jscoo",
+          "to": "corridor-mp5jruet",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jscoo",
+          "to": "stairs-mp5jsj0l",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "room-mp5jufl9",
+          "to": "corridor-mp5jntyp",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jntyp",
+          "to": "stairs-mp5jum3w",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jntyp",
+          "to": "corridor-mp5juv4x",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5juv4x",
+          "to": "room-mp5jux8q",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5juv4x",
+          "to": "corridor-mp5jv5jg",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jv5jg",
+          "to": "room-mp5jv7z5",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jv5jg",
+          "to": "corridor-mp5jvx21",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jvx21",
+          "to": "room-mp5jw2wp",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jvx21",
+          "to": "stairs-mp5jwsnb",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jax7j",
+          "to": "corridor-mp5jzok7",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jax7j",
+          "to": "room-mp5jzi6a",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jzok7",
+          "to": "room-mp5jzrej",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5jzok7",
+          "to": "corridor-mp5k03gd",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k03gd",
+          "to": "room-mp5k06td",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k03gd",
+          "to": "corridor-mp5k0nkw",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k0nkw",
+          "to": "room-mp5k0smm",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k0nkw",
+          "to": "corridor-mp5k12gs",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k12gs",
+          "to": "room-mp5k14y1",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k12gs",
+          "to": "corridor-mp5k1i8w",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k1i8w",
+          "to": "stairs-mp5k1pdd",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k1i8w",
+          "to": "corridor-mp5k2acu",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k2acu",
+          "to": "room-mp5k2e57",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "stairs-mp5hggkn",
+          "to": "corridor-mp5huzhz",
+          "type": "walk",
+          "weight": 10
+        },
+        {
+          "from": "corridor-mp5k2acu",
+          "to": "corridor-mp5hvfrn",
+          "type": "walk",
+          "weight": 10
+        }
+      ],
+      "areas": [],
+      "contours": [
+        [
+          [
+            599.2,
+            4062.2
+          ],
+          [
+            0,
+            4062.2
+          ],
+          [
+            -7,
+            214.2
+          ],
+          [
+            95.4,
+            112
+          ],
+          [
+            1679.4,
+            112
+          ],
+          [
+            1679.4,
+            425.2
+          ],
+          [
+            1579.4,
+            425.2
+          ],
+          [
+            1611.2,
+            509.4
+          ],
+          [
+            1652.3,
+            578.7
+          ],
+          [
+            1715.8,
+            650.2
+          ],
+          [
+            1780.2,
+            715.6
+          ],
+          [
+            1854.6,
+            769.4
+          ],
+          [
+            1937,
+            810.2
+          ],
+          [
+            2024.8,
+            836.8
+          ],
+          [
+            2115.8,
+            848.8
+          ],
+          [
+            2207.6,
+            845.4
+          ],
+          [
+            2323.4,
+            845.4
+          ],
+          [
+            2323.4,
+            689.2
+          ],
+          [
+            2998.4,
+            689.2
+          ],
+          [
+            2998.4,
+            836.6
+          ],
+          [
+            3140,
+            836.6
+          ],
+          [
+            3222.4,
+            835.6
+          ],
+          [
+            3304,
+            823.2
+          ],
+          [
+            3383.2,
+            800.2
+          ],
+          [
+            3458.6,
+            766.4
+          ],
+          [
+            3528.8,
+            723
+          ],
+          [
+            3592.4,
+            670.4
+          ],
+          [
+            3648.2,
+            609.8
+          ],
+          [
+            3695.4,
+            542
+          ],
+          [
+            3733.2,
+            468.6
+          ],
+          [
+            3760.4,
+            390.6
+          ],
+          [
+            3671,
+            390.6
+          ],
+          [
+            3671,
+            102.2
+          ],
+          [
+            5081.2,
+            102.2
+          ],
+          [
+            5169.6,
+            190.6
+          ],
+          [
+            5169.6,
+            4186.2
+          ],
+          [
+            4603.4,
+            4186.2
+          ],
+          [
+            4603.4,
+            3430
+          ],
+          [
+            3084.6,
+            3430
+          ],
+          [
+            3084.6,
+            3151.8
+          ],
+          [
+            2306.6,
+            3151.8
+          ],
+          [
+            2306.6,
+            3463.2
+          ],
+          [
+            592.4,
+            3463.2
+          ]
+        ],
+        [
+          [
+            568.9,
+            3056.4
+          ],
+          [
+            572.4,
+            2010.1
+          ],
+          [
+            438.8,
+            2010.1
+          ],
+          [
+            438.8,
+            473
+          ],
+          [
+            1232.9,
+            473
+          ],
+          [
+            1259.6,
+            600.4
+          ],
+          [
+            1298.4,
+            696
+          ],
+          [
+            1348.8,
+            785.8
+          ],
+          [
+            1410,
+            868.6
+          ],
+          [
+            1481.2,
+            943.2
+          ],
+          [
+            1561,
+            1008.2
+          ],
+          [
+            1648.4,
+            1062.8
+          ],
+          [
+            1741.8,
+            1106
+          ],
+          [
+            1840,
+            1137.4
+          ],
+          [
+            1941.4,
+            1156
+          ],
+          [
+            1941.4,
+            3063.9
+          ]
+        ],
+        [
+          [
+            2274,
+            1255.8
+          ],
+          [
+            3047.4,
+            1255.8
+          ],
+          [
+            3173,
+            1255.8
+          ],
+          [
+            3170.9,
+            2683.7
+          ],
+          [
+            2857.3,
+            2679.5
+          ],
+          [
+            2860.1,
+            2598.1
+          ],
+          [
+            2842.7,
+            2530.1
+          ],
+          [
+            2800.9,
+            2494.7
+          ],
+          [
+            2748.9,
+            2477.3
+          ],
+          [
+            2694.3,
+            2480.9
+          ],
+          [
+            2644.9,
+            2504.7
+          ],
+          [
+            2608.1,
+            2545.3
+          ],
+          [
+            2589.3,
+            2596.7
+          ],
+          [
+            2583.3,
+            2674.9
+          ],
+          [
+            2283.8,
+            2673
+          ]
+        ],
+        [
+          [
+            3627.4,
+            3119.4
+          ],
+          [
+            3405.2,
+            3119.4
+          ],
+          [
+            3405.2,
+            1144.6
+          ],
+          [
+            3495.4,
+            1107.6
+          ],
+          [
+            3581.4,
+            1061.6
+          ],
+          [
+            3662.4,
+            1007.2
+          ],
+          [
+            3737.4,
+            945
+          ],
+          [
+            3805.8,
+            875.4
+          ],
+          [
+            3867,
+            799.4
+          ],
+          [
+            3920,
+            717.6
+          ],
+          [
+            3964.6,
+            630.8
+          ],
+          [
+            4000.4,
+            540
+          ],
+          [
+            4026.6,
+            446.2
+          ],
+          [
+            4826.6,
+            446.2
+          ],
+          [
+            4826.6,
+            1943.6
+          ],
+          [
+            4724.8,
+            1943.6
+          ],
+          [
+            4724.8,
+            3064
+          ],
+          [
+            4224.4,
+            3064
+          ],
+          [
+            4224.4,
+            2630.8
+          ],
+          [
+            3959.2,
+            2630.8
+          ],
+          [
+            3959.2,
+            3019.8
+          ],
+          [
+            3871.4,
+            3019.8
+          ],
+          [
+            3871.4,
+            2630.8
+          ],
+          [
+            3623.6,
+            2630.8
+          ]
+        ]
+      ]
+    }
+  ],
+  "cross_floor_edges": [
+    {
+      "from": "stairs-mp5henlk",
+      "to": "stairs-mp5hggkn",
+      "type": "stairs",
+      "weight": 5
+    },
+    {
+      "from": "stairs-mp5gwovl",
+      "to": "stairs-mp5hkuqf",
+      "type": "stairs",
+      "weight": 5
+    },
+    {
+      "from": "elevator-mp5gycs9",
+      "to": "elevator-mp5hk50p",
+      "type": "elevator",
+      "weight": 5
+    },
+    {
+      "from": "elevator-mp5gxp2d",
+      "to": "elevator-mp5ho8xw",
+      "type": "elevator",
+      "weight": 5
+    },
+    {
+      "from": "stairs-mp5h8fbh",
+      "to": "stairs-mp5htagq",
+      "type": "stairs",
+      "weight": 5
+    },
+    {
+      "from": "stairs-mp5iqg13",
+      "to": "stairs-mp5iowa1",
+      "type": "stairs",
+      "weight": 5
+    },
+    {
+      "from": "stairs-mp5jca8v",
+      "to": "stairs-mp5jbjy5",
+      "type": "stairs",
+      "weight": 5
+    }
+  ]
+}
