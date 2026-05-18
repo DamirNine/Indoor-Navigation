@@ -143,6 +143,8 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    const { width, height } = el.getBoundingClientRect();
+    if (width > 0 && height > 0) setStageSize({ w: Math.floor(width), h: Math.floor(height) });
     const ro = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect;
       if (width > 0 && height > 0) setStageSize({ w: Math.floor(width), h: Math.floor(height) });
