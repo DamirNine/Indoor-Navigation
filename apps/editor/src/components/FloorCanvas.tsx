@@ -81,7 +81,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const {
     building, activeFloorIndex, tool, selectedNodeId, selectedEdgeKey, pendingEdgeFromId,
     previewRoute, addNode, selectNode, selectEdge, setPendingEdgeFrom, addEdge,
-    moveNode, addArea, addFloorContour, updateFloorContour, removeFloorContour,
+    moveNode, addArea, addFloorContour, updateFloorContour, updateAllFloorsContours, removeFloorContour,
   } = useEditorStore();
 
   const routeSet = new Set(previewRoute ?? []);
@@ -614,14 +614,17 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   };
 
   const applyCtxTxAll = () => {
-    if (!floor.contours || !ctxBbox) return;
-    for (let i = 0; i < floor.contours.length; i++) {
-      const newPts: number[][] = floor.contours[i].map(([px, py]: number[]) => {
-        const [nx, ny] = applyCtxTransform(px, py, ctxCx, ctxCy, ctxTx);
-        return [+nx.toFixed(1), +ny.toFixed(1)];
-      });
-      updateFloorContour(i, newPts);
-    }
+    if (!ctxBbox) return;
+    const contoursByFloor = building.floors.map(f => {
+      if (!f.contours) return undefined;
+      return f.contours.map(contour =>
+        contour.map(([px, py]: number[]) => {
+          const [nx, ny] = applyCtxTransform(px, py, ctxCx, ctxCy, ctxTx);
+          return [+nx.toFixed(1), +ny.toFixed(1)];
+        })
+      );
+    });
+    updateAllFloorsContours(contoursByFloor);
     setCtxTx({ tx: 0, ty: 0, scale: 1, rot: 0 });
     setCtxMode(false);
   };

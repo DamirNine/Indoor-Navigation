@@ -43,6 +43,7 @@ interface EditorState {
   setPreviewRoute: (route: string[] | null) => void;
   addFloorContour: (points: number[][]) => void;
   updateFloorContour: (idx: number, points: number[][]) => void;
+  updateAllFloorsContours: (contoursByFloor: Array<number[][][] | undefined>) => void;
   removeFloorContour: (idx: number) => void;
   loadBuilding: (building: Building) => void;
 }
@@ -251,6 +252,15 @@ export const useEditorStore = create<EditorState>()(
           const contours = [...(floors[i].contours ?? [])];
           contours[idx] = points;
           floors[i] = { ...floors[i], contours };
+          return { building: { ...s.building, floors } };
+        }),
+
+      updateAllFloorsContours: (contoursByFloor: Array<number[][][] | undefined>) =>
+        set(s => {
+          const floors = s.building.floors.map((f, i) => {
+            const c = contoursByFloor[i];
+            return c !== undefined ? { ...f, contours: c } : f;
+          });
           return { building: { ...s.building, floors } };
         }),
 
