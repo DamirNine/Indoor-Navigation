@@ -154,7 +154,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const isZone = tool === 'zone';
   const isContour = tool === 'contour';
 
-  // Map<nodeId, anchorColor> — green=min fixed, red=max fixed
+  // Map<nodeId, anchorColor> — green=min, red=max, orange=center-closest
   const stretchAnchorMap = (() => {
     const m = new Map<string, string>();
     if (!isMoving || selNodeIds.length < 2) return m;
@@ -163,11 +163,18 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     const minV = Math.min(...vals), maxV = Math.max(...vals);
     const nMin = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === minV);
     const nMax = nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === maxV);
-    if (stretchAnchor === 'min' && nMin) m.set(nMin.id, '#43A047');
-    else if (stretchAnchor === 'max' && nMax) m.set(nMax.id, '#E53935');
-    else {
-      if (nMin) m.set(nMin.id, '#43A047');
-      if (nMax && nMax.id !== nMin?.id) m.set(nMax.id, '#E53935');
+    if (stretchAnchor === 'min' && nMin) {
+      m.set(nMin.id, '#43A047');
+    } else if (stretchAnchor === 'max' && nMax) {
+      m.set(nMax.id, '#E53935');
+    } else {
+      const midV = (minV + maxV) / 2;
+      const nCenter = nodes.reduce((best, n) => {
+        const v = stretchAxis === 'x' ? n.x : n.y;
+        const bv = stretchAxis === 'x' ? best.x : best.y;
+        return Math.abs(v - midV) < Math.abs(bv - midV) ? n : best;
+      });
+      m.set(nCenter.id, '#FF9800');
     }
     return m;
   })();
@@ -1095,7 +1102,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
               <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
                 {([
                   ['min',    '● Мин',   '#43A047', '#E8F5E9'],
-                  ['center', '● Центр', '#555',    '#eee'],
+                  ['center', '● Центр', '#E65100', '#FFF3E0'],
                   ['max',    '● Макс',  '#E53935', '#FFEBEE'],
                 ] as const).map(([v, label, activeColor, activeBg]) => (
                   <button key={v} onClick={() => setStretchAnchor(v)}
