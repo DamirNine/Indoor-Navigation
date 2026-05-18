@@ -132,6 +132,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [stretchAxis, setStretchAxis] = useState<'x' | 'y'>('x');
   const [stretchAnchor, setStretchAnchor] = useState<'min' | 'center' | 'max'>('center');
   const [stretchTarget, setStretchTarget] = useState(0);
+  const [uniformSpacing, setUniformSpacing] = useState(true);
 
   useEffect(() => {
     if (selNodeIds.length < 2) return;
@@ -691,15 +692,65 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     const minV = Math.min(...vals);
     const maxV = Math.max(...vals);
     const span = maxV - minV;
-    if (span === 0) return;
-    const ratio = stretchTarget / span;
-    const anchorV = stretchAnchor === 'min' ? minV : stretchAnchor === 'max' ? maxV : (minV + maxV) / 2;
-    const moves = nodes.map(n => {
-      const v = stretchAxis === 'x' ? n.x : n.y;
-      const nv = +(anchorV + (v - anchorV) * ratio).toFixed(1);
-      return stretchAxis === 'x' ? { id: n.id, x: nv, y: n.y } : { id: n.id, x: n.x, y: nv };
-    });
+
+    let moves: Array<{ id: string; x: number; y: number }>;
+
+    if (uniformSpacing) {
+      const sorted = [...nodes].sort((a, b) => {
+        const av = stretchAxis === 'x' ? a.x : a.y;
+        const bv = stretchAxis === 'x' ? b.x : b.y;
+        return av - bv;
+      });
+      const center = (minV + maxV) / 2;
+      const newStart = stretchAnchor === 'min' ? minV
+        : stretchAnchor === 'max' ? maxV - stretchTarget
+        : center - stretchTarget / 2;
+      moves = sorted.map((n, i) => {
+        const nv = +(sorted.length === 1 ? newStart : newStart + i * stretchTarget / (sorted.length - 1)).toFixed(1);
+        return stretchAxis === 'x' ? { id: n.id, x: nv, y: n.y } : { id: n.id, x: n.x, y: nv };
+      });
+    } else {
+      if (span === 0) return;
+      const ratio = stretchTarget / span;
+      const anchorV = stretchAnchor === 'min' ? minV : stretchAnchor === 'max' ? maxV : (minV + maxV) / 2;
+      moves = nodes.map(n => {
+        const v = stretchAxis === 'x' ? n.x : n.y;
+        const nv = +(anchorV + (v - anchorV) * ratio).toFixed(1);
+        return stretchAxis === 'x' ? { id: n.id, x: nv, y: n.y } : { id: n.id, x: n.x, y: nv };
+      });
+    }
     moveNodes(moves);
+  };
+
+  const applySnap90 = () => {
+    if (selNodeIds.length < 2) return;
+    const selSet = new Set(selNodeIds);
+    const pos: Record<string, { x: number; y: number }> = {};
+    selNodeIds.forEach(id => {
+      const n = floor.nodes.find(nd => nd.id === id);
+      if (n) pos[id] = { x: n.x, y: n.y };
+    });
+    for (let iter = 0; iter < 20; iter++) {
+      for (const edge of floor.edges) {
+        const fromSel = selSet.has(edge.from);
+        const toSel = selSet.has(edge.to);
+        if (!fromSel && !toSel) continue;
+        const fp = fromSel ? pos[edge.from] : (() => { const n = floor.nodes.find(nd => nd.id === edge.from); return n ? { x: n.x, y: n.y } : null; })();
+        const tp = toSel ? pos[edge.to] : (() => { const n = floor.nodes.find(nd => nd.id === edge.to); return n ? { x: n.x, y: n.y } : null; })();
+        if (!fp || !tp) continue;
+        const adx = Math.abs(tp.x - fp.x), ady = Math.abs(tp.y - fp.y);
+        if (adx < ady) {
+          const ax = (fromSel && toSel) ? (fp.x + tp.x) / 2 : fromSel ? tp.x : fp.x;
+          if (fromSel) pos[edge.from].x = ax;
+          if (toSel) pos[edge.to].x = ax;
+        } else {
+          const ay = (fromSel && toSel) ? (fp.y + tp.y) / 2 : fromSel ? tp.y : fp.y;
+          if (fromSel) pos[edge.from].y = ay;
+          if (toSel) pos[edge.to].y = ay;
+        }
+      }
+    }
+    moveNodes(Object.entries(pos).map(([id, p]) => ({ id, x: +p.x.toFixed(1), y: +p.y.toFixed(1) })));
   };
 
   // ── ARC PREVIEW POINTS ────────────────────────────────────────────────────
@@ -1071,7 +1122,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
 
             {/* ── Сдвиг группы ── */}
             <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>Сдвиг по пикселям</div>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', marginBottom: 10 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', marginBottom: 6 }}>
               <label style={{ flex: 1, fontSize: 11 }}>dx
                 <input type="number" value={precDx} onChange={e => setPrecDx(+e.target.value)}
                   style={{ width: '100%', boxSizing: 'border-box', marginTop: 2 }} />
@@ -1085,6 +1136,14 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
                 →
               </button>
             </div>
+
+            {/* ── Выровнять 90° ── */}
+            {selNodes.length >= 2 && (
+              <button onClick={applySnap90}
+                style={{ width: '100%', marginBottom: 10, padding: '4px 0', background: '#5C6BC0', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
+                Выровнять углы 90°
+              </button>
+            )}
 
             {/* ── Растяжение ── */}
             {selNodes.length >= 2 && (<>
@@ -1121,7 +1180,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
               <input type="range" min={0} max={sliderMax} value={stretchTarget}
                 onChange={e => setStretchTarget(+e.target.value)}
                 style={{ width: '100%', marginBottom: 4 }} />
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
                 <input type="number" value={stretchTarget} min={0}
                   onChange={e => setStretchTarget(+e.target.value)}
                   style={{ flex: 1, boxSizing: 'border-box' }} />
@@ -1130,6 +1189,10 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
                   Применить
                 </button>
               </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#555', cursor: 'pointer', userSelect: 'none' }}>
+                <input type="checkbox" checked={uniformSpacing} onChange={e => setUniformSpacing(e.target.checked)} />
+                Равномерное расстояние между узлами
+              </label>
             </>)}
           </div>
         );
