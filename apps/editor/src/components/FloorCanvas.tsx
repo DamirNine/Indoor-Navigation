@@ -135,11 +135,18 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [uniformSpacing, setUniformSpacing] = useState(true);
 
   useEffect(() => {
-    if (selNodeIds.length < 2) return;
-    const nodes = selNodeIds.map(id => floor.nodes.find(n => n.id === id)).filter(Boolean) as NavNode[];
-    const vals = nodes.map(n => stretchAxis === 'x' ? n.x : n.y);
-    setStretchTarget(Math.round(Math.max(...vals) - Math.min(...vals)));
-  }, [selNodeIds.join(','), stretchAxis]);
+    if (selNodeIds.length >= 2) {
+      const nodes = selNodeIds.map(id => floor.nodes.find(n => n.id === id)).filter(Boolean) as NavNode[];
+      const vals = nodes.map(n => stretchAxis === 'x' ? n.x : n.y);
+      setStretchTarget(Math.round(Math.max(...vals) - Math.min(...vals)));
+    } else if (selVerts.length >= 2 && editingContourIdx !== null) {
+      const contour = floor.contours?.[editingContourIdx];
+      if (contour) {
+        const vals = selVerts.map(i => stretchAxis === 'x' ? contour[i][0] : contour[i][1]);
+        setStretchTarget(Math.round(Math.max(...vals) - Math.min(...vals)));
+      }
+    }
+  }, [selNodeIds.join(','), selVerts.join(','), stretchAxis, editingContourIdx]);
 
   // Refs for drag tracking (avoid stale closures)
   const dragging = useRef<{ indices: number[]; startMouse: [number, number]; startPts: [number, number][] } | null>(null);
@@ -693,6 +700,19 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     const maxV = Math.max(...vals);
     const span = maxV - minV;
 
+    // Find the actual anchor node (not the midpoint)
+    const midV = (minV + maxV) / 2;
+    const anchorNode = stretchAnchor === 'min'
+      ? nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === minV)!
+      : stretchAnchor === 'max'
+      ? nodes.find(n => (stretchAxis === 'x' ? n.x : n.y) === maxV)!
+      : nodes.reduce((best, n) => {
+          const v = stretchAxis === 'x' ? n.x : n.y;
+          const bv = stretchAxis === 'x' ? best.x : best.y;
+          return Math.abs(v - midV) < Math.abs(bv - midV) ? n : best;
+        });
+    const anchorV = stretchAxis === 'x' ? anchorNode.x : anchorNode.y;
+
     let moves: Array<{ id: string; x: number; y: number }>;
 
     if (uniformSpacing) {
@@ -701,18 +721,16 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         const bv = stretchAxis === 'x' ? b.x : b.y;
         return av - bv;
       });
-      const center = (minV + maxV) / 2;
-      const newStart = stretchAnchor === 'min' ? minV
-        : stretchAnchor === 'max' ? maxV - stretchTarget
-        : center - stretchTarget / 2;
+      const k = sorted.findIndex(n => n.id === anchorNode.id);
+      const step = sorted.length === 1 ? 0 : stretchTarget / (sorted.length - 1);
+      const newStart = anchorV - k * step;
       moves = sorted.map((n, i) => {
-        const nv = +(sorted.length === 1 ? newStart : newStart + i * stretchTarget / (sorted.length - 1)).toFixed(1);
+        const nv = +(newStart + i * step).toFixed(1);
         return stretchAxis === 'x' ? { id: n.id, x: nv, y: n.y } : { id: n.id, x: n.x, y: nv };
       });
     } else {
       if (span === 0) return;
       const ratio = stretchTarget / span;
-      const anchorV = stretchAnchor === 'min' ? minV : stretchAnchor === 'max' ? maxV : (minV + maxV) / 2;
       moves = nodes.map(n => {
         const v = stretchAxis === 'x' ? n.x : n.y;
         const nv = +(anchorV + (v - anchorV) * ratio).toFixed(1);
@@ -723,7 +741,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   };
 
   const applySnap90 = () => {
-    if (selNodeIds.length < 2) return;
+    if (selNodeIds.length < 1) return;
     const selSet = new Set(selNodeIds);
     const pos: Record<string, { x: number; y: number }> = {};
     selNodeIds.forEach(id => {
@@ -1138,7 +1156,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
             </div>
 
             {/* ── Выровнять 90° ── */}
-            {selNodes.length >= 2 && (
+            {selNodes.length >= 1 && (
               <button onClick={applySnap90}
                 style={{ width: '100%', marginBottom: 10, padding: '4px 0', background: '#5C6BC0', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
                 Выровнять углы 90°
