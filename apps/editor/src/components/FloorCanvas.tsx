@@ -50,6 +50,31 @@ function arcThrough3Pts(A: [number, number], B: [number, number], C: [number, nu
   });
 }
 
+// ── Stick clip helpers ────────────────────────────────────────────────────────
+function sideOfLine(p1: [number, number], p2: [number, number], pt: [number, number]): number {
+  return Math.sign((p2[0] - p1[0]) * (pt[1] - p1[1]) - (p2[1] - p1[1]) * (pt[0] - p1[0]));
+}
+function lineSegIntersect(a: [number, number], b: [number, number], c: [number, number], d: [number, number]): [number, number] {
+  const dx1 = b[0] - a[0], dy1 = b[1] - a[1], dx2 = d[0] - c[0], dy2 = d[1] - c[1];
+  const cross = dx1 * dy2 - dy1 * dx2;
+  if (Math.abs(cross) < 1e-10) return c;
+  const t = ((c[0] - a[0]) * dy2 - (c[1] - a[1]) * dx2) / cross;
+  return [a[0] + dx1 * t, a[1] + dy1 * t];
+}
+function clipPolyByLine(poly: number[][], p1: [number, number], p2: [number, number], keep: number): number[][] {
+  const result: number[][] = [];
+  const n = poly.length;
+  for (let i = 0; i < n; i++) {
+    const curr = poly[i] as [number, number];
+    const next = poly[(i + 1) % n] as [number, number];
+    const cs = sideOfLine(p1, p2, curr);
+    const ns = sideOfLine(p1, p2, next);
+    if (cs === keep || cs === 0) result.push(curr);
+    if (cs !== 0 && ns !== 0 && cs !== ns) result.push(lineSegIntersect(p1, p2, curr, next));
+  }
+  return result;
+}
+
 function applyCtxTransform(px: number, py: number, cx: number, cy: number, t: { tx: number; ty: number; scale: number; rot: number }): [number, number] {
   const dx = px - cx, dy = py - cy;
   const sx = dx * t.scale, sy = dy * t.scale;
@@ -81,7 +106,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const {
     building, activeFloorIndex, tool, selectedNodeId, selectedEdgeKey, pendingEdgeFromId,
     previewRoute, addNode, selectNode, selectEdge, setPendingEdgeFrom, addEdge,
-    moveNode, moveNodes, undo, addArea, addFloorContour, updateFloorContour, updateAllFloorsContours, removeFloorContour,
+    moveNode, moveNodes, undo, addArea, setFloorAreas, addFloorContour, updateFloorContour, updateAllFloorsContours, removeFloorContour,
     addWall, removeWall,
   } = useEditorStore();
 
@@ -131,6 +156,10 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [wallStart, setWallStart] = useState<[number, number] | null>(null);
   const [selectedWallIdx, setSelectedWallIdx] = useState<number | null>(null);
 
+  // Stick state
+  const [stick, setStick] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const stickDrag = useRef<{ mode: 'create' | 'move'; startMouse: [number, number]; origStick?: { x1: number; y1: number; x2: number; y2: number } } | null>(null);
+
   // Precision panel state
   const [precDx, setPrecDx] = useState(0);
   const [precDy, setPrecDy] = useState(0);
@@ -167,6 +196,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const isZone = tool === 'zone';
   const isContour = tool === 'contour';
   const isWall = tool === 'wall';
+  const isStick = tool === 'stick';
 
   // Map<nodeId, anchorColor> — green=min, red=max, orange=center-closest
   const stretchAnchorMap = (() => {
@@ -252,7 +282,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   }, []);
 
   const handleEscape = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') { setPendingEdgeFrom(null); setPendingEdgeTo(null); cancelZone(); cancelContour(); setWallStart(null); setSelectedWallIdx(null); }
+    if (e.key === 'Escape') { setPendingEdgeFrom(null); setPendingEdgeTo(null); cancelZone(); cancelContour(); setWallStart(null); setSelectedWallIdx(null); setStick(null); stickDrag.current = null; }
     if (e.key === 'Delete' && selectedWallIdx !== null) { removeWall(selectedWallIdx); setSelectedWallIdx(null); }
     if (e.key === 'Delete' && zoneMode === 'edit' && selectedVertex !== null) {
       setZonePoints(pts => pts.filter((_, i) => i !== selectedVertex));
@@ -275,6 +305,10 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   useEffect(() => {
     if (!isWall) { setWallStart(null); setSelectedWallIdx(null); }
   }, [isWall]);
+
+  useEffect(() => {
+    if (!isStick) { setStick(null); stickDrag.current = null; }
+  }, [isStick]);
 
   useEffect(() => {
     if (!isContour) { cancelContour(); return; }
@@ -399,6 +433,25 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     y: pts.reduce((s, p) => s + p[1], 0) / pts.length,
   });
 
+  const STICK_TYPES = new Set(['room', 'stairs', 'elevator']);
+
+  const applyStickClip = (s: { x1: number; y1: number; x2: number; y2: number }) => {
+    const len = Math.hypot(s.x2 - s.x1, s.y2 - s.y1);
+    if (len < 5) return;
+    const p1: [number, number] = [s.x1, s.y1];
+    const p2: [number, number] = [s.x2, s.y2];
+    const areas = floor.areas ?? [];
+    const newAreas = areas.flatMap(a => {
+      const node = floor.nodes.find(n => n.id === a.nodeId);
+      if (!node || !STICK_TYPES.has(node.type)) return [a];
+      const keep = sideOfLine(p1, p2, [node.x, node.y]);
+      if (keep === 0) return [a];
+      const clipped = clipPolyByLine(a.points, p1, p2, keep);
+      return clipped.length >= 3 ? [{ ...a, points: clipped }] : [];
+    });
+    setFloorAreas(newAreas);
+  };
+
   const saveZone = () => {
     if (zoneNodeId && zonePoints.length >= 3) addArea({ nodeId: zoneNodeId, points: zonePoints });
     cancelZone();
@@ -458,6 +511,18 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     if (ctxMode) return;
     if (e.target.getClassName() === 'Circle') return;
     const [x, y] = toVirtXY(e.target.getStage());
+    if (isStick) {
+      if (stick) {
+        const d = ptToSegDist(x, y, stick.x1, stick.y1, stick.x2, stick.y2);
+        if (d < 20) {
+          stickDrag.current = { mode: 'move', startMouse: [x, y], origStick: { ...stick } };
+          return;
+        }
+      }
+      stickDrag.current = { mode: 'create', startMouse: [x, y] };
+      setStick({ x1: x, y1: y, x2: x, y2: y });
+      return;
+    }
     if (isMoving) {
       setRubberBand({ sx: x, sy: y, ex: x, ey: y });
       if (!shiftKey) setSelNodeIds([]);
@@ -470,6 +535,12 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
 
   // ── STAGE MOUSE UP → end drag / rubber band ──────────────────────────────
   const handleStageMouseUp = () => {
+    if (stickDrag.current) {
+      const d = stickDrag.current;
+      if (d.mode === 'move' && stick) applyStickClip(stick);
+      stickDrag.current = null;
+      return;
+    }
     if (ctxDrag.current) { ctxDrag.current = null; return; }
     if (nodeDrag.current) {
       if (draggingNodePos) {
@@ -512,6 +583,19 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   // ── MOUSE MOVE ────────────────────────────────────────────────────────────
   const handleMouseMove = (e: any) => {
     const [x, y] = toVirtXY(e.target.getStage());
+
+    if (stickDrag.current) {
+      const d = stickDrag.current;
+      didDrag.current = true;
+      if (d.mode === 'create') {
+        const [ex, ey]: [number, number] = shiftKey ? constrainTo45([d.startMouse[0], d.startMouse[1]], x, y) : [x, y];
+        setStick(s => s ? { ...s, x2: ex, y2: ey } : s);
+      } else if (d.mode === 'move' && d.origStick) {
+        const dx = x - d.startMouse[0], dy = y - d.startMouse[1];
+        setStick({ x1: d.origStick.x1 + dx, y1: d.origStick.y1 + dy, x2: d.origStick.x2 + dx, y2: d.origStick.y2 + dy });
+      }
+      return;
+    }
 
     if (ctxDrag.current) {
       const d = ctxDrag.current;
@@ -969,6 +1053,12 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         : 'Кликните первую точку стены'
     : null;
 
+  const stickHint = isStick
+    ? stick
+      ? 'Тяните палку чтобы сдвинуть и обрезать области • Esc убрать'
+      : 'Нажмите и тяните чтобы нарисовать палку'
+    : null;
+
   const zoneHint = isZone
     ? zoneMode === 'draw'
       ? `${getNode(zoneNodeId!)?.label || ''} — кликайте${shiftKey ? ' (45°)' : ''}${zonePoints.length >= 3 ? ' • на первую точку чтобы замкнуть' : ''}`
@@ -1024,6 +1114,16 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         </div>
       )}
 
+      {stickHint && (
+        <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#6A1B9A', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '90%' }}>
+          <span>{stickHint}</span>
+          {stick && (
+            <button onClick={() => { setStick(null); stickDrag.current = null; }}
+              style={{ padding: '2px 8px', background: 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Убрать</button>
+          )}
+        </div>
+      )}
+
       {wallHint && (
         <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#4E342E', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '90%' }}>
           <span>{wallHint}</span>
@@ -1066,7 +1166,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         onMouseUp={handleStageMouseUp}
         onWheel={handleWheel} onTouchMove={handleTouchMove}
         onTouchEnd={() => { lastPinchDist.current = 0; }}
-        style={{ cursor: isPanning ? 'grab' : (tool === 'node' || isZone || isContour || isWall) ? 'crosshair' : isMoving ? 'cell' : 'default' }}
+        style={{ cursor: isPanning ? 'grab' : (tool === 'node' || isZone || isContour || isWall) ? 'crosshair' : isStick ? (stick ? 'grab' : 'crosshair') : isMoving ? 'cell' : 'default' }}
       >
         <Layer>
           {bgImage
@@ -1284,6 +1384,30 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
               }}
             />
           ))}
+
+          {/* Stick */}
+          {isStick && stick && (() => {
+            const len = Math.hypot(stick.x2 - stick.x1, stick.y2 - stick.y1);
+            const isCreating = stickDrag.current?.mode === 'create';
+            return (
+              <Group>
+                <Line
+                  points={[stick.x1, stick.y1, stick.x2, stick.y2]}
+                  stroke="#AB47BC" strokeWidth={4 / zoom} hitStrokeWidth={24 / zoom}
+                  dash={isCreating ? [12 / zoom, 6 / zoom] : undefined}
+                  onMouseDown={(e: any) => {
+                    e.cancelBubble = true;
+                    const [mx, my] = toVirtXY(e.target.getStage());
+                    stickDrag.current = { mode: 'move', startMouse: [mx, my], origStick: { ...stick } };
+                  }}
+                />
+                {len > 5 && <>
+                  <Circle x={stick.x1} y={stick.y1} radius={6 / zoom} fill="#AB47BC" listening={false} />
+                  <Circle x={stick.x2} y={stick.y2} radius={6 / zoom} fill="#AB47BC" listening={false} />
+                </>}
+              </Group>
+            );
+          })()}
 
           {/* Wall draw preview */}
           {isWall && wallStart && (

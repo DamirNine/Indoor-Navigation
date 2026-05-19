@@ -10,6 +10,7 @@ const TOOLS: { value: Tool; label: string; title: string }[] = [
   { value: 'zone',    label: '⬡', title: 'Нарисовать область узла' },
   { value: 'contour', label: '⬜', title: 'Контур здания' },
   { value: 'wall',    label: '‖', title: 'Нарисовать стену' },
+  { value: 'stick',   label: '╱', title: 'Палка — сжимает области при перетаскивании' },
 ];
 
 interface Props {

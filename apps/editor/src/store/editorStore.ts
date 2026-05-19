@@ -41,6 +41,7 @@ interface EditorState {
   deleteEdge: (from: string, to: string) => void;
   addArea: (area: Area) => void;
   deleteArea: (nodeId: string) => void;
+  setFloorAreas: (areas: Area[]) => void;
   moveNode: (id: string, newX: number, newY: number) => void;
   moveNodes: (moves: Array<{ id: string; x: number; y: number }>) => void;
   addCrossFloorEdge: (edge: CrossFloorEdge) => void;
@@ -228,6 +229,14 @@ export const useEditorStore = create<EditorState>()(
             })),
           },
         })),
+
+      setFloorAreas: (areas) =>
+        set(s => {
+          const floors = [...s.building.floors];
+          const i = s.activeFloorIndex;
+          floors[i] = { ...floors[i], areas };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
+        }),
 
       moveNode: (id, newX, newY) =>
         set(s => ({
