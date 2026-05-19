@@ -1,9 +1,18 @@
+import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   base: '/Indoor-Navigation/',
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        viewer: resolve(__dirname, 'viewer.html'),
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
