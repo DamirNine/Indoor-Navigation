@@ -187,6 +187,22 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     return m;
   })();
 
+  // Index of anchor vertex for contour stretch highlight
+  const stretchAnchorVertIdx = (() => {
+    if (!isContour || contourMode !== 'edit' || selVerts.length < 2 || editingContourIdx === null) return -1;
+    const vals = selVerts.map(i => stretchAxis === 'x' ? contourPoints[i]?.[0] : contourPoints[i]?.[1]).filter(v => v !== undefined) as number[];
+    if (vals.length === 0) return -1;
+    const minV = Math.min(...vals), maxV = Math.max(...vals), midV = (minV + maxV) / 2;
+    if (stretchAnchor === 'min') return selVerts[vals.indexOf(minV)];
+    if (stretchAnchor === 'max') return selVerts[vals.indexOf(maxV)];
+    let best = selVerts[0], bestDist = Infinity;
+    selVerts.forEach((vi, j) => {
+      const d = Math.abs(vals[j] - midV);
+      if (d < bestDist) { bestDist = d; best = vi; }
+    });
+    return best;
+  })();
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -208,13 +224,14 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   }, [floor?.imageDataUrl]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       setShiftKey(e.shiftKey);
       if ((e.key === 'z' || e.key === 'я') && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.repeat) { e.preventDefault(); undo(); }
     };
-    window.addEventListener('keydown', onKey);
-    window.addEventListener('keyup', onKey);
-    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('keyup', onKey); };
+    const onKeyUp = (e: KeyboardEvent) => { setShiftKey(e.shiftKey); };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => { window.removeEventListener('keydown', onKeyDown); window.removeEventListener('keyup', onKeyUp); };
   }, []);
 
   const cancelZone = useCallback(() => {
@@ -771,6 +788,87 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     moveNodes(Object.entries(pos).map(([id, p]) => ({ id, x: +p.x.toFixed(1), y: +p.y.toFixed(1) })));
   };
 
+  const applyContourGroupMove = () => {
+    if (editingContourIdx === null || selVerts.length === 0) return;
+    const newPts = contourPoints.map((p, i) =>
+      selVerts.includes(i) ? [+(p[0] + precDx).toFixed(1), +(p[1] + precDy).toFixed(1)] : p
+    );
+    setContourPoints(newPts);
+    updateFloorContour(editingContourIdx, newPts);
+  };
+
+  const applyContourStretch = () => {
+    if (selVerts.length < 2 || editingContourIdx === null) return;
+    const verts = selVerts.map(i => ({ i, pt: contourPoints[i] })).filter(v => v.pt);
+    const vals = verts.map(v => stretchAxis === 'x' ? v.pt[0] : v.pt[1]);
+    const minV = Math.min(...vals), maxV = Math.max(...vals), span = maxV - minV;
+    const midV = (minV + maxV) / 2;
+
+    let anchorIdx: number;
+    if (stretchAnchor === 'min') anchorIdx = verts[vals.indexOf(minV)].i;
+    else if (stretchAnchor === 'max') anchorIdx = verts[vals.indexOf(maxV)].i;
+    else {
+      let best = verts[0].i, bestDist = Infinity;
+      verts.forEach((v, j) => { const d = Math.abs(vals[j] - midV); if (d < bestDist) { bestDist = d; best = v.i; } });
+      anchorIdx = best;
+    }
+    const anchorPt = contourPoints[anchorIdx];
+    const anchorV = stretchAxis === 'x' ? anchorPt[0] : anchorPt[1];
+
+    const newPts = contourPoints.map(p => [...p] as number[]);
+    if (uniformSpacing) {
+      const sorted = [...verts].sort((a, b) => {
+        const av = stretchAxis === 'x' ? a.pt[0] : a.pt[1];
+        const bv = stretchAxis === 'x' ? b.pt[0] : b.pt[1];
+        return av - bv;
+      });
+      const k = sorted.findIndex(v => v.i === anchorIdx);
+      const step = sorted.length === 1 ? 0 : stretchTarget / (sorted.length - 1);
+      const newStart = anchorV - k * step;
+      sorted.forEach((v, j) => {
+        const nv = +(newStart + j * step).toFixed(1);
+        if (stretchAxis === 'x') newPts[v.i][0] = nv; else newPts[v.i][1] = nv;
+      });
+    } else {
+      if (span === 0) return;
+      const ratio = stretchTarget / span;
+      verts.forEach(v => {
+        const val = stretchAxis === 'x' ? v.pt[0] : v.pt[1];
+        const nv = +(anchorV + (val - anchorV) * ratio).toFixed(1);
+        if (stretchAxis === 'x') newPts[v.i][0] = nv; else newPts[v.i][1] = nv;
+      });
+    }
+    setContourPoints(newPts);
+    updateFloorContour(editingContourIdx, newPts);
+  };
+
+  const applyContourSnap90 = () => {
+    if (selVerts.length < 1 || editingContourIdx === null) return;
+    const n = contourPoints.length;
+    const selSet = new Set(selVerts);
+    const pos = contourPoints.map(p => [...p]);
+    for (let iter = 0; iter < 20; iter++) {
+      for (let i = 0; i < n; i++) {
+        const j = (i + 1) % n;
+        const iSel = selSet.has(i), jSel = selSet.has(j);
+        if (!iSel && !jSel) continue;
+        const adx = Math.abs(pos[j][0] - pos[i][0]), ady = Math.abs(pos[j][1] - pos[i][1]);
+        if (adx < ady) {
+          const ax = (iSel && jSel) ? (pos[i][0] + pos[j][0]) / 2 : iSel ? pos[j][0] : pos[i][0];
+          if (iSel) pos[i][0] = ax;
+          if (jSel) pos[j][0] = ax;
+        } else {
+          const ay = (iSel && jSel) ? (pos[i][1] + pos[j][1]) / 2 : iSel ? pos[j][1] : pos[i][1];
+          if (iSel) pos[i][1] = ay;
+          if (jSel) pos[j][1] = ay;
+        }
+      }
+    }
+    const newPts = pos.map(p => [+p[0].toFixed(1), +p[1].toFixed(1)]);
+    setContourPoints(newPts);
+    updateFloorContour(editingContourIdx, newPts);
+  };
+
   // ── ARC PREVIEW POINTS ────────────────────────────────────────────────────
   const arcPreview = (isContour && contourMode === 'draw' && isArcMode && arcControlPt && cursorPos && contourPoints.length > 0)
     ? arcThrough3Pts(contourPoints[contourPoints.length - 1] as [number, number], arcControlPt, [cursorPos.x, cursorPos.y])
@@ -962,11 +1060,9 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
             <Group>
               {contourPoints.map((pt: number[], i: number) => {
                 const isSel = selVerts.includes(i);
+                const isAnchor = i === stretchAnchorVertIdx;
                 return (
-                  <Circle key={i} x={pt[0]} y={pt[1]}
-                    radius={isSel ? 9 : 7}
-                    fill={isSel ? '#1976D2' : 'white'}
-                    stroke={isSel ? '#0D47A1' : 'black'} strokeWidth={isSel ? 3 : 2.5}
+                  <Group key={i} x={pt[0]} y={pt[1]}
                     onMouseDown={(e: any) => handleVertexMouseDown(e, i)}
                     onClick={(e: any) => {
                       if (didDrag.current) return;
@@ -974,8 +1070,12 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
                       if (shiftKey) setSelVerts(prev => prev.includes(i) ? prev.filter(v => v !== i) : [...prev, i]);
                       else setSelVerts([i]);
                     }}
-                    onTap={(e: any) => { e.cancelBubble = true; setSelVerts([i]); }}
-                  />
+                    onTap={(e: any) => { e.cancelBubble = true; setSelVerts([i]); }}>
+                    {isAnchor && <Circle radius={24} fill="#E5393533" stroke="#E53935" strokeWidth={3} />}
+                    <Circle radius={isSel ? 9 : 7}
+                      fill={isSel ? '#1976D2' : 'white'}
+                      stroke={isSel ? '#0D47A1' : 'black'} strokeWidth={isSel ? 3 : 2.5} />
+                  </Group>
                 );
               })}
             </Group>
@@ -1210,6 +1310,91 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#555', cursor: 'pointer', userSelect: 'none' }}>
                 <input type="checkbox" checked={uniformSpacing} onChange={e => setUniformSpacing(e.target.checked)} />
                 Равномерное расстояние между узлами
+              </label>
+            </>)}
+          </div>
+        );
+      })()}
+
+      {isContour && contourMode === 'edit' && selVerts.length > 0 && (() => {
+        const cvVals = selVerts.map(i => stretchAxis === 'x' ? contourPoints[i]?.[0] : contourPoints[i]?.[1]).filter(v => v !== undefined) as number[];
+        const cvSpan = cvVals.length > 1 ? Math.round(Math.max(...cvVals) - Math.min(...cvVals)) : 0;
+        const cvSliderMax = Math.max(cvSpan * 3, 200);
+        const btnBase: React.CSSProperties = { flex: 1, padding: '3px 0', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 };
+        return (
+          <div style={{ position: 'absolute', bottom: 16, right: 16, background: 'white', border: '1px solid #ccc', borderRadius: 6, padding: 12, zIndex: 20, width: 250, boxShadow: '0 2px 8px rgba(0,0,0,0.18)', fontSize: 13 }}>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>Контур · {selVerts.length} верш.</div>
+
+            {/* ── Сдвиг ── */}
+            <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>Сдвиг по пикселям</div>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', marginBottom: 6 }}>
+              <label style={{ flex: 1, fontSize: 11 }}>dx
+                <input type="number" value={precDx} onChange={e => setPrecDx(+e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', marginTop: 2 }} />
+              </label>
+              <label style={{ flex: 1, fontSize: 11 }}>dy
+                <input type="number" value={precDy} onChange={e => setPrecDy(+e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', marginTop: 2 }} />
+              </label>
+              <button onClick={applyContourGroupMove}
+                style={{ padding: '4px 10px', marginBottom: 1, background: '#1976D2', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
+                →
+              </button>
+            </div>
+
+            {/* ── Выровнять 90° ── */}
+            <button onClick={applyContourSnap90}
+              style={{ width: '100%', marginBottom: 10, padding: '4px 0', background: '#5C6BC0', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
+              Выровнять углы 90°
+            </button>
+
+            {/* ── Растяжение ── */}
+            {selVerts.length >= 2 && (<>
+              <div style={{ borderTop: '1px solid #eee', paddingTop: 8, fontSize: 11, color: '#666', marginBottom: 6 }}>Растяжение / сжатие</div>
+
+              <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                {(['x', 'y'] as const).map(ax => (
+                  <button key={ax} onClick={() => setStretchAxis(ax)}
+                    style={{ ...btnBase, background: stretchAxis === ax ? '#1976D2' : '#eee', color: stretchAxis === ax ? 'white' : '#333' }}>
+                    Ось {ax.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                {([
+                  ['min',    '● Мин',   '#E53935', '#FFEBEE'],
+                  ['center', '● Центр', '#E53935', '#FFEBEE'],
+                  ['max',    '● Макс',  '#E53935', '#FFEBEE'],
+                ] as const).map(([v, label, activeColor, activeBg]) => (
+                  <button key={v} onClick={() => setStretchAnchor(v)}
+                    style={{ ...btnBase,
+                      background: stretchAnchor === v ? activeBg : '#eee',
+                      color: stretchAnchor === v ? activeColor : '#333',
+                      fontWeight: stretchAnchor === v ? 700 : 400,
+                      border: stretchAnchor === v ? `1.5px solid ${activeColor}` : '1.5px solid transparent',
+                    }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ fontSize: 11, color: '#999', marginBottom: 4 }}>Текущее: {cvSpan} px</div>
+              <input type="range" min={0} max={cvSliderMax} value={stretchTarget}
+                onChange={e => setStretchTarget(+e.target.value)}
+                style={{ width: '100%', marginBottom: 4 }} />
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
+                <input type="number" value={stretchTarget} min={0}
+                  onChange={e => setStretchTarget(+e.target.value)}
+                  style={{ flex: 1, boxSizing: 'border-box' }} />
+                <button onClick={applyContourStretch}
+                  style={{ padding: '4px 10px', background: '#388E3C', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
+                  Применить
+                </button>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#555', cursor: 'pointer', userSelect: 'none' }}>
+                <input type="checkbox" checked={uniformSpacing} onChange={e => setUniformSpacing(e.target.checked)} />
+                Равномерное расстояние
               </label>
             </>)}
           </div>
