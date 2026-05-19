@@ -135,18 +135,18 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [uniformSpacing, setUniformSpacing] = useState(true);
 
   useEffect(() => {
-    if (selNodeIds.length >= 2) {
+    if (isMoving && selNodeIds.length >= 2) {
       const nodes = selNodeIds.map(id => floor.nodes.find(n => n.id === id)).filter(Boolean) as NavNode[];
       const vals = nodes.map(n => stretchAxis === 'x' ? n.x : n.y);
       setStretchTarget(Math.round(Math.max(...vals) - Math.min(...vals)));
-    } else if (selVerts.length >= 2 && editingContourIdx !== null) {
+    } else if (isContour && selVerts.length >= 2 && editingContourIdx !== null) {
       const contour = floor.contours?.[editingContourIdx];
       if (contour) {
         const vals = selVerts.map(i => stretchAxis === 'x' ? contour[i][0] : contour[i][1]);
         setStretchTarget(Math.round(Math.max(...vals) - Math.min(...vals)));
       }
     }
-  }, [selNodeIds.join(','), selVerts.join(','), stretchAxis, editingContourIdx]);
+  }, [tool, selNodeIds.join(','), selVerts.join(','), stretchAxis, editingContourIdx]);
 
   // Refs for drag tracking (avoid stale closures)
   const dragging = useRef<{ indices: number[]; startMouse: [number, number]; startPts: [number, number][] } | null>(null);
@@ -1058,11 +1058,18 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           {/* Edit mode vertex handles */}
           {isContour && !ctxMode && contourMode === 'edit' && editingContourIdx !== null && contourPoints.length >= 3 && (
             <Group>
+              {stretchAnchorVertIdx >= 0 && contourPoints[stretchAnchorVertIdx] && (
+                <Circle
+                  x={contourPoints[stretchAnchorVertIdx][0]} y={contourPoints[stretchAnchorVertIdx][1]}
+                  radius={24} fill="#E5393533" stroke="#E53935" strokeWidth={3} listening={false} />
+              )}
               {contourPoints.map((pt: number[], i: number) => {
                 const isSel = selVerts.includes(i);
-                const isAnchor = i === stretchAnchorVertIdx;
                 return (
-                  <Group key={i} x={pt[0]} y={pt[1]}
+                  <Circle key={i} x={pt[0]} y={pt[1]}
+                    radius={isSel ? 9 : 7}
+                    fill={isSel ? '#1976D2' : 'white'}
+                    stroke={isSel ? '#0D47A1' : 'black'} strokeWidth={isSel ? 3 : 2.5}
                     onMouseDown={(e: any) => handleVertexMouseDown(e, i)}
                     onClick={(e: any) => {
                       if (didDrag.current) return;
@@ -1070,12 +1077,8 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
                       if (shiftKey) setSelVerts(prev => prev.includes(i) ? prev.filter(v => v !== i) : [...prev, i]);
                       else setSelVerts([i]);
                     }}
-                    onTap={(e: any) => { e.cancelBubble = true; setSelVerts([i]); }}>
-                    {isAnchor && <Circle radius={24} fill="#E5393533" stroke="#E53935" strokeWidth={3} />}
-                    <Circle radius={isSel ? 9 : 7}
-                      fill={isSel ? '#1976D2' : 'white'}
-                      stroke={isSel ? '#0D47A1' : 'black'} strokeWidth={isSel ? 3 : 2.5} />
-                  </Group>
+                    onTap={(e: any) => { e.cancelBubble = true; setSelVerts([i]); }}
+                  />
                 );
               })}
             </Group>
