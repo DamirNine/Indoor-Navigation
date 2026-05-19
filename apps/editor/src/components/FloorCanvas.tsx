@@ -733,17 +733,34 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     let moves: Array<{ id: string; x: number; y: number }>;
 
     if (uniformSpacing) {
-      const sorted = [...nodes].sort((a, b) => {
-        const av = stretchAxis === 'x' ? a.x : a.y;
-        const bv = stretchAxis === 'x' ? b.x : b.y;
-        return av - bv;
+      // Group by other axis, apply same step to all groups
+      const otherKey = (n: NavNode) => stretchAxis === 'x' ? n.y : n.x;
+      const groups = new Map<number, NavNode[]>();
+      nodes.forEach(n => {
+        const k = otherKey(n);
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k)!.push(n);
       });
-      const k = sorted.findIndex(n => n.id === anchorNode.id);
-      const step = sorted.length === 1 ? 0 : stretchTarget / (sorted.length - 1);
-      const newStart = anchorV - k * step;
-      moves = sorted.map((n, i) => {
-        const nv = +(newStart + i * step).toFixed(1);
-        return stretchAxis === 'x' ? { id: n.id, x: nv, y: n.y } : { id: n.id, x: n.x, y: nv };
+      const anchorGroupKey = otherKey(anchorNode);
+      const anchorGroup = groups.get(anchorGroupKey)!;
+      const stepBase = anchorGroup.length > 1 ? anchorGroup.length
+        : Math.max(...Array.from(groups.values()).map(g => g.length));
+      const step = stepBase <= 1 ? stretchTarget : stretchTarget / (stepBase - 1);
+
+      moves = [];
+      groups.forEach(groupNodes => {
+        const sorted = [...groupNodes].sort((a, b) =>
+          (stretchAxis === 'x' ? a.x : a.y) - (stretchAxis === 'x' ? b.x : b.y));
+        // local anchor = node closest to global anchorV
+        let localK = 0, bestDist = Infinity;
+        sorted.forEach((n, i) => {
+          const d = Math.abs((stretchAxis === 'x' ? n.x : n.y) - anchorV);
+          if (d < bestDist) { bestDist = d; localK = i; }
+        });
+        sorted.forEach((n, i) => {
+          const nv = +(anchorV + (i - localK) * step).toFixed(1);
+          moves.push(stretchAxis === 'x' ? { id: n.id, x: nv, y: n.y } : { id: n.id, x: n.x, y: nv });
+        });
       });
     } else {
       if (span === 0) return;
@@ -817,17 +834,32 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
 
     const newPts = contourPoints.map(p => [...p] as number[]);
     if (uniformSpacing) {
-      const sorted = [...verts].sort((a, b) => {
-        const av = stretchAxis === 'x' ? a.pt[0] : a.pt[1];
-        const bv = stretchAxis === 'x' ? b.pt[0] : b.pt[1];
-        return av - bv;
+      // Group by other axis, same step across all groups
+      const otherIdx = stretchAxis === 'x' ? 1 : 0;
+      const groups = new Map<number, typeof verts>();
+      verts.forEach(v => {
+        const k = v.pt[otherIdx];
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k)!.push(v);
       });
-      const k = sorted.findIndex(v => v.i === anchorIdx);
-      const step = sorted.length === 1 ? 0 : stretchTarget / (sorted.length - 1);
-      const newStart = anchorV - k * step;
-      sorted.forEach((v, j) => {
-        const nv = +(newStart + j * step).toFixed(1);
-        if (stretchAxis === 'x') newPts[v.i][0] = nv; else newPts[v.i][1] = nv;
+      const anchorGroupKey = contourPoints[anchorIdx][otherIdx];
+      const anchorGroup = groups.get(anchorGroupKey)!;
+      const stepBase = anchorGroup.length > 1 ? anchorGroup.length
+        : Math.max(...Array.from(groups.values()).map(g => g.length));
+      const step = stepBase <= 1 ? stretchTarget : stretchTarget / (stepBase - 1);
+
+      groups.forEach(groupVerts => {
+        const sorted = [...groupVerts].sort((a, b) =>
+          (stretchAxis === 'x' ? a.pt[0] : a.pt[1]) - (stretchAxis === 'x' ? b.pt[0] : b.pt[1]));
+        let localK = 0, bestDist = Infinity;
+        sorted.forEach((v, i) => {
+          const d = Math.abs((stretchAxis === 'x' ? v.pt[0] : v.pt[1]) - anchorV);
+          if (d < bestDist) { bestDist = d; localK = i; }
+        });
+        sorted.forEach((v, i) => {
+          const nv = +(anchorV + (i - localK) * step).toFixed(1);
+          if (stretchAxis === 'x') newPts[v.i][0] = nv; else newPts[v.i][1] = nv;
+        });
       });
     } else {
       if (span === 0) return;
