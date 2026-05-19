@@ -31,6 +31,7 @@ function parse(text: string, imageMap: Map<string, string>): Building {
       imageDataUrl: f.image ? imageMap.get(f.image) : undefined,
       nodes: f.nodes ?? [], edges: f.edges ?? [], areas: f.areas ?? [],
       ...(f.contours ? { contours: f.contours } : f.contour ? { contours: [f.contour] } : {}),
+      ...(f.walls?.length ? { walls: f.walls } : {}),
     })),
   };
 }

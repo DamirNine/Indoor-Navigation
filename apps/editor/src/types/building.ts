@@ -1,6 +1,6 @@
 export type NodeType = 'room' | 'stairs' | 'elevator' | 'entrance' | 'corridor';
 export type EdgeType = 'walk' | 'stairs' | 'elevator';
-export type Tool = 'select' | 'node' | 'edge' | 'pan' | 'move' | 'zone' | 'contour';
+export type Tool = 'select' | 'node' | 'edge' | 'pan' | 'move' | 'zone' | 'contour' | 'wall';
 
 export interface NavNode {
   id: string;
@@ -39,6 +39,7 @@ export interface Floor {
   edges: NavEdge[];
   areas?: Area[];
   contours?: number[][][];  // building outline polygons [[[x,y],...],...]
+  walls?: number[][];       // interior walls [[x1,y1,x2,y2],...]
 }
 
 export interface Building {

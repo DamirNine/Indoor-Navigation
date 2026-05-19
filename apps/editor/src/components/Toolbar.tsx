@@ -9,6 +9,7 @@ const TOOLS: { value: Tool; label: string; title: string }[] = [
   { value: 'pan',    label: '✋', title: 'Перемещение карты и зум' },
   { value: 'zone',    label: '⬡', title: 'Нарисовать область узла' },
   { value: 'contour', label: '⬜', title: 'Контур здания' },
+  { value: 'wall',    label: '‖', title: 'Нарисовать стену' },
 ];
 
 interface Props {

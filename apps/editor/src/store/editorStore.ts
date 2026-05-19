@@ -54,6 +54,8 @@ interface EditorState {
   updateFloorContour: (idx: number, points: number[][]) => void;
   updateAllFloorsContours: (contoursByFloor: Array<number[][][] | undefined>) => void;
   removeFloorContour: (idx: number) => void;
+  addWall: (wall: number[]) => void;
+  removeWall: (idx: number) => void;
   loadBuilding: (building: Building) => void;
 }
 
@@ -337,6 +339,22 @@ export const useEditorStore = create<EditorState>()(
           floors[i] = { ...floors[i], contours: contours.length ? contours : undefined };
           return { past: snap(s.past, s.building), building: { ...s.building, floors } };
         }),
+
+      addWall: (wall: number[]) =>
+        set(s => {
+          const floors = [...s.building.floors];
+          const i = s.activeFloorIndex;
+          floors[i] = { ...floors[i], walls: [...(floors[i].walls ?? []), wall] };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
+        }),
+
+      removeWall: (idx: number) =>
+        set(s => {
+          const floors = [...s.building.floors];
+          const i = s.activeFloorIndex;
+          floors[i] = { ...floors[i], walls: (floors[i].walls ?? []).filter((_, wi) => wi !== idx) };
+          return { past: snap(s.past, s.building), building: { ...s.building, floors } };
+        }),
     }),
     {
       name: 'indoor-nav-editor',
@@ -347,6 +365,7 @@ export const useEditorStore = create<EditorState>()(
             level: f.level, name: f.name, image: f.image, imageDataUrl: f.imageDataUrl,
             nodes: f.nodes, edges: f.edges, areas: f.areas ?? [],
             ...(f.contours?.length ? { contours: f.contours } : {}),
+            ...(f.walls?.length ? { walls: f.walls } : {}),
           })),
         });
         return {

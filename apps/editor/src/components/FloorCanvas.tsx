@@ -82,6 +82,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     building, activeFloorIndex, tool, selectedNodeId, selectedEdgeKey, pendingEdgeFromId,
     previewRoute, addNode, selectNode, selectEdge, setPendingEdgeFrom, addEdge,
     moveNode, moveNodes, undo, addArea, addFloorContour, updateFloorContour, updateAllFloorsContours, removeFloorContour,
+    addWall, removeWall,
   } = useEditorStore();
 
   const routeSet = new Set(previewRoute ?? []);
@@ -126,6 +127,10 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const [ctxMode, setCtxMode] = useState(false);
   const [ctxTx, setCtxTx] = useState({ tx: 0, ty: 0, scale: 1, rot: 0 });
 
+  // Wall state
+  const [wallStart, setWallStart] = useState<[number, number] | null>(null);
+  const [selectedWallIdx, setSelectedWallIdx] = useState<number | null>(null);
+
   // Precision panel state
   const [precDx, setPrecDx] = useState(0);
   const [precDy, setPrecDy] = useState(0);
@@ -161,6 +166,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   const isMoving = tool === 'move';
   const isZone = tool === 'zone';
   const isContour = tool === 'contour';
+  const isWall = tool === 'wall';
 
   // Map<nodeId, anchorColor> — green=min, red=max, orange=center-closest
   const stretchAnchorMap = (() => {
@@ -246,7 +252,8 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   }, []);
 
   const handleEscape = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') { setPendingEdgeFrom(null); setPendingEdgeTo(null); cancelZone(); cancelContour(); }
+    if (e.key === 'Escape') { setPendingEdgeFrom(null); setPendingEdgeTo(null); cancelZone(); cancelContour(); setWallStart(null); setSelectedWallIdx(null); }
+    if (e.key === 'Delete' && selectedWallIdx !== null) { removeWall(selectedWallIdx); setSelectedWallIdx(null); }
     if (e.key === 'Delete' && zoneMode === 'edit' && selectedVertex !== null) {
       setZonePoints(pts => pts.filter((_, i) => i !== selectedVertex));
       setSelectedVertex(null);
@@ -256,7 +263,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
       setContourPoints(pts => { const next = pts.filter((_, i) => !del.has(i)); return next.length >= 3 ? next : pts; });
       setSelVerts([]);
     }
-  }, [setPendingEdgeFrom, cancelZone, cancelContour, zoneMode, selectedVertex, contourMode, selVerts]);
+  }, [setPendingEdgeFrom, cancelZone, cancelContour, zoneMode, selectedVertex, contourMode, selVerts, selectedWallIdx, removeWall]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleEscape);
@@ -264,6 +271,10 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   }, [handleEscape]);
 
   useEffect(() => { if (!isZone) cancelZone(); }, [isZone, cancelZone]);
+
+  useEffect(() => {
+    if (!isWall) { setWallStart(null); setSelectedWallIdx(null); }
+  }, [isWall]);
 
   useEffect(() => {
     if (!isContour) { cancelContour(); return; }
@@ -356,6 +367,19 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         if (Math.hypot(x - px, y - py) < SNAP_DIST) return [px, py];
     for (const [px, py] of contourPoints)
       if (Math.hypot(x - px, y - py) < SNAP_DIST) return [px, py];
+    return [x, y];
+  };
+
+  const snapWall = (x: number, y: number): [number, number] => {
+    for (const area of (floor.areas ?? []))
+      for (const [px, py] of area.points)
+        if (Math.hypot(x - px, y - py) < SNAP_DIST) return [px, py];
+    for (const c of (floor.contours ?? []))
+      for (const [px, py] of c)
+        if (Math.hypot(x - px, y - py) < SNAP_DIST) return [px, py];
+    for (const w of (floor.walls ?? []))
+      for (const [px, py] of [[w[0], w[1]], [w[2], w[3]]])
+        if (Math.hypot(x - (px as number), y - (py as number)) < SNAP_DIST) return [px as number, py as number];
     return [x, y];
   };
 
@@ -544,6 +568,10 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         [cx, cy] = constrainTo45(contourPoints[contourPoints.length - 1] as [number, number], x, y);
       setCursorPos({ x: cx, y: cy });
     }
+    if (isWall && wallStart) {
+      let [sx, sy]: [number, number] = shiftKey ? constrainTo45(wallStart, x, y) : snapWall(x, y);
+      setCursorPos({ x: sx, y: sy });
+    }
   };
 
   // ── STAGE CLICK ──────────────────────────────────────────────────────────
@@ -554,6 +582,19 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     const onBg = className === 'Stage' || className === 'Rect' || className === 'Image';
 
     if (tool === 'node' && onBg) { setAddNodePos(toVirtual(e)); return; }
+
+    if (isWall && onBg) {
+      const { x, y } = toVirtual(e);
+      let [sx, sy]: [number, number] = shiftKey && wallStart ? constrainTo45(wallStart, x, y) : snapWall(x, y);
+      if (!wallStart) {
+        setWallStart([sx, sy]);
+      } else {
+        addWall([wallStart[0], wallStart[1], sx, sy]);
+        setWallStart(null);
+        setCursorPos(null);
+      }
+      return;
+    }
 
     if (isZone) {
       if (zoneMode === 'draw' && zoneNodeId && onBg) {
@@ -920,6 +961,14 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
           : `Контур${totalContours > 1 ? ` ${(editingContourIdx ?? 0) + 1}/${totalContours}` : ''} — тяните вершину • обведите область мышью для выбора • клик по сегменту вставляет точку`
     : null;
 
+  const wallHint = isWall
+    ? wallStart
+      ? `Кликните вторую точку${shiftKey ? ' (45°)' : ''} • Esc — отмена`
+      : selectedWallIdx !== null
+        ? 'Стена выбрана • Del удалить • Esc снять выбор'
+        : 'Кликните первую точку стены'
+    : null;
+
   const zoneHint = isZone
     ? zoneMode === 'draw'
       ? `${getNode(zoneNodeId!)?.label || ''} — кликайте${shiftKey ? ' (45°)' : ''}${zonePoints.length >= 3 ? ' • на первую точку чтобы замкнуть' : ''}`
@@ -975,6 +1024,20 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         </div>
       )}
 
+      {wallHint && (
+        <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#4E342E', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '90%' }}>
+          <span>{wallHint}</span>
+          {selectedWallIdx !== null && !wallStart && (
+            <button onClick={() => { removeWall(selectedWallIdx!); setSelectedWallIdx(null); }}
+              style={{ padding: '2px 8px', background: '#c62828', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Удалить</button>
+          )}
+          {wallStart && (
+            <button onClick={() => { setWallStart(null); setCursorPos(null); }}
+              style={{ padding: '2px 8px', background: 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>Отмена</button>
+          )}
+        </div>
+      )}
+
       {zoneHint && (
         <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', background: '#37474F', color: 'white', padding: '4px 12px', borderRadius: 4, zIndex: 10, fontSize: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '90%' }}>
           <span>{zoneHint}</span>
@@ -1003,7 +1066,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         onMouseUp={handleStageMouseUp}
         onWheel={handleWheel} onTouchMove={handleTouchMove}
         onTouchEnd={() => { lastPinchDist.current = 0; }}
-        style={{ cursor: isPanning ? 'grab' : (tool === 'node' || isZone || isContour) ? 'crosshair' : isMoving ? 'cell' : 'default' }}
+        style={{ cursor: isPanning ? 'grab' : (tool === 'node' || isZone || isContour || isWall) ? 'crosshair' : isMoving ? 'cell' : 'default' }}
       >
         <Layer>
           {bgImage
@@ -1201,6 +1264,37 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
               </Group>
             );
           })()}
+
+          {/* Walls */}
+          {(floor.walls ?? []).map((w, i) => (
+            <Line key={`wall-${i}`}
+              points={[w[0], w[1], w[2], w[3]]}
+              stroke={selectedWallIdx === i ? '#f44336' : '#333'}
+              strokeWidth={selectedWallIdx === i ? 7 : 5}
+              hitStrokeWidth={18}
+              onClick={(e: any) => {
+                if (wallStart !== null) return;
+                e.cancelBubble = true;
+                if (isWall || tool === 'select') setSelectedWallIdx(i === selectedWallIdx ? null : i);
+              }}
+              onTap={(e: any) => {
+                if (wallStart !== null) return;
+                e.cancelBubble = true;
+                if (isWall || tool === 'select') setSelectedWallIdx(i === selectedWallIdx ? null : i);
+              }}
+            />
+          ))}
+
+          {/* Wall draw preview */}
+          {isWall && wallStart && (
+            <Group listening={false}>
+              {cursorPos && (
+                <Line points={[wallStart[0], wallStart[1], cursorPos.x, cursorPos.y]}
+                  stroke="#555" strokeWidth={5} dash={[12, 6]} />
+              )}
+              <Circle x={wallStart[0]} y={wallStart[1]} radius={8} fill="#333" opacity={0.7} />
+            </Group>
+          )}
 
           {/* Edges */}
           {floor.edges.map(edge => {
