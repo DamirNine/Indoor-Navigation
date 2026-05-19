@@ -61,6 +61,17 @@ function lineSegIntersect(a: [number, number], b: [number, number], c: [number, 
   const t = ((c[0] - a[0]) * dy2 - (c[1] - a[1]) * dx2) / cross;
   return [a[0] + dx1 * t, a[1] + dy1 * t];
 }
+function segmentsIntersect(a: [number, number], b: [number, number], c: [number, number], d: [number, number]): boolean {
+  const s1 = sideOfLine(c, d, a), s2 = sideOfLine(c, d, b);
+  const s3 = sideOfLine(a, b, c), s4 = sideOfLine(a, b, d);
+  return s1 * s2 <= 0 && s3 * s4 <= 0;
+}
+function polyIntersectsSeg(poly: number[][], p1: [number, number], p2: [number, number]): boolean {
+  const n = poly.length;
+  for (let i = 0; i < n; i++)
+    if (segmentsIntersect(poly[i] as [number, number], poly[(i + 1) % n] as [number, number], p1, p2)) return true;
+  return false;
+}
 function clipPolyByLine(poly: number[][], p1: [number, number], p2: [number, number], keep: number): number[][] {
   const result: number[][] = [];
   const n = poly.length;
@@ -155,6 +166,11 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   // Wall state
   const [wallStart, setWallStart] = useState<[number, number] | null>(null);
   const [selectedWallIdx, setSelectedWallIdx] = useState<number | null>(null);
+
+  // Area selection state
+  const [selAreaIds, setSelAreaIds] = useState<string[]>([]);
+  const [areaDx, setAreaDx] = useState('0');
+  const [areaDy, setAreaDy] = useState('0');
 
   // Stick state
   const [stick, setStick] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
@@ -311,6 +327,10 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
   }, [isStick]);
 
   useEffect(() => {
+    if (tool === 'pan' || tool === 'wall' || tool === 'contour' || tool === 'stick') setSelAreaIds([]);
+  }, [tool]);
+
+  useEffect(() => {
     if (!isContour) { cancelContour(); return; }
     const existing = floor?.contours;
     if (existing && existing.length > 0) {
@@ -433,6 +453,15 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     y: pts.reduce((s, p) => s + p[1], 0) / pts.length,
   });
 
+  const moveSelectedAreas = (dx: number, dy: number) => {
+    if (dx === 0 && dy === 0) return;
+    const newAreas = (floor.areas ?? []).map(a => {
+      if (!selAreaIds.includes(a.nodeId)) return a;
+      return { ...a, points: a.points.map(([x, y]: number[]) => [+(x + dx).toFixed(1), +(y + dy).toFixed(1)]) };
+    });
+    setFloorAreas(newAreas);
+  };
+
   const STICK_TYPES = new Set(['room', 'stairs', 'elevator']);
 
   const applyStickClip = (s: { x1: number; y1: number; x2: number; y2: number }) => {
@@ -444,6 +473,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     const newAreas = areas.flatMap(a => {
       const node = floor.nodes.find(n => n.id === a.nodeId);
       if (!node || !STICK_TYPES.has(node.type)) return [a];
+      if (!polyIntersectsSeg(a.points, p1, p2)) return [a];
       const keep = sideOfLine(p1, p2, [node.x, node.y]);
       if (keep === 0) return [a];
       const clipped = clipPolyByLine(a.points, p1, p2, keep);
@@ -664,6 +694,7 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
     if (isPanning) return;
     const className = e.target.getClassName();
     const onBg = className === 'Stage' || className === 'Rect' || className === 'Image';
+    if (onBg && !shiftKey) setSelAreaIds([]);
 
     if (tool === 'node' && onBg) { setAddNodePos(toVirtual(e)); return; }
 
@@ -1155,6 +1186,34 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
         </div>
       )}
 
+      {selAreaIds.length > 0 && (
+        <div style={{ position: 'absolute', bottom: 12, right: 12, background: 'white', border: '1px solid #ddd', borderRadius: 6, padding: 12, zIndex: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.18)', minWidth: 220 }}>
+          <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+            {selAreaIds.length === 1 ? '1 область выбрана' : `${selAreaIds.length} областей выбрано`}
+          </div>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
+            <label style={{ fontSize: 12, color: '#555', width: 22 }}>dX</label>
+            <input type="number" value={areaDx} onChange={e => setAreaDx(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { moveSelectedAreas(parseFloat(areaDx) || 0, parseFloat(areaDy) || 0); } }}
+              style={{ width: 72, padding: '3px 6px', border: '1px solid #bbb', borderRadius: 3, fontSize: 13 }} />
+            <label style={{ fontSize: 12, color: '#555', width: 22 }}>dY</label>
+            <input type="number" value={areaDy} onChange={e => setAreaDy(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { moveSelectedAreas(parseFloat(areaDx) || 0, parseFloat(areaDy) || 0); } }}
+              style={{ width: 72, padding: '3px 6px', border: '1px solid #bbb', borderRadius: 3, fontSize: 13 }} />
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button onClick={() => moveSelectedAreas(parseFloat(areaDx) || 0, parseFloat(areaDy) || 0)}
+              style={{ flex: 1, padding: '5px 0', background: '#1976D2', color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer', fontSize: 12 }}>
+              Переместить
+            </button>
+            <button onClick={() => setSelAreaIds([])}
+              style={{ padding: '5px 8px', background: 'white', border: '1px solid #bbb', borderRadius: 3, cursor: 'pointer', fontSize: 13 }}>
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       <Stage
         width={stageSize.w} height={stageSize.h}
         scaleX={zoom} scaleY={zoom} x={stagePos.x} y={stagePos.y}
@@ -1323,12 +1382,30 @@ export default function FloorCanvas({ zoom, setZoom, stagePos, setStagePos }: Pr
             const pts = area.points.flatMap(p => p);
             const c = centroid(area.points);
             const isActive = zoneNodeId === area.nodeId;
+            const isSelArea = selAreaIds.includes(area.nodeId);
+            const canSelectArea = tool !== 'pan' && tool !== 'wall' && tool !== 'contour' && tool !== 'stick' && zoneMode !== 'draw';
             return (
-              <Group key={area.nodeId}>
-                <Line points={pts} closed fill={AREA_FILL[node.type] || 'rgba(0,0,0,0.05)'}
-                  stroke={isActive ? '#F57C00' : NODE_COLOR[node.type]} strokeWidth={isActive ? 2.5 : 1.5} />
+              <Group key={area.nodeId}
+                onClick={(e: any) => {
+                  if (!canSelectArea) return;
+                  e.cancelBubble = true;
+                  if (shiftKey) setSelAreaIds(prev => prev.includes(area.nodeId) ? prev.filter(id => id !== area.nodeId) : [...prev, area.nodeId]);
+                  else setSelAreaIds([area.nodeId]);
+                }}
+                onTap={(e: any) => {
+                  if (!canSelectArea) return;
+                  e.cancelBubble = true;
+                  setSelAreaIds(prev => prev.includes(area.nodeId) ? prev.filter(id => id !== area.nodeId) : [...prev, area.nodeId]);
+                }}
+              >
+                <Line points={pts} closed
+                  fill={isSelArea ? 'rgba(255,87,34,0.18)' : AREA_FILL[node.type] || 'rgba(0,0,0,0.05)'}
+                  stroke={isSelArea ? '#FF5722' : isActive ? '#F57C00' : NODE_COLOR[node.type]}
+                  strokeWidth={isSelArea ? 3 : isActive ? 2.5 : 1.5}
+                  hitStrokeWidth={8}
+                />
                 <Text text={node.label} x={c.x - node.label.length * 4} y={c.y - 7}
-                  fontSize={13} fill={NODE_COLOR[node.type]} fontStyle="bold" />
+                  fontSize={13} fill={NODE_COLOR[node.type]} fontStyle="bold" listening={false} />
               </Group>
             );
           })}
