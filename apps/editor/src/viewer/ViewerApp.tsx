@@ -153,9 +153,7 @@ export default function ViewerApp() {
 
   const handleBuild = () => {
     if (!fromId || !toId) return;
-    console.log('crossFloorEdges count:', building.crossFloorEdges.length, building.crossFloorEdges);
     const r = findRoute(building, fromId, toId);
-    console.log('route:', r);
     setRoute(r);
     if (r && r.length > 0) {
       const idx = building.floors.findIndex(f => f.nodes.some(n => n.id === fromId));
@@ -277,7 +275,7 @@ export default function ViewerApp() {
         {/* Footer link */}
         <div style={{ padding: '8px 12px', borderTop: '1px solid #eee', fontSize: 11, color: '#aaa', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <a href="./" style={{ color: '#1976D2', textDecoration: 'none' }}>← Редактор карт</a>
-          <span>v1.0.5</span>
+          <span>v1.0.6</span>
         </div>
       </div>
 
