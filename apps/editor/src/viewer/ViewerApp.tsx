@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import JSZip from 'jszip';
 import type { Building } from '../types/building';
-import { findRoute } from '../lib/routing';
+import { findRoute, buildRouteInstructions } from '../lib/routing';
+import type { RouteInstruction } from '../lib/routing';
 import ViewerCanvas from './ViewerCanvas';
 
 const btnStyle = (active: boolean): React.CSSProperties => ({
@@ -170,27 +171,7 @@ export default function ViewerApp() {
     route ? building.floors.map((f, i) => f.nodes.some(n => routeNodeIds.has(n.id)) ? i : -1).filter(i => i >= 0) : []
   );
 
-  // Build readable steps with floor index for tab switching
-  const steps: { text: string; floor: boolean; floorIdx?: number }[] = [];
-  if (route) {
-    let prevFloor = '';
-    let prevLabel = '';
-    for (const id of route) {
-      const n = nodeMap.get(id);
-      if (!n || n.type === 'corridor') continue;
-      if (n.floorName !== prevFloor) {
-        const fi = building.floors.findIndex(f => f.name === n.floorName);
-        if (prevFloor) steps.push({ text: `→ ${n.floorName}`, floor: true, floorIdx: fi });
-        else steps.push({ text: n.floorName, floor: true, floorIdx: fi });
-        prevFloor = n.floorName;
-        prevLabel = '';
-      }
-      if (n.type !== 'stairs' && n.type !== 'elevator' && n.label !== prevLabel) {
-        steps.push({ text: n.label, floor: false });
-        prevLabel = n.label;
-      }
-    }
-  }
+  const instructions: RouteInstruction[] = route ? buildRouteInstructions(building, route) : [];
 
   const floor = building.floors[activeFloor];
 
@@ -249,33 +230,41 @@ export default function ViewerApp() {
           )}
         </div>
 
-        {/* Steps — takes remaining space, scrollable */}
-        {steps.length > 0 && (
-          <div style={{ padding: '12px 16px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
-            <div style={{ fontSize: 12, color: '#888', marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Шаги</div>
-            {steps.map((s, i) => (
-              <div key={i}
-                onClick={s.floor && s.floorIdx !== undefined ? () => setActiveFloor(s.floorIdx!) : undefined}
-                style={{
-                  padding: s.floor ? '8px 0 6px' : '4px 10px',
-                  fontSize: 14,
-                  color: s.floor ? '#5c35a5' : '#333',
-                  fontWeight: s.floor ? 700 : 400,
-                  borderTop: s.floor && i > 0 ? '1px solid #e8e8e8' : 'none',
-                  marginTop: s.floor && i > 0 ? 8 : 0,
-                  cursor: s.floor ? 'pointer' : 'default',
-                  textDecoration: s.floor ? 'underline dotted' : 'none',
-                }}>
-                {s.floor ? s.text : `• ${s.text}`}
-              </div>
-            ))}
+        {/* Instructions — takes remaining space, scrollable */}
+        {instructions.length > 0 && (
+          <div style={{ overflowY: 'auto', flex: 1, minHeight: 0 }}>
+            <div style={{ padding: '12px 16px 4px', fontSize: 12, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Маршрут</div>
+            {instructions.map((ins, i) => {
+              const icon = ins.edgeType === 'stairs' ? '🪜' : ins.edgeType === 'elevator' ? '🛗' : '🚶';
+              const isTransit = ins.edgeType !== 'walk';
+              const floorIdx = building.floors.findIndex(f => f.name === ins.floorName);
+              return (
+                <div key={i}
+                  onClick={isTransit && floorIdx >= 0 ? () => setActiveFloor(floorIdx) : undefined}
+                  style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 10,
+                    padding: '10px 16px',
+                    borderBottom: '1px solid #f0f0f0',
+                    background: isTransit ? '#f3f0ff' : 'white',
+                    cursor: isTransit ? 'pointer' : 'default',
+                  }}>
+                  <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>{icon}</span>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: isTransit ? 600 : 400, color: isTransit ? '#5c35a5' : '#222' }}>
+                      {ins.description}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>{ins.floorName}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
         {/* Footer */}
         <div style={{ padding: '10px 16px', borderTop: '1px solid #eee', fontSize: 12, color: '#aaa', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <a href="./" style={{ color: '#1976D2', textDecoration: 'none' }}>← Редактор карт</a>
-          <span>v1.0.8</span>
+          <span>v1.0.9</span>
         </div>
       </div>
 
