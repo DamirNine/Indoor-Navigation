@@ -153,7 +153,9 @@ export default function ViewerApp() {
 
   const handleBuild = () => {
     if (!fromId || !toId) return;
+    console.log('crossFloorEdges count:', building.crossFloorEdges.length, building.crossFloorEdges);
     const r = findRoute(building, fromId, toId);
+    console.log('route:', r);
     setRoute(r);
     if (r && r.length > 0) {
       const idx = building.floors.findIndex(f => f.nodes.some(n => n.id === fromId));
