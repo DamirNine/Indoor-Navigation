@@ -67,7 +67,8 @@ function NodeSearch({ label, value, onChange, nodes }: {
 const STORAGE_KEY = 'viewer_building';
 
 function applyMigrations(data: Building) {
-  data.crossFloorEdges = data.crossFloorEdges ?? [];
+  // Export writes cross_floor_edges (snake_case); handle both forms
+  data.crossFloorEdges = data.crossFloorEdges ?? (data as any).cross_floor_edges ?? [];
   for (const floor of data.floors) {
     if (!floor.contours && (floor as any).contour) floor.contours = [(floor as any).contour];
     floor.areas = floor.areas ?? [];
