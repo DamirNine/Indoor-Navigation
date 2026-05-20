@@ -158,6 +158,7 @@ class _FloorView extends StatefulWidget {
   final bool fitted;
   final VoidCallback onFitted;
 
+
   const _FloorView({
     super.key,
     required this.floor,
@@ -283,6 +284,7 @@ class _FloorViewState extends State<_FloorView> {
                 stepsOnFloor: const [],
                 imageSize: _virtualSize,
                 contours: widget.floor.contours,
+                rotationIndex: widget.rotationIndex,
               ),
             ),
           ],
