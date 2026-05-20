@@ -70,6 +70,7 @@ export default function ViewerApp() {
   const [fromId, setFromId] = useState('');
   const [toId, setToId] = useState('');
   const [route, setRoute] = useState<string[] | null>(null);
+  const [rotation, setRotation] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const loadFile = useCallback(async (file: File) => {
@@ -148,8 +149,13 @@ export default function ViewerApp() {
 
   const routeNodeIds = new Set(route ?? []);
 
-  // Build readable steps
-  const steps: { text: string; floor: boolean }[] = [];
+  // Which floor indices have route nodes
+  const routeFloorIndices = new Set(
+    route ? building.floors.map((f, i) => f.nodes.some(n => routeNodeIds.has(n.id)) ? i : -1).filter(i => i >= 0) : []
+  );
+
+  // Build readable steps with floor index for tab switching
+  const steps: { text: string; floor: boolean; floorIdx?: number }[] = [];
   if (route) {
     let prevFloor = '';
     let prevLabel = '';
@@ -157,8 +163,9 @@ export default function ViewerApp() {
       const n = nodeMap.get(id);
       if (!n || n.type === 'corridor') continue;
       if (n.floorName !== prevFloor) {
-        if (prevFloor) steps.push({ text: `→ ${n.floorName}`, floor: true });
-        else steps.push({ text: n.floorName, floor: true });
+        const fi = building.floors.findIndex(f => f.name === n.floorName);
+        if (prevFloor) steps.push({ text: `→ ${n.floorName}`, floor: true, floorIdx: fi });
+        else steps.push({ text: n.floorName, floor: true, floorIdx: fi });
         prevFloor = n.floorName;
         prevLabel = '';
       }
@@ -192,7 +199,10 @@ export default function ViewerApp() {
           <div style={{ fontSize: 11, color: '#888', marginBottom: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Этаж</div>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {building.floors.map((f, i) => (
-              <button key={i} onClick={() => setActiveFloor(i)} style={btnStyle(activeFloor === i)}>
+              <button key={i} onClick={() => setActiveFloor(i)} style={{
+                ...btnStyle(activeFloor === i),
+                outline: routeFloorIndices.has(i) && activeFloor !== i ? '2px solid #43A047' : 'none',
+              }}>
                 {f.name}
               </button>
             ))}
@@ -228,14 +238,18 @@ export default function ViewerApp() {
           <div style={{ padding: '10px 12px', overflowY: 'auto', flex: 1 }}>
             <div style={{ fontSize: 11, color: '#888', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Шаги</div>
             {steps.map((s, i) => (
-              <div key={i} style={{
-                padding: s.floor ? '6px 0 4px' : '3px 8px',
-                fontSize: s.floor ? 12 : 12,
-                color: s.floor ? '#5c35a5' : '#333',
-                fontWeight: s.floor ? 700 : 400,
-                borderTop: s.floor && i > 0 ? '1px solid #e8e8e8' : 'none',
-                marginTop: s.floor && i > 0 ? 6 : 0,
-              }}>
+              <div key={i}
+                onClick={s.floor && s.floorIdx !== undefined ? () => setActiveFloor(s.floorIdx!) : undefined}
+                style={{
+                  padding: s.floor ? '6px 0 4px' : '3px 8px',
+                  fontSize: 12,
+                  color: s.floor ? '#5c35a5' : '#333',
+                  fontWeight: s.floor ? 700 : 400,
+                  borderTop: s.floor && i > 0 ? '1px solid #e8e8e8' : 'none',
+                  marginTop: s.floor && i > 0 ? 6 : 0,
+                  cursor: s.floor ? 'pointer' : 'default',
+                  textDecoration: s.floor ? 'underline dotted' : 'none',
+                }}>
                 {s.floor ? s.text : `• ${s.text}`}
               </div>
             ))}
@@ -248,8 +262,16 @@ export default function ViewerApp() {
         </div>
       </div>
 
-      {/* Canvas */}
-      <ViewerCanvas floor={floor} routeNodeIds={routeNodeIds} route={route} />
+      {/* Canvas + rotation buttons */}
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <ViewerCanvas floor={floor} routeNodeIds={routeNodeIds} route={route} rotation={rotation} />
+        <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4, zIndex: 10 }}>
+          <button onClick={() => setRotation(r => (r + 270) % 360)} title="Повернуть влево"
+            style={{ width: 34, height: 34, fontSize: 16, background: 'white', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer' }}>↺</button>
+          <button onClick={() => setRotation(r => (r + 90) % 360)} title="Повернуть вправо"
+            style={{ width: 34, height: 34, fontSize: 16, background: 'white', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer' }}>↻</button>
+        </div>
+      </div>
     </div>
   );
 }

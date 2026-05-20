@@ -118,6 +118,7 @@ class _BuildingMapScreenState extends State<BuildingMapScreen>
             : null,
       ),
       body: TabBarView(
+        physics: const NeverScrollableScrollPhysics(),
         controller: _tabController!,
         children: building.floors.asMap().entries.map((entry) {
           final idx = entry.key;
@@ -260,6 +261,7 @@ class _FloorViewState extends State<_FloorView> {
   Widget build(BuildContext context) {
     return InteractiveViewer(
       transformationController: widget.transform,
+      boundaryMargin: const EdgeInsets.all(double.infinity),
       minScale: 0.05,
       maxScale: 10.0,
       child: LayoutBuilder(builder: (ctx, constraints) {

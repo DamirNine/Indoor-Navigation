@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Stage, Layer, Shape, Line, Text, Group } from 'react-konva';
 import type { Floor, NavNode } from '../types/building';
 import type Konva from 'konva';
@@ -17,9 +17,10 @@ interface Props {
   floor: Floor;
   routeNodeIds: Set<string>;
   route: string[] | null;
+  rotation: number; // degrees: 0, 90, 180, 270
 }
 
-export default function ViewerCanvas({ floor, routeNodeIds, route }: Props) {
+export default function ViewerCanvas({ floor, routeNodeIds, route, rotation }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const [size, setSize] = useState({ w: 800, h: 600 });
@@ -36,6 +37,7 @@ export default function ViewerCanvas({ floor, routeNodeIds, route }: Props) {
     return () => obs.disconnect();
   }, []);
 
+  // Fit to contour bbox (re-runs on floor or size change)
   useEffect(() => {
     const allPts = (floor.contours ?? []).flat();
     let minX: number, maxX: number, minY: number, maxY: number;
@@ -52,12 +54,15 @@ export default function ViewerCanvas({ floor, routeNodeIds, route }: Props) {
     } else return;
     const pad = 400;
     minX -= pad; maxX += pad; minY -= pad; maxY += pad;
-    const z = Math.min(size.w / (maxX - minX), size.h / (maxY - minY));
+    // swap dims for 90/270 rotation so fit still covers the rotated content
+    const bboxW = rotation % 180 === 0 ? maxX - minX : maxY - minY;
+    const bboxH = rotation % 180 === 0 ? maxY - minY : maxX - minX;
+    const z = Math.min(size.w / bboxW, size.h / bboxH);
     const cx = (minX + maxX) / 2;
     const cy = (minY + maxY) / 2;
     setZoom(z);
     setPos({ x: size.w / 2 - cx * z, y: size.h / 2 - cy * z });
-  }, [floor, size.w, size.h]);
+  }, [floor, size.w, size.h, rotation]);
 
   const handleWheel = useCallback((e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
@@ -71,6 +76,22 @@ export default function ViewerCanvas({ floor, routeNodeIds, route }: Props) {
     setZoom(newZoom);
     setPos({ x: ptr.x - origin.x * newZoom, y: ptr.y - origin.y * newZoom });
   }, [zoom, pos]);
+
+  // Rotation pivot = center of building bounding box
+  const pivot = useMemo(() => {
+    const allPts = (floor.contours ?? []).flat();
+    if (allPts.length >= 2) {
+      const xs = allPts.map((p: number[]) => p[0]);
+      const ys = allPts.map((p: number[]) => p[1]);
+      return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
+    }
+    if (floor.nodes.length > 0) {
+      const xs = floor.nodes.map((n: NavNode) => n.x);
+      const ys = floor.nodes.map((n: NavNode) => n.y);
+      return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
+    }
+    return { x: 5000, y: 4000 };
+  }, [floor]);
 
   const nodeMap = new Map<string, NavNode>(floor.nodes.map((n: NavNode) => [n.id, n]));
 
@@ -97,66 +118,73 @@ export default function ViewerCanvas({ floor, routeNodeIds, route }: Props) {
         onDragEnd={e => setPos({ x: e.target.x(), y: e.target.y() })}
       >
         <Layer>
-          {contours.length > 0 && (
-            <Shape
-              listening={false}
-              sceneFunc={(ctx: any) => {
-                const nc: CanvasRenderingContext2D = ctx._context;
-                nc.beginPath();
-                for (const pts of contours) {
-                  if (pts.length < 3) continue;
-                  nc.moveTo(pts[0][0], pts[0][1]);
-                  for (let i = 1; i < pts.length; i++) nc.lineTo(pts[i][0], pts[i][1]);
-                  nc.closePath();
-                }
-                nc.fillStyle = 'rgba(0,0,0,0.04)';
-                nc.fill('evenodd');
-                for (const pts of contours) {
-                  if (pts.length < 3) continue;
+          {/* Rotate content around building center */}
+          <Group x={pivot.x} y={pivot.y} rotation={rotation} offsetX={pivot.x} offsetY={pivot.y}>
+
+            {/* Contours — even-odd fill */}
+            {contours.length > 0 && (
+              <Shape
+                listening={false}
+                sceneFunc={(ctx: any) => {
+                  const nc: CanvasRenderingContext2D = ctx._context;
                   nc.beginPath();
-                  nc.moveTo(pts[0][0], pts[0][1]);
-                  for (let i = 1; i < pts.length; i++) nc.lineTo(pts[i][0], pts[i][1]);
-                  nc.closePath();
-                  nc.strokeStyle = '#333';
-                  nc.lineWidth = 2 / zoom;
-                  nc.stroke();
-                }
-              }}
-            />
-          )}
+                  for (const pts of contours) {
+                    if (pts.length < 3) continue;
+                    nc.moveTo(pts[0][0], pts[0][1]);
+                    for (let i = 1; i < pts.length; i++) nc.lineTo(pts[i][0], pts[i][1]);
+                    nc.closePath();
+                  }
+                  nc.fillStyle = 'rgba(0,0,0,0.04)';
+                  nc.fill('evenodd');
+                  for (const pts of contours) {
+                    if (pts.length < 3) continue;
+                    nc.beginPath();
+                    nc.moveTo(pts[0][0], pts[0][1]);
+                    for (let i = 1; i < pts.length; i++) nc.lineTo(pts[i][0], pts[i][1]);
+                    nc.closePath();
+                    nc.strokeStyle = '#333';
+                    nc.lineWidth = 2 / zoom;
+                    nc.stroke();
+                  }
+                }}
+              />
+            )}
 
-          {(floor.areas ?? []).map(area => {
-            const node = nodeMap.get(area.nodeId);
-            if (!node || area.points.length < 3) return null;
-            const onRoute = routeNodeIds.has(area.nodeId);
-            const color = NODE_COLOR[node.type] ?? '#1976D2';
-            const fill = onRoute ? ROUTE_FILL : (AREA_FILL[node.type] ?? 'rgba(0,0,0,0.05)');
-            const pts = area.points.flat();
-            const cx = area.points.reduce((s: number, p: number[]) => s + p[0], 0) / area.points.length;
-            const cy = area.points.reduce((s: number, p: number[]) => s + p[1], 0) / area.points.length;
-            const areaW = Math.max(...area.points.map((p: number[]) => p[0])) - Math.min(...area.points.map((p: number[]) => p[0]));
-            return (
-              <Group key={area.nodeId} listening={false}>
-                <Line points={pts} closed fill={fill}
-                  stroke={onRoute ? '#43A047' : color}
-                  strokeWidth={1.5 / zoom} />
-                <Text
-                  text={node.label}
-                  x={cx} y={cy}
-                  offsetX={node.label.length * 3.5} offsetY={7}
-                  width={areaW} align="center"
-                  fontSize={13} fill={onRoute ? '#1B5E20' : color} fontStyle="bold"
-                />
-              </Group>
-            );
-          })}
+            {/* Areas */}
+            {(floor.areas ?? []).map(area => {
+              const node = nodeMap.get(area.nodeId);
+              if (!node || area.points.length < 3) return null;
+              const onRoute = routeNodeIds.has(area.nodeId);
+              const color = NODE_COLOR[node.type] ?? '#1976D2';
+              const fill = onRoute ? ROUTE_FILL : (AREA_FILL[node.type] ?? 'rgba(0,0,0,0.05)');
+              const pts = area.points.flat();
+              const cx = area.points.reduce((s: number, p: number[]) => s + p[0], 0) / area.points.length;
+              const cy = area.points.reduce((s: number, p: number[]) => s + p[1], 0) / area.points.length;
+              const areaW = Math.max(...area.points.map((p: number[]) => p[0])) - Math.min(...area.points.map((p: number[]) => p[0]));
+              return (
+                <Group key={area.nodeId} listening={false}>
+                  <Line points={pts} closed fill={fill}
+                    stroke={onRoute ? '#43A047' : color}
+                    strokeWidth={1.5 / zoom} />
+                  <Text
+                    text={node.label}
+                    x={cx - areaW / 2} y={cy - 7}
+                    width={areaW} align="center"
+                    fontSize={13} fill={onRoute ? '#1B5E20' : color} fontStyle="bold"
+                  />
+                </Group>
+              );
+            })}
 
-          {routeSegs.map((seg, i) => (
-            <Line key={i} points={seg}
-              stroke="#43A047" strokeWidth={2 / zoom}
-              lineCap="round" lineJoin="round"
-              listening={false} opacity={0.8} />
-          ))}
+            {/* Route path */}
+            {routeSegs.map((seg, i) => (
+              <Line key={i} points={seg}
+                stroke="#43A047" strokeWidth={2 / zoom}
+                lineCap="round" lineJoin="round"
+                listening={false} opacity={0.8} />
+            ))}
+
+          </Group>
         </Layer>
       </Stage>
     </div>
