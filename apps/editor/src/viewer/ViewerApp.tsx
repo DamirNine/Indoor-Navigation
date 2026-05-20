@@ -93,17 +93,18 @@ export default function ViewerApp() {
 
   const loadFile = useCallback(async (file: File) => {
     try {
-      let data: Building;
+      let rawJson: string;
       if (file.name.endsWith('.zip')) {
         const zip = await JSZip.loadAsync(file);
         const jsonFile = Object.values(zip.files).find(f => f.name.endsWith('.json') && !f.dir);
         if (!jsonFile) throw new Error('no json');
-        data = JSON.parse(await jsonFile.async('text'));
+        rawJson = await jsonFile.async('text');
       } else {
-        data = JSON.parse(await file.text());
+        rawJson = await file.text();
       }
-      applyMigrations(data);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      // Save raw JSON so re-loading always applies fresh migrations
+      localStorage.setItem(STORAGE_KEY, rawJson);
+      const data: Building = applyMigrations(JSON.parse(rawJson));
       setBuilding(data);
       setActiveFloor(0);
       setRoute(null);
