@@ -273,8 +273,9 @@ export default function ViewerApp() {
         )}
 
         {/* Footer link */}
-        <div style={{ padding: '8px 12px', borderTop: '1px solid #eee', fontSize: 11, color: '#aaa', flexShrink: 0 }}>
+        <div style={{ padding: '8px 12px', borderTop: '1px solid #eee', fontSize: 11, color: '#aaa', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <a href="./" style={{ color: '#1976D2', textDecoration: 'none' }}>← Редактор карт</a>
+          <span>v1.0.4</span>
         </div>
       </div>
 
