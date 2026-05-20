@@ -64,8 +64,25 @@ function NodeSearch({ label, value, onChange, nodes }: {
   );
 }
 
+const STORAGE_KEY = 'viewer_building';
+
+function applyMigrations(data: Building) {
+  data.crossFloorEdges = data.crossFloorEdges ?? [];
+  for (const floor of data.floors) {
+    if (!floor.contours && (floor as any).contour) floor.contours = [(floor as any).contour];
+    floor.areas = floor.areas ?? [];
+  }
+  return data;
+}
+
 export default function ViewerApp() {
-  const [building, setBuilding] = useState<Building | null>(null);
+  const [building, setBuilding] = useState<Building | null>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return applyMigrations(JSON.parse(saved) as Building);
+    } catch { /* ignore */ }
+    return null;
+  });
   const [activeFloor, setActiveFloor] = useState(0);
   const [fromId, setFromId] = useState('');
   const [toId, setToId] = useState('');
@@ -84,11 +101,8 @@ export default function ViewerApp() {
       } else {
         data = JSON.parse(await file.text());
       }
-      data.crossFloorEdges = data.crossFloorEdges ?? [];
-      for (const floor of data.floors) {
-        if (!floor.contours && (floor as any).contour) floor.contours = [(floor as any).contour];
-        floor.areas = floor.areas ?? [];
-      }
+      applyMigrations(data);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       setBuilding(data);
       setActiveFloor(0);
       setRoute(null);
@@ -188,7 +202,7 @@ export default function ViewerApp() {
           <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {building.name || building.id}
           </div>
-          <button onClick={() => { setBuilding(null); setRoute(null); }}
+          <button onClick={() => { localStorage.removeItem(STORAGE_KEY); setBuilding(null); setRoute(null); }}
             style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             ← загрузить другой
           </button>

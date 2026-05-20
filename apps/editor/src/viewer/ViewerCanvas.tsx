@@ -20,12 +20,25 @@ interface Props {
   rotation: number; // degrees: 0, 90, 180, 270
 }
 
+function rotatePt(x: number, y: number, px: number, py: number, deg: number) {
+  const r = deg * Math.PI / 180;
+  const dx = x - px, dy = y - py;
+  return { x: px + dx * Math.cos(r) - dy * Math.sin(r), y: py + dx * Math.sin(r) + dy * Math.cos(r) };
+}
+
 export default function ViewerCanvas({ floor, routeNodeIds, route, rotation }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const [size, setSize] = useState({ w: 800, h: 600 });
   const [zoom, setZoom] = useState(0.08);
   const [pos, setPos] = useState({ x: 0, y: 0 });
+
+  // Refs for stale-closure-safe access in effects
+  const prevRotationRef = useRef(rotation);
+  const zoomRef = useRef(zoom);
+  const sizeRef = useRef(size);
+  zoomRef.current = zoom;
+  sizeRef.current = size;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -36,46 +49,6 @@ export default function ViewerCanvas({ floor, routeNodeIds, route, rotation }: P
     obs.observe(containerRef.current);
     return () => obs.disconnect();
   }, []);
-
-  // Fit to contour bbox (re-runs on floor or size change)
-  useEffect(() => {
-    const allPts = (floor.contours ?? []).flat();
-    let minX: number, maxX: number, minY: number, maxY: number;
-    if (allPts.length >= 2) {
-      minX = Math.min(...allPts.map((p: number[]) => p[0]));
-      maxX = Math.max(...allPts.map((p: number[]) => p[0]));
-      minY = Math.min(...allPts.map((p: number[]) => p[1]));
-      maxY = Math.max(...allPts.map((p: number[]) => p[1]));
-    } else if (floor.nodes.length > 0) {
-      minX = Math.min(...floor.nodes.map((n: NavNode) => n.x));
-      maxX = Math.max(...floor.nodes.map((n: NavNode) => n.x));
-      minY = Math.min(...floor.nodes.map((n: NavNode) => n.y));
-      maxY = Math.max(...floor.nodes.map((n: NavNode) => n.y));
-    } else return;
-    const pad = 400;
-    minX -= pad; maxX += pad; minY -= pad; maxY += pad;
-    // swap dims for 90/270 rotation so fit still covers the rotated content
-    const bboxW = rotation % 180 === 0 ? maxX - minX : maxY - minY;
-    const bboxH = rotation % 180 === 0 ? maxY - minY : maxX - minX;
-    const z = Math.min(size.w / bboxW, size.h / bboxH);
-    const cx = (minX + maxX) / 2;
-    const cy = (minY + maxY) / 2;
-    setZoom(z);
-    setPos({ x: size.w / 2 - cx * z, y: size.h / 2 - cy * z });
-  }, [floor, size.w, size.h, rotation]);
-
-  const handleWheel = useCallback((e: Konva.KonvaEventObject<WheelEvent>) => {
-    e.evt.preventDefault();
-    const stage = stageRef.current;
-    if (!stage) return;
-    const ptr = stage.getPointerPosition();
-    if (!ptr) return;
-    const factor = e.evt.deltaY > 0 ? 0.85 : 1 / 0.85;
-    const newZoom = Math.min(Math.max(zoom * factor, 0.01), 5);
-    const origin = { x: (ptr.x - pos.x) / zoom, y: (ptr.y - pos.y) / zoom };
-    setZoom(newZoom);
-    setPos({ x: ptr.x - origin.x * newZoom, y: ptr.y - origin.y * newZoom });
-  }, [zoom, pos]);
 
   // Rotation pivot = center of building bounding box
   const pivot = useMemo(() => {
@@ -93,6 +66,68 @@ export default function ViewerCanvas({ floor, routeNodeIds, route, rotation }: P
     return { x: 5000, y: 4000 };
   }, [floor]);
 
+  const pivotRef = useRef(pivot);
+  pivotRef.current = pivot;
+
+  // Fit to bbox on floor or size change (NOT on rotation — rotation handled separately)
+  useEffect(() => {
+    const allPts = (floor.contours ?? []).flat();
+    let minX: number, maxX: number, minY: number, maxY: number;
+    if (allPts.length >= 2) {
+      minX = Math.min(...allPts.map((p: number[]) => p[0]));
+      maxX = Math.max(...allPts.map((p: number[]) => p[0]));
+      minY = Math.min(...allPts.map((p: number[]) => p[1]));
+      maxY = Math.max(...allPts.map((p: number[]) => p[1]));
+    } else if (floor.nodes.length > 0) {
+      minX = Math.min(...floor.nodes.map((n: NavNode) => n.x));
+      maxX = Math.max(...floor.nodes.map((n: NavNode) => n.x));
+      minY = Math.min(...floor.nodes.map((n: NavNode) => n.y));
+      maxY = Math.max(...floor.nodes.map((n: NavNode) => n.y));
+    } else return;
+    const pad = 400;
+    minX -= pad; maxX += pad; minY -= pad; maxY += pad;
+    const bboxW = maxX - minX, bboxH = maxY - minY;
+    const z = Math.min(sizeRef.current.w / bboxW, sizeRef.current.h / bboxH);
+    const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    setZoom(z);
+    setPos({ x: sizeRef.current.w / 2 - cx * z, y: sizeRef.current.h / 2 - cy * z });
+    prevRotationRef.current = rotation; // sync so rotation effect starts from correct baseline
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [floor, size.w, size.h]);
+
+  // On rotation change: keep the current viewport center pointing at the same virtual point
+  useEffect(() => {
+    const prevR = prevRotationRef.current;
+    prevRotationRef.current = rotation;
+    if (prevR === rotation) return;
+    const p = pivotRef.current;
+    const z = zoomRef.current;
+    const s = sizeRef.current;
+    setPos(cur => {
+      // Layer-space point currently at screen center
+      const lcx = (s.w / 2 - cur.x) / z;
+      const lcy = (s.h / 2 - cur.y) / z;
+      // Un-rotate from old angle → virtual center
+      const vc = rotatePt(lcx, lcy, p.x, p.y, -prevR);
+      // Re-rotate with new angle → new layer center
+      const nlc = rotatePt(vc.x, vc.y, p.x, p.y, rotation);
+      return { x: s.w / 2 - nlc.x * z, y: s.h / 2 - nlc.y * z };
+    });
+  }, [rotation]);
+
+  const handleWheel = useCallback((e: Konva.KonvaEventObject<WheelEvent>) => {
+    e.evt.preventDefault();
+    const stage = stageRef.current;
+    if (!stage) return;
+    const ptr = stage.getPointerPosition();
+    if (!ptr) return;
+    const factor = e.evt.deltaY > 0 ? 0.85 : 1 / 0.85;
+    const newZoom = Math.min(Math.max(zoom * factor, 0.01), 5);
+    const origin = { x: (ptr.x - pos.x) / zoom, y: (ptr.y - pos.y) / zoom };
+    setZoom(newZoom);
+    setPos({ x: ptr.x - origin.x * newZoom, y: ptr.y - origin.y * newZoom });
+  }, [zoom, pos]);
+
   const nodeMap = new Map<string, NavNode>(floor.nodes.map((n: NavNode) => [n.id, n]));
 
   const routeSegs: number[][] = [];
@@ -106,8 +141,29 @@ export default function ViewerCanvas({ floor, routeNodeIds, route, rotation }: P
 
   const contours = floor.contours ?? [];
 
+  // Text labels: rendered outside the rotating Group at their rotated positions — always upright
+  const areaLabels = useMemo(() => {
+    return (floor.areas ?? []).map(area => {
+      const node = nodeMap.get(area.nodeId);
+      if (!node || area.points.length < 3) return null;
+      const cx = area.points.reduce((s: number, p: number[]) => s + p[0], 0) / area.points.length;
+      const cy = area.points.reduce((s: number, p: number[]) => s + p[1], 0) / area.points.length;
+      const xs = area.points.map((p: number[]) => p[0]);
+      const ys = area.points.map((p: number[]) => p[1]);
+      const areaW = Math.max(...xs) - Math.min(...xs);
+      const areaH = Math.max(...ys) - Math.min(...ys);
+      // Use extent along screen-horizontal axis after rotation
+      const textW = rotation % 180 === 0 ? areaW : areaH;
+      const rotated = rotatePt(cx, cy, pivot.x, pivot.y, rotation);
+      const onRoute = routeNodeIds.has(area.nodeId);
+      const color = NODE_COLOR[node.type] ?? '#1976D2';
+      return { id: area.nodeId, x: rotated.x, y: rotated.y, textW, onRoute, color, label: node.label };
+    }).filter(Boolean) as { id: string; x: number; y: number; textW: number; onRoute: boolean; color: string; label: string }[];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [floor.areas, floor.nodes, pivot, rotation, routeNodeIds]);
+
   return (
-    <div ref={containerRef} style={{ flex: 1, overflow: 'hidden', background: '#f0f2f5' }}>
+    <div ref={containerRef} style={{ width: '100%', height: '100%', overflow: 'hidden', background: '#f0f2f5' }}>
       <Stage
         ref={stageRef}
         width={size.w} height={size.h}
@@ -118,7 +174,7 @@ export default function ViewerCanvas({ floor, routeNodeIds, route, rotation }: P
         onDragEnd={e => setPos({ x: e.target.x(), y: e.target.y() })}
       >
         <Layer>
-          {/* Rotate content around building center */}
+          {/* Rotating group: contours, area polygons, route lines */}
           <Group x={pivot.x} y={pivot.y} rotation={rotation} offsetX={pivot.x} offsetY={pivot.y}>
 
             {/* Contours — even-odd fill */}
@@ -150,31 +206,19 @@ export default function ViewerCanvas({ floor, routeNodeIds, route, rotation }: P
               />
             )}
 
-            {/* Areas */}
+            {/* Area polygons (no text here) */}
             {(floor.areas ?? []).map(area => {
               const node = nodeMap.get(area.nodeId);
               if (!node || area.points.length < 3) return null;
               const onRoute = routeNodeIds.has(area.nodeId);
               const color = NODE_COLOR[node.type] ?? '#1976D2';
               const fill = onRoute ? ROUTE_FILL : (AREA_FILL[node.type] ?? 'rgba(0,0,0,0.05)');
-              const pts = area.points.flat();
-              const cx = area.points.reduce((s: number, p: number[]) => s + p[0], 0) / area.points.length;
-              const cy = area.points.reduce((s: number, p: number[]) => s + p[1], 0) / area.points.length;
-              const areaW = Math.max(...area.points.map((p: number[]) => p[0])) - Math.min(...area.points.map((p: number[]) => p[0]));
               return (
-                <Group key={area.nodeId} listening={false}>
-                  <Line points={pts} closed fill={fill}
-                    stroke={onRoute ? '#43A047' : color}
-                    strokeWidth={1.5 / zoom} />
-                  <Text
-                    text={node.label}
-                    x={cx} y={cy}
-                    offsetX={areaW / 2} offsetY={7}
-                    width={areaW} align="center"
-                    fontSize={13} fill={onRoute ? '#1B5E20' : color} fontStyle="bold"
-                    rotation={-rotation}
-                  />
-                </Group>
+                <Line key={area.nodeId} listening={false}
+                  points={area.points.flat()} closed
+                  fill={fill}
+                  stroke={onRoute ? '#43A047' : color}
+                  strokeWidth={1.5 / zoom} />
               );
             })}
 
@@ -187,6 +231,20 @@ export default function ViewerCanvas({ floor, routeNodeIds, route, rotation }: P
             ))}
 
           </Group>
+
+          {/* Non-rotating text labels at the rotated positions of each area centroid */}
+          <Group listening={false}>
+            {areaLabels.map(t => (
+              <Text key={t.id}
+                text={t.label}
+                x={t.x} y={t.y}
+                offsetX={t.textW / 2} offsetY={7}
+                width={t.textW} align="center"
+                fontSize={13} fill={t.onRoute ? '#1B5E20' : t.color} fontStyle="bold"
+              />
+            ))}
+          </Group>
+
         </Layer>
       </Stage>
     </div>
