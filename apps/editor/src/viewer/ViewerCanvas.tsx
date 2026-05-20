@@ -168,9 +168,11 @@ export default function ViewerCanvas({ floor, routeNodeIds, route, rotation }: P
                     strokeWidth={1.5 / zoom} />
                   <Text
                     text={node.label}
-                    x={cx - areaW / 2} y={cy - 7}
+                    x={cx} y={cy}
+                    offsetX={areaW / 2} offsetY={7}
                     width={areaW} align="center"
                     fontSize={13} fill={onRoute ? '#1B5E20' : color} fontStyle="bold"
+                    rotation={-rotation}
                   />
                 </Group>
               );
